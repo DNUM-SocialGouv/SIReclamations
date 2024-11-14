@@ -69,7 +69,7 @@
 				</executions>
 				<configuration>
 					<outputDirectory>${project.build.directory}/dependency-check-report</outputDirectory>
-					<format>JSON</format>
+					<format>HTML</format>
 					<failBuildOnCVSS>7.0</failBuildOnCVSS>
 				</configuration>
 			</plugin>
