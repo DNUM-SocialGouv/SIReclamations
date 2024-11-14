@@ -55,6 +55,24 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>11.1.0</version> <!-- Vérifiez pour obtenir la dernière version -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<outputDirectory>${project.build.directory}/dependency-check-report</outputDirectory>
+					<format>JSON</format>
+					<failBuildOnCVSS>7.0</failBuildOnCVSS>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
