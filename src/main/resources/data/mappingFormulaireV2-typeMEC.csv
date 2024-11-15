@@ -1,0 +1,6 @@
+﻿label;typeMEC;codeTypeMEC
+Un autre résident ou un autre patient;Particulier;P
+Un professionnel de santé ( médecin, infirmier, aide-soignant, kiné, ostéopathe….);Professionnel de santé;PS
+Un professionnel du soin (coiffeur, esthéticienne, naturopathe, ...);Autre professionnel;AP
+Un autre professionnel de l'établissement (directeur, animateur, agent d'entretie, ambulancier…);Autre professionnel;AP
+Personne en particulier;;
