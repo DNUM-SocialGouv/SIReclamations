@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+    <appender name="access_stdout"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>common</pattern>
+        </encoder>
+    </appender>
+    <appender name="ACCESS_FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/access_log.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/access_log-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashAccessEncoder"/>
+    </appender>
+
+    <appender-ref ref="access_stdout"/>
+
+</configuration>
