@@ -1,5 +1,7 @@
 package fr.gouv.social.sireclamations.infrastructure;
 
+import java.util.List;
+
 public interface CategorieEtablissementRepository {
-    String recupererAutoriteCompetenteParCodeSousCategorieEtablissement(String codeSousCategorieEtablissement);
+    List<String> recupererAutoriteCompetenteParCodeSousCategorieEtablissement(String codeSousCategorieEtablissement);
 }

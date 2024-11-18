@@ -1,21 +1,21 @@
 package fr.gouv.social.sireclamations.infrastructure;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.InputStreamReader;
+import java.util.*;
 
 @Repository
 public class CategorieEtablissementRepositoryImpl implements CategorieEtablissementRepository {
 
-    private final Map<String, String> autoriteCompetenteMap = new HashMap<>();
+    private final Map<String, List<String>> autoriteCompetenteMap = new HashMap<>();
 
-    public CategorieEtablissementRepositoryImpl(@Value("${referentiel.categorie.etablissement}") String csvFilePath) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
+    public CategorieEtablissementRepositoryImpl(@Value("${referentiel.categorie.etablissement}") Resource csvResource) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(csvResource.getInputStream()))) {
             reader.readLine();
             String line;
 
@@ -23,15 +23,25 @@ public class CategorieEtablissementRepositoryImpl implements CategorieEtablissem
                 String[] columns = line.split(";");
                 if (columns.length >= 5) {
                     String codeSousCategorie = columns[0].trim();
-                    String autoriteCompetente = columns[4].trim();
-                    autoriteCompetenteMap.put(codeSousCategorie, autoriteCompetente);
+
+                    // Ajoute la première autorité compétente
+                    List<String> autorites = new ArrayList<>();
+                    if (!columns[4].trim().isEmpty()) {
+                        autorites.add(columns[4].trim());
+                    }
+
+                    // Ajoute la deuxième autorité competente
+                    if (columns.length > 5 && !columns[5].trim().isEmpty()) {
+                        autorites.add(columns[5].trim());
+                    }
+                    autoriteCompetenteMap.put(codeSousCategorie, autorites);
                 }
             }
         }
     }
 
     @Override
-    public String recupererAutoriteCompetenteParCodeSousCategorieEtablissement(String codeSousCategorieEtablissement) {
-        return autoriteCompetenteMap.get(codeSousCategorieEtablissement);
+    public List<String> recupererAutoriteCompetenteParCodeSousCategorieEtablissement(String codeSousCategorieEtablissement) {
+        return autoriteCompetenteMap.getOrDefault(codeSousCategorieEtablissement, Collections.emptyList());
     }
 }
