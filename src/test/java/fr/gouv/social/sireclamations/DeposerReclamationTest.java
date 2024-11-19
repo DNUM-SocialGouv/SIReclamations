@@ -35,7 +35,7 @@ class DeposerReclamationTest {
         String finess = "940003858";
         String nom = "EHPAD LE VERGER DE VINCENNES";
         var etablissement = new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom);
-        var dossierReclamation = new DossierReclamation(numeroDossier, codeSousCategorieEtablissement, codePostal, etablissement);
+        var dossierReclamation = new DossierReclamation(numeroDossier, codeSousCategorieEtablissement, etablissement);
 
         when(dematSocialPort.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
         //When

@@ -13,7 +13,6 @@ class CategorieEtablissementRepositoryImplTest {
     private CategorieEtablissementRepository categorieEtablissementRepository;
     @BeforeEach
     void setUp() throws Exception {
-        // Utilisation d'un fichier CSV en mémoire ou d'un chemin fictif
         Resource csvResource = new ClassPathResource("data/sousCatFINESS-ac-test.csv");
         categorieEtablissementRepository = new CategorieEtablissementRepositoryImpl(csvResource);
     }

@@ -26,7 +26,7 @@ public class ReclamationAdapter implements ReclamationPort {
     public void deposerReclamation(DossierReclamation dossierReclamation) {
         var autoriteCompetente = categorieEtablissementRepository.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(
                 dossierReclamation.getCodeSousCategorieEtablissement());
-        var contactsEmail = contactsRepository.recupererContactsParCodePostal(dossierReclamation.getEtablissement().getCodePostal(), autoriteCompetente);
+        var contactsEmail = contactsRepository.recupererContacts(dossierReclamation.getCodePostal(), autoriteCompetente);
 
         if (autoriteCompetente == null) {
             throw new AutoriteCompetenteNotFoundException("Aucune autorité compétente trouvée pour le code sous-catégorie d'établissement : " + dossierReclamation.getCodeSousCategorieEtablissement());

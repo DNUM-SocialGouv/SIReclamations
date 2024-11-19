@@ -31,9 +31,9 @@ class ReclamationAdapterTest {
         String finess = "940003858";
         String nom = "EHPAD LE VERGER DE VINCENNES";
         var etablissement = new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom);
-        var dossierReclamation = new DossierReclamation(numeroDossier, codeSousCategorieEtablissement,codePostal, etablissement);
+        var dossierReclamation = new DossierReclamation(numeroDossier, codeSousCategorieEtablissement, etablissement);
         when(categorieEtablissementRepository.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorieEtablissement)).thenReturn(List.of("ARS"));
-        when(contactsRepository.recupererContactsParCodePostal(codePostal, List.of("ARS"))).thenReturn(List.of("idf@ars.com"));
+        when(contactsRepository.recupererContacts(codePostal, List.of("ARS"))).thenReturn(List.of("idf@ars.com"));
 
         //When
         reclamationAdapter.deposerReclamation(dossierReclamation);
@@ -53,7 +53,7 @@ class ReclamationAdapterTest {
         String finess = "940003858";
         String nom = "EHPAD LE VERGER DE VINCENNES";
         var etablissement = new Etablissement(finess, codeSousCategorieEtablissementIntrouvable, codePostal, nom);
-        var dossierReclamation = new DossierReclamation(numeroDossier, codeSousCategorieEtablissementIntrouvable,codePostal, etablissement);
+        var dossierReclamation = new DossierReclamation(numeroDossier, codeSousCategorieEtablissementIntrouvable, etablissement);
         when(categorieEtablissementRepository.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorieEtablissementIntrouvable)).thenReturn(null);
         //When Then
         assertThatThrownBy(

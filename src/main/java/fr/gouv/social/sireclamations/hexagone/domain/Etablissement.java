@@ -4,7 +4,6 @@ public class Etablissement {
     private String numeroFiness;
     private String codeSousCategorieEtablissement;
     private String codePostal;
-
     private String nom;
 
     public Etablissement(String numeroFiness, String codeEtablissement, String codePostal, String nom) {
