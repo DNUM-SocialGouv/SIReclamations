@@ -3,12 +3,14 @@ package fr.gouv.social.sireclamations.infrastructure;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.infrastructure.exceptions.AutoriteCompetenteNotFoundException;
+import fr.gouv.social.sireclamations.infrastructure.exceptions.ContactNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,6 +62,26 @@ class ReclamationAdapterTest {
                 () -> reclamationAdapter.deposerReclamation(dossierReclamation))
                 .isInstanceOf(AutoriteCompetenteNotFoundException.class)
                 .hasMessage("Aucune autorité compétente trouvée pour le code sous-catégorie d'établissement : 123-code-categorie-introuvable-45679");
+
+    }
+
+    @Test
+    void lorsqueLonDeposeUneReclamationConcernantUneAutoriteSansContactsRenseignés_alorsRetourneContactNotFoundException(){
+        //Given
+        var numeroDossier = "12345";
+        var codeSousCategorieEtablissement = "500";
+        var codePostal = "94300";
+        String finess = "940003858";
+        String nom = "EHPAD LE VERGER DE VINCENNES";
+        var etablissement = new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom);
+        var dossierReclamation = new DossierReclamation(numeroDossier, codeSousCategorieEtablissement, etablissement);
+        when(categorieEtablissementRepository.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorieEtablissement)).thenReturn(List.of("ARS"));
+        when(contactsRepository.recupererContacts(finess, List.of("ARS"))).thenReturn(Collections.emptyList());
+        //When Then
+        assertThatThrownBy(
+                () -> reclamationAdapter.deposerReclamation(dossierReclamation))
+                .isInstanceOf(ContactNotFoundException.class)
+                .hasMessage("Aucun contact n'a été trouvé. Autorité(s) compétente(s) : ARS,  Code sous-catégorie d'établissement : 500");
 
     }
 }

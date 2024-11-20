@@ -3,6 +3,7 @@ package fr.gouv.social.sireclamations.infrastructure;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierReclamation;
 import fr.gouv.social.sireclamations.hexagone.port.ReclamationPort;
 import fr.gouv.social.sireclamations.infrastructure.exceptions.AutoriteCompetenteNotFoundException;
+import fr.gouv.social.sireclamations.infrastructure.exceptions.ContactNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,9 @@ public class ReclamationAdapter implements ReclamationPort {
 
         if (autoriteCompetente == null) {
             throw new AutoriteCompetenteNotFoundException("Aucune autorité compétente trouvée pour le code sous-catégorie d'établissement : " + dossierReclamation.getCodeSousCategorieEtablissement());
+        }
+        if (contactsEmail.isEmpty()){
+            throw new ContactNotFoundException("Aucun contact n'a été trouvé. Autorité(s) compétente(s) : " + String.join(", ", autoriteCompetente) + ",  Code sous-catégorie d'établissement : " + dossierReclamation.getCodeSousCategorieEtablissement());
         }
         emailService.envoyer(contactsEmail, "vous êtes les autorités responsables !");
     }
