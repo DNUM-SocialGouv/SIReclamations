@@ -1,5 +1,6 @@
 package fr.gouv.social.sireclamations.infrastructure;
 
+import fr.gouv.social.sireclamations.hexagone.port.CategorieEtablissementPort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
@@ -10,11 +11,11 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 @Repository
-public class CategorieEtablissementRepositoryImpl implements CategorieEtablissementRepository {
+public class CategorieEtablissementAdapter implements CategorieEtablissementPort {
 
     private final Map<String, List<String>> autoritesCompetentesParCodeCategorieEtablissement = new HashMap<>();
 
-    public CategorieEtablissementRepositoryImpl(@Value("${referentiel.categorie.etablissement}") Resource csvResource) throws IOException {
+    public CategorieEtablissementAdapter(@Value("${referentiel.categorie.etablissement}") Resource csvResource) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(csvResource.getInputStream()))) {
             reader.readLine();
             String ligne;

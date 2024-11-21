@@ -1,4 +1,5 @@
 package fr.gouv.social.sireclamations.infrastructure;
+import fr.gouv.social.sireclamations.hexagone.port.ContactsPort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
@@ -10,11 +11,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
-public class ContactsRepositoryImpl implements ContactsRepository {
+public class ContactsAdapter implements ContactsPort {
 
     private final Map<String, Map<String, String>> csvData = new HashMap<>();
 
-    public ContactsRepositoryImpl(@Value("${referentiel.autorite.contact}") Resource csvResource) throws IOException {
+    public ContactsAdapter(@Value("${referentiel.autorite.contact}") Resource csvResource) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(csvResource.getInputStream()))) {
             // Lire l'en-tête pour mapper les colonnes
             String headerLine = reader.readLine();

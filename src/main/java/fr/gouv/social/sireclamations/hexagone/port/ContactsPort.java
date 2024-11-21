@@ -1,8 +1,8 @@
-package fr.gouv.social.sireclamations.infrastructure;
+package fr.gouv.social.sireclamations.hexagone.port;
 
 import java.util.List;
 
-public interface ContactsRepository {
+public interface ContactsPort {
     List<String> recupererContacts(String finess, List<String> autoriteCompetente);
 }
 

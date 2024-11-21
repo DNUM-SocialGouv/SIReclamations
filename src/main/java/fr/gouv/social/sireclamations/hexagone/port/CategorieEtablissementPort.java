@@ -1,7 +1,7 @@
-package fr.gouv.social.sireclamations.infrastructure;
+package fr.gouv.social.sireclamations.hexagone.port;
 
 import java.util.List;
 
-public interface CategorieEtablissementRepository {
+public interface CategorieEtablissementPort {
     List<String> recupererAutoriteCompetenteParCodeSousCategorieEtablissement(String codeSousCategorieEtablissement);
 }

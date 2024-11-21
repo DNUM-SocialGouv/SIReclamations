@@ -1,5 +1,6 @@
 package fr.gouv.social.sireclamations.infrastructure;
 
+import fr.gouv.social.sireclamations.hexagone.port.CategorieEtablissementPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -9,19 +10,19 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CategorieEtablissementRepositoryImplTest {
-    private CategorieEtablissementRepository categorieEtablissementRepository;
+class CategorieEtablissementPortImplTest {
+    private CategorieEtablissementPort categorieEtablissementPort;
     @BeforeEach
     void setUp() throws Exception {
         Resource csvResource = new ClassPathResource("data/sousCatFINESS-ac-test.csv");
-        categorieEtablissementRepository = new CategorieEtablissementRepositoryImpl(csvResource);
+        categorieEtablissementPort = new CategorieEtablissementAdapter(csvResource);
     }
     @Test
     void lorsqueLonVeutRecupererAutoriteCompetentePourUnEhpad_alorsRenvoiARSetCD(){
         //Given
         String codeSousCategorie = "500";
         //When
-        var autoritesCompetentes = categorieEtablissementRepository.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorie);
+        var autoritesCompetentes = categorieEtablissementPort.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorie);
         //Then
         assertEquals(List.of("ARS", "CD"), autoritesCompetentes);
     }
@@ -31,7 +32,7 @@ class CategorieEtablissementRepositoryImplTest {
         //Given
         String codeSousCategorieInexistant = "12345678910";
         //When
-        var autoritesCompetentes = categorieEtablissementRepository.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorieInexistant);
+        var autoritesCompetentes = categorieEtablissementPort.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorieInexistant);
         //Then
         assertTrue(autoritesCompetentes.isEmpty());
     }

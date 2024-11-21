@@ -2,12 +2,10 @@ package fr.gouv.social.sireclamations.hexagone.domain;
 
 public class DossierReclamation {
     private String numeroDossier;
-    private String codeSousCategorieEtablissement;
     private Etablissement etablissement;
 
-    public DossierReclamation(String numeroDossier, String codeSousCategorieEtablissement, Etablissement etablissement) {
+    public DossierReclamation(String numeroDossier, Etablissement etablissement) {
         this.numeroDossier = numeroDossier;
-        this.codeSousCategorieEtablissement = codeSousCategorieEtablissement;
         this.etablissement = etablissement;
     }
 
@@ -15,9 +13,6 @@ public class DossierReclamation {
         return numeroDossier;
     }
 
-    public String getCodeSousCategorieEtablissement() {
-        return codeSousCategorieEtablissement;
-    }
 
     public String getCodePostal() {
         return etablissement.getCodePostal();
