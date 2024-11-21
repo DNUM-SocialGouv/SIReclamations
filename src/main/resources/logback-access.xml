@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
+
     <appender name="access_stdout"
               class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>common</pattern>
+        <encoder class="net.logstash.logback.encoder.LogstashAccessEncoder">
+            <timeZone>UTC</timeZone>
         </encoder>
     </appender>
-    <appender name="ACCESS_FILE"
+
+    <appender name="access_file"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/access_log.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
