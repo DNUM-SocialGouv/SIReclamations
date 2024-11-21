@@ -1,14 +1,17 @@
-package fr.gouv.social.sireclamations.hexagone.domain;
+package fr.gouv.social.sireclamations.application;
 
 import java.util.List;
 
-public class Reclamation {
-    private final String numeroDossier;
-    private final String codeSousCategorieEtablissement;
-    private final List<String> autoritesCompetentes;
-    private final List<String> contacts;
+public class ReclamationApiResponse {
+    private String numeroDossier;
+    private String codeSousCategorieEtablissement;
+    private List<String> autoritesCompetentes;
+    private List<String> contacts;
 
-    public Reclamation(String numeroDossier, String codeSousCategorieEtablissement, List<String> autoritesCompetentes, List<String> contacts) {
+    public ReclamationApiResponse(String numeroDossier,
+                                  String codeSousCategorieEtablissement,
+                                  List<String> autoritesCompetentes,
+                                  List<String> contacts) {
         this.numeroDossier = numeroDossier;
         this.codeSousCategorieEtablissement = codeSousCategorieEtablissement;
         this.autoritesCompetentes = autoritesCompetentes;

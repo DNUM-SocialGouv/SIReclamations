@@ -1,18 +1,18 @@
 package fr.gouv.social.sireclamations.hexagone.domain;
 
 public class DossierReclamation {
-    private String numero;
+    private String numeroDossier;
     private String codeSousCategorieEtablissement;
     private Etablissement etablissement;
 
-    public DossierReclamation(String numero, String codeSousCategorieEtablissement, Etablissement etablissement) {
-        this.numero = numero;
+    public DossierReclamation(String numeroDossier, String codeSousCategorieEtablissement, Etablissement etablissement) {
+        this.numeroDossier = numeroDossier;
         this.codeSousCategorieEtablissement = codeSousCategorieEtablissement;
         this.etablissement = etablissement;
     }
 
-    public String getNumero() {
-        return numero;
+    public String getNumeroDossier() {
+        return numeroDossier;
     }
 
     public String getCodeSousCategorieEtablissement() {

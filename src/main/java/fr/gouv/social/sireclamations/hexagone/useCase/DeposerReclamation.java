@@ -1,8 +1,11 @@
 package fr.gouv.social.sireclamations.hexagone.useCase;
 
+import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.port.DematSocialPort;
 import fr.gouv.social.sireclamations.hexagone.port.ReclamationPort;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DeposerReclamation {
 
     private final DematSocialPort dematSocial;
@@ -12,9 +15,8 @@ public class DeposerReclamation {
         this.dematSocial = dematSocial;
         this.reclamation = reclamation;
     }
-    public void executer(String numeroDossier){
+    public Reclamation executer(String numeroDossier){
         var dossierDeReclamation = dematSocial.recupererDossier(numeroDossier);
-        reclamation.deposerReclamation(dossierDeReclamation);
-
+        return reclamation.deposerReclamation(dossierDeReclamation);
     }
 }

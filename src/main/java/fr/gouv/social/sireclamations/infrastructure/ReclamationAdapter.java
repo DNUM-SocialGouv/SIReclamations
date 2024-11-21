@@ -1,10 +1,12 @@
 package fr.gouv.social.sireclamations.infrastructure;
 
 import fr.gouv.social.sireclamations.hexagone.domain.DossierReclamation;
+import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.port.ReclamationPort;
 import fr.gouv.social.sireclamations.infrastructure.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.infrastructure.exceptions.ContactNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -14,7 +16,8 @@ public class ReclamationAdapter implements ReclamationPort {
     private final ContactsRepository contactsRepository;
     private final EmailService emailService;
 
-    @Autowired
+    private static final Logger logger = LoggerFactory.getLogger(ReclamationAdapter.class);
+
     public ReclamationAdapter(CategorieEtablissementRepository categorieEtablissementRepository,
                               ContactsRepository contactsRepository,
                               EmailService emailService) {
@@ -24,17 +27,29 @@ public class ReclamationAdapter implements ReclamationPort {
     }
 
     @Override
-    public void deposerReclamation(DossierReclamation dossierReclamation) {
+    public Reclamation deposerReclamation(DossierReclamation dossierReclamation) {
         var autoriteCompetente = categorieEtablissementRepository.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(
                 dossierReclamation.getCodeSousCategorieEtablissement());
-        var contactsEmail = contactsRepository.recupererContacts(dossierReclamation.getCodePostal(), autoriteCompetente);
+        var contactsEmail = contactsRepository.recupererContacts(dossierReclamation.getCodePostal(),
+                autoriteCompetente);
 
-        if (autoriteCompetente == null) {
-            throw new AutoriteCompetenteNotFoundException("Aucune autorité compétente trouvée pour le code sous-catégorie d'établissement : " + dossierReclamation.getCodeSousCategorieEtablissement());
+        if (autoriteCompetente == null || autoriteCompetente.isEmpty()) {
+            var messageErreur = "Aucune autorité compétente trouvée pour le code sous-catégorie d'établissement : " +
+                    dossierReclamation.getCodeSousCategorieEtablissement();
+            logger.error(messageErreur);
+            throw new AutoriteCompetenteNotFoundException(messageErreur);
         }
-        if (contactsEmail.isEmpty()){
-            throw new ContactNotFoundException("Aucun contact n'a été trouvé. Autorité(s) compétente(s) : " + String.join(", ", autoriteCompetente) + ",  Code sous-catégorie d'établissement : " + dossierReclamation.getCodeSousCategorieEtablissement());
+        if (contactsEmail == null || contactsEmail.isEmpty()) {
+            var messageErreur = "Aucun contact n'a été trouvé. Autorité(s) compétente(s) : " +
+                    String.join(", ", autoriteCompetente) + ",  Code sous-catégorie d'établissement : " +
+                    dossierReclamation.getCodeSousCategorieEtablissement();
+            logger.error(messageErreur);
+            throw new ContactNotFoundException(messageErreur);
         }
         emailService.envoyer(contactsEmail, "vous êtes les autorités responsables !");
+        return new Reclamation(dossierReclamation.getNumeroDossier(),
+                dossierReclamation.getCodeSousCategorieEtablissement(),
+                autoriteCompetente,
+                contactsEmail);
     }
 }
