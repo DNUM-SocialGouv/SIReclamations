@@ -1,4 +1,4 @@
-package fr.gouv.social.sireclamations.hexagone.useCase;
+package fr.gouv.social.sireclamations.hexagone.use_cases;
 
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.port.DematSocialPort;
@@ -32,28 +32,28 @@ public class DeposerReclamation {
 
     public Reclamation executer(String numeroDossier){
         var dossierReclamation = dematSocial.recupererDossier(numeroDossier);
-        var autoriteCompetente = categorieEtablissementPort.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(
-                dossierReclamation.getEtablissement().getCodeSousCategorieEtablissement());
-        var contactsEmail = contactsPort.recupererContacts(dossierReclamation.getEtablissement().getNumeroFiness(),
-                autoriteCompetente);
+        var autoritesCompetentes = categorieEtablissementPort.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(
+                dossierReclamation.getCodeSousCategorieEtablissement());
+        var contactsEmail = contactsPort.recupererContacts(dossierReclamation.getNumeroFinessEtablissement(),
+                autoritesCompetentes);
 
-        if (autoriteCompetente == null || autoriteCompetente.isEmpty()) {
+        if (autoritesCompetentes.isEmpty()) {
             var messageErreur = "Aucune autorité compétente trouvée pour le code sous-catégorie d'établissement : " +
-                    dossierReclamation.getEtablissement().getCodeSousCategorieEtablissement();
+                    dossierReclamation.getCodeSousCategorieEtablissement();
             logger.error(messageErreur);
             throw new AutoriteCompetenteNotFoundException(messageErreur);
         }
-        if (contactsEmail == null || contactsEmail.isEmpty()) {
+        if (contactsEmail.isEmpty()) {
             var messageErreur = "Aucun contact n'a été trouvé. Autorité(s) compétente(s) : " +
-                    String.join(", ", autoriteCompetente) + ",  Code sous-catégorie d'établissement : " +
-                    dossierReclamation.getEtablissement().getCodeSousCategorieEtablissement();
+                    String.join(", ", autoritesCompetentes) + ",  Code sous-catégorie d'établissement : " +
+                    dossierReclamation.getCodeSousCategorieEtablissement();
             logger.error(messageErreur);
             throw new ContactNotFoundException(messageErreur);
         }
         emailService.envoyer(contactsEmail, "vous êtes les autorités responsables !");
         return new Reclamation(dossierReclamation.getNumeroDossier(),
-                dossierReclamation.getEtablissement().getCodeSousCategorieEtablissement(),
-                autoriteCompetente,
+                dossierReclamation.getCodeSousCategorieEtablissement(),
+                autoritesCompetentes,
                 contactsEmail);
     }
 }

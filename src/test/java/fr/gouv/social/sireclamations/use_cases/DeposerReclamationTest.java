@@ -1,10 +1,10 @@
-package fr.gouv.social.sireclamations;
+package fr.gouv.social.sireclamations.use_cases;
 
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.port.DematSocialPort;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
-import fr.gouv.social.sireclamations.hexagone.useCase.DeposerReclamation;
+import fr.gouv.social.sireclamations.hexagone.use_cases.DeposerReclamation;
 import fr.gouv.social.sireclamations.hexagone.port.CategorieEtablissementPort;
 import fr.gouv.social.sireclamations.hexagone.port.ContactsPort;
 import fr.gouv.social.sireclamations.infrastructure.EmailService;
@@ -83,6 +83,7 @@ class DeposerReclamationTest {
         assertThat(reclamationActuelle).usingRecursiveComparison().isEqualTo(reclamationAttendue);
 
     }
+
     @Test
     void lorsqueLonDeposeUneReclamationConcernantUneCategorieEtablissementInconnu_alorsAutoriteCompetenteNotFoundException(){
         //Given
@@ -94,7 +95,7 @@ class DeposerReclamationTest {
         var etablissement = new Etablissement(finess, codeSousCategorieEtablissementIntrouvable, codePostal, nom);
         var dossierReclamation = new DossierReclamation(numeroDossier, etablissement);
         when(dematSocialPort.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
-        when(categorieEtablissementPort.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorieEtablissementIntrouvable)).thenReturn(null);
+        when(categorieEtablissementPort.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorieEtablissementIntrouvable)).thenReturn(Collections.emptyList());
         //When Then
         assertThatThrownBy(
                 () -> deposerReclamation.executer(numeroDossier))

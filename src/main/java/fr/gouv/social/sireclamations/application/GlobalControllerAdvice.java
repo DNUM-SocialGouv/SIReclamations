@@ -33,7 +33,7 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public Map<String, String> handleGenericException(Exception ex) {
-        return Map.of("error", "Une erreur inattendue s'est produite.");
+        return Map.of("error", "Une erreur inattendue s'est produite." + ex.getMessage());
     }
 }
 

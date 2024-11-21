@@ -21,11 +21,4 @@ public class Etablissement {
         return codeSousCategorieEtablissement;
     }
 
-    public String getCodePostal() {
-        return codePostal;
-    }
-
-    public String getNom() {
-        return nom;
-    }
 }

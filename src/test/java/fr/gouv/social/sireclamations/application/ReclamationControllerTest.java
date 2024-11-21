@@ -1,7 +1,7 @@
 package fr.gouv.social.sireclamations.application;
 
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
-import fr.gouv.social.sireclamations.hexagone.useCase.DeposerReclamation;
+import fr.gouv.social.sireclamations.hexagone.use_cases.DeposerReclamation;
 import fr.gouv.social.sireclamations.infrastructure.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.infrastructure.exceptions.ContactNotFoundException;
 import org.junit.jupiter.api.Test;
