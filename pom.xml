@@ -1,95 +1,176 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-	<groupId>fr.gouv.social</groupId>
-	<artifactId>sireclamations</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>sireclamations</name>
-	<description>Projet du nouveau SI reclamations</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
-	<properties>
-		<java.version>17</java.version>
-		<maven.compiler.source>${java.version}</maven.compiler.source>
-		<maven.compiler.target>${java.version}</maven.compiler.target>
-	</properties>
-	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.5</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>fr.gouv.social</groupId>
+    <artifactId>sireclamations</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>sireclamations</name>
+    <description>Projet du nouveau SI reclamations</description>
+    <url/>
+    <licenses>
+        <license/>
+    </licenses>
+    <developers>
+        <developer/>
+    </developers>
+    <scm>
+        <connection/>
+        <developerConnection/>
+        <tag/>
+        <url/>
+    </scm>
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>net.logstash.logback</groupId>
-			<artifactId>logstash-logback-encoder</artifactId>
-			<version>8.0</version>
-		</dependency>
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>8.0</version>
+        </dependency>
 
-		<dependency>
-			<groupId>ch.qos.logback.access</groupId>
-			<artifactId>tomcat</artifactId>
-			<version>2.0.3</version>
-		</dependency>
+        <dependency>
+            <groupId>ch.qos.logback.access</groupId>
+            <artifactId>tomcat</artifactId>
+            <version>2.0.3</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-			<version>3.3.5</version>
-		</dependency>
+    </dependencies>
 
 
-	</dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
+            <plugin>
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>11.1.0</version> <!-- Vérifiez pour obtenir la dernière version -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/dependency-check-report</outputDirectory>
+                    <format>HTML</format>
+                    <failBuildOnCVSS>7.0</failBuildOnCVSS>
+                </configuration>
+            </plugin>
 
-			<plugin>
-				<groupId>org.owasp</groupId>
-				<artifactId>dependency-check-maven</artifactId>
-				<version>11.1.0</version> <!-- Vérifiez pour obtenir la dernière version -->
-				<executions>
-					<execution>
-						<goals>
-							<goal>check</goal>
-						</goals>
-						<phase>none</phase>
-					</execution>
-				</executions>
-				<configuration>
-					<outputDirectory>${project.build.directory}/dependency-check-report</outputDirectory>
-					<format>HTML</format>
-					<failBuildOnCVSS>7.0</failBuildOnCVSS>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+
+            <!--<plugin>
+                <groupId>io.github.kobylynskyi</groupId>
+                <artifactId>graphql-codegen-maven-plugin</artifactId>
+                <version>5.10.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+
+
+                            <graphqlSchemaPaths>
+                                <graphqlSchemaPath>src/main/resources/schema.graphql</graphqlSchemaPath>
+                                <path>src/main/resources/schema.graphql</path>
+                                <schemaPath>src/main/resources/schema.graphql</schemaPath>
+                            </graphqlSchemaPaths>
+                            <outputDir>${project.build.directory}/generated-sources/graphql</outputDir>
+                            <packageName>fr.gouv.social.sireclamations.dematsocial.graphql.model</packageName>
+                            <customTypesMapping>
+                                <DateTime>java.util.Date</DateTime>
+                            </customTypesMapping>
+                            <customAnnotationsMapping>
+                                <EpochMillis>
+                                    <annotation>com.fasterxml.jackson.databind.annotation.JsonDeserialize(using =
+                                        com.example.json.EpochMillisScalarDeserializer.class)
+                                    </annotation>
+                                </EpochMillis>
+                            </customAnnotationsMapping>
+                            <modelNameSuffix>TO</modelNameSuffix>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            -->
+
+            <plugin>
+                <groupId>io.github.deweyjose</groupId>
+                <artifactId>graphqlcodegen-maven-plugin</artifactId>
+                <version>1.61.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <schemaPaths>
+                        <param>src/main/resources/schema.graphql</param>
+                    </schemaPaths>
+                    <packageName>fr.gouv.social.sireclamations.generated</packageName>
+                    <generateIsGetterForPrimitiveBooleanFields>true</generateIsGetterForPrimitiveBooleanFields>
+                    <generateDocs>true</generateDocs>
+                    <addGeneratedAnnotation>false</addGeneratedAnnotation>
+                    <disableDatesInGeneratedAnnotation>true</disableDatesInGeneratedAnnotation>
+                    <generateBoxedTypes>true</generateBoxedTypes>
+                    <generateClientApiV2>false</generateClientApiV2>
+                    <typeMapping>
+                        <Date>java.time.LocalDateTime</Date>
+                        <ISO8601DateTime>java.time.OffsetDateTime</ISO8601DateTime>
+                        <ISO8601Date>java.time.LocalDate</ISO8601Date>
+                        <URL>java.lang.String</URL>
+                        <BigInt>java.lang.Long</BigInt>
+                        <Coordinates>java.lang.String</Coordinates>
+                    </typeMapping>
+                    <outputDir>${project.build.directory}/generated-sources</outputDir>
+                    <implementSerializable>true</implementSerializable>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
