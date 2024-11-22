@@ -1,9 +1,7 @@
-package fr.gouv.social.sireclamations.application;
+package fr.gouv.social.sireclamations.user_side;
 
-import fr.gouv.social.sireclamations.infrastructure.exceptions.AutoriteCompetenteNotFoundException;
-import fr.gouv.social.sireclamations.infrastructure.exceptions.ContactNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import fr.gouv.social.sireclamations.server_side.exceptions.AutoriteCompetenteNotFoundException;
+import fr.gouv.social.sireclamations.server_side.exceptions.ContactNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

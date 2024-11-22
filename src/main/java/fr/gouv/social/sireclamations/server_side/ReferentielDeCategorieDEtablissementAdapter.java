@@ -1,6 +1,6 @@
-package fr.gouv.social.sireclamations.infrastructure;
+package fr.gouv.social.sireclamations.server_side;
 
-import fr.gouv.social.sireclamations.hexagone.port.CategorieEtablissementPort;
+import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDeCategoriesDEtablissements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
@@ -11,11 +11,11 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 @Repository
-public class CategorieEtablissementAdapter implements CategorieEtablissementPort {
+public class ReferentielDeCategorieDEtablissementAdapter implements ReferentielDeCategoriesDEtablissements {
 
     private final Map<String, List<String>> autoritesCompetentesParCodeCategorieEtablissement = new HashMap<>();
 
-    public CategorieEtablissementAdapter(@Value("${referentiel.categorie.etablissement}") Resource csvResource) throws IOException {
+    public ReferentielDeCategorieDEtablissementAdapter(@Value("${referentiel.categorie.etablissement}") Resource csvResource) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(csvResource.getInputStream()))) {
             reader.readLine();
             String ligne;
@@ -42,7 +42,7 @@ public class CategorieEtablissementAdapter implements CategorieEtablissementPort
     }
 
     @Override
-    public List<String> recupererAutoriteCompetenteParCodeSousCategorieEtablissement(String codeSousCategorieEtablissement) {
+    public List<String> recupererAutoritesCompetentesParCodeSousCategorieEtablissement(String codeSousCategorieEtablissement) {
         return autoritesCompetentesParCodeCategorieEtablissement.getOrDefault(codeSousCategorieEtablissement, Collections.emptyList());
     }
 }

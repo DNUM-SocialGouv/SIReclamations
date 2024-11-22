@@ -1,6 +1,6 @@
-package fr.gouv.social.sireclamations.application;
+package fr.gouv.social.sireclamations.user_side;
 
-import fr.gouv.social.sireclamations.hexagone.use_cases.DeposerReclamation;
+import fr.gouv.social.sireclamations.hexagone.DeposerReclamation;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

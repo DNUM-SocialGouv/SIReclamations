@@ -1,10 +1,10 @@
 package fr.gouv.social.sireclamations.hexagone.domain;
 
-public class DossierReclamation {
+public class DossierDeReclamation {
     private String numeroDossier;
     private Etablissement etablissement;
 
-    public DossierReclamation(String numeroDossier, Etablissement etablissement) {
+    public DossierDeReclamation(String numeroDossier, Etablissement etablissement) {
         this.numeroDossier = numeroDossier;
         this.etablissement = etablissement;
     }

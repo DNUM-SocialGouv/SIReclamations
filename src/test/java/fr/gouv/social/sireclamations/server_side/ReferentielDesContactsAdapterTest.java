@@ -1,6 +1,6 @@
-package fr.gouv.social.sireclamations.infrastructure;
+package fr.gouv.social.sireclamations.server_side;
 
-import fr.gouv.social.sireclamations.hexagone.port.ContactsPort;
+import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDesContacts;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -10,13 +10,13 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ContactsAdapterTest {
-    private ContactsPort contactsPort;
+class ReferentielDesContactsAdapterTest {
+    private ReferentielDesContacts contactsPort;
 
     @BeforeEach
     void setup() throws Exception {
         Resource csvResource = new ClassPathResource("data/departements-ac-contacts-test.csv");
-        contactsPort = new ContactsAdapter(csvResource);
+        contactsPort = new ReferentielDesContactsAdapter(csvResource);
     }
     @Test
     void lorsqueFinessProvientDeMarseilleEtAutoriteCompetenteARS_alorsRenvoiEmailContactDeARSetAutres() {

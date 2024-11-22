@@ -1,4 +1,4 @@
-package fr.gouv.social.sireclamations.application;
+package fr.gouv.social.sireclamations.user_side;
 
 import java.util.List;
 

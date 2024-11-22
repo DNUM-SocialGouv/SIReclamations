@@ -1,9 +1,11 @@
-package fr.gouv.social.sireclamations.application;
+package fr.gouv.social.sireclamations.user_side;
 
+import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
+import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
-import fr.gouv.social.sireclamations.hexagone.use_cases.DeposerReclamation;
-import fr.gouv.social.sireclamations.infrastructure.exceptions.AutoriteCompetenteNotFoundException;
-import fr.gouv.social.sireclamations.infrastructure.exceptions.ContactNotFoundException;
+import fr.gouv.social.sireclamations.hexagone.DeposerReclamation;
+import fr.gouv.social.sireclamations.server_side.exceptions.AutoriteCompetenteNotFoundException;
+import fr.gouv.social.sireclamations.server_side.exceptions.ContactNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -82,10 +84,11 @@ class ReclamationControllerTest {
                     "numeroDossier": "%s"
                 }
                 """.formatted(numeroDossier);
+        var etablissement = new Etablissement("finess", "500", "78210", "nom etablissement");
+        var dossierDeReclamation = new DossierDeReclamation(numeroDossier, etablissement);
         given(deposerReclamation.executer("12345"))
                 .willReturn(new Reclamation(
-                        "1234",
-                        "500",
+                        dossierDeReclamation,
                         List.of("ARS"),
                         List.of("email@email.fr"))
                 );
@@ -95,7 +98,7 @@ class ReclamationControllerTest {
                         .content(dossierRequest))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.numeroDossier").value("1234"))
+                .andExpect(jsonPath("$.numeroDossier").value("12345"))
                 .andExpect(jsonPath("$.codeSousCategorieEtablissement").value("500"))
                 .andExpect(jsonPath("$.autoritesCompetentes[0]").value("ARS"))
                 .andExpect(jsonPath("$.contacts[0]").value("email@email.fr"));

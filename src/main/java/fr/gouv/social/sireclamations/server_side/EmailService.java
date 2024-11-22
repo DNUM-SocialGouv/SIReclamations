@@ -1,4 +1,4 @@
-package fr.gouv.social.sireclamations.infrastructure;
+package fr.gouv.social.sireclamations.server_side;
 
 import org.springframework.stereotype.Service;
 

@@ -1,15 +1,14 @@
-package fr.gouv.social.sireclamations.use_cases;
+package fr.gouv.social.sireclamations.hexagone;
 
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
-import fr.gouv.social.sireclamations.hexagone.port.DematSocialPort;
-import fr.gouv.social.sireclamations.hexagone.domain.DossierReclamation;
+import fr.gouv.social.sireclamations.hexagone.domain.port.DematSocial;
+import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
-import fr.gouv.social.sireclamations.hexagone.use_cases.DeposerReclamation;
-import fr.gouv.social.sireclamations.hexagone.port.CategorieEtablissementPort;
-import fr.gouv.social.sireclamations.hexagone.port.ContactsPort;
-import fr.gouv.social.sireclamations.infrastructure.EmailService;
-import fr.gouv.social.sireclamations.infrastructure.exceptions.AutoriteCompetenteNotFoundException;
-import fr.gouv.social.sireclamations.infrastructure.exceptions.ContactNotFoundException;
+import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDeCategoriesDEtablissements;
+import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDesContacts;
+import fr.gouv.social.sireclamations.server_side.EmailService;
+import fr.gouv.social.sireclamations.server_side.exceptions.AutoriteCompetenteNotFoundException;
+import fr.gouv.social.sireclamations.server_side.exceptions.ContactNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,33 +29,13 @@ class DeposerReclamationTest {
     @InjectMocks
     DeposerReclamation deposerReclamation;
     @Mock
-    DematSocialPort dematSocialPort;
+    DematSocial dematSocial;
     @Mock
-    private CategorieEtablissementPort categorieEtablissementPort;
+    private ReferentielDeCategoriesDEtablissements referentielDeCategoriesDEtablissements;
     @Mock
-    private ContactsPort contactsPort;
+    private ReferentielDesContacts contactsPort;
     @Mock
     private EmailService emailService;
-
-//    @Test
-//    void lorsquUnDossierExiste_alorsOnDeposeUneReclamationAssocieeAceDossier(){
-//        //Given
-//        var numeroDossier = "12345";
-//        var codeSousCategorieEtablissement = "500";
-//        var codePostal = "94300";
-//        String finess = "940003858";
-//        String nom = "EHPAD LE VERGER DE VINCENNES";
-//        var etablissement = new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom);
-//        var dossierReclamation = new DossierReclamation(numeroDossier, codeSousCategorieEtablissement, etablissement);
-//
-//        when(dematSocialPort.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
-//        //When
-//        deposerReclamation.executer(numeroDossier);
-//        //Then
-//        ArgumentCaptor<DossierReclamation> captor = ArgumentCaptor.forClass(DossierReclamation.class);
-//        verify(reclamationPort, times(1)).deposerReclamation(captor.capture());
-//        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(dossierReclamation);
-//    }
 
     @Test
     void lorsqueLonDeposeUneReclamationConcernantUneEHPADsurParis_alorsEnvoiUnMailAuContactDeLARSdeParis(){
@@ -67,15 +46,15 @@ class DeposerReclamationTest {
         String finess = "940003858";
         String nom = "EHPAD LE VERGER DE VINCENNES";
         var etablissement = new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom);
-        var dossierReclamation = new DossierReclamation(numeroDossier, etablissement);
-        when(dematSocialPort.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
-        when(categorieEtablissementPort.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorieEtablissement)).thenReturn(List.of("ARS"));
+        var dossierReclamation = new DossierDeReclamation(numeroDossier, etablissement);
+        when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
+        when(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorieEtablissement)).thenReturn(List.of("ARS"));
         when(contactsPort.recupererContacts(finess, List.of("ARS"))).thenReturn(List.of("idf@ars.com"));
 
         //When
         var reclamationActuelle = deposerReclamation.executer(numeroDossier);
         //Then
-        var reclamationAttendue = new Reclamation("12345", "500", List.of("ARS"), List.of("idf@ars.com"));
+        var reclamationAttendue = new Reclamation(dossierReclamation, List.of("ARS"), List.of("idf@ars.com"));
         ArgumentCaptor<List<String>> emailsCaptor = ArgumentCaptor.forClass(List.class);
         var destinatairesEmails = List.of("idf@ars.com");
         verify(emailService, times(1)).envoyer(emailsCaptor.capture(), any());
@@ -93,9 +72,9 @@ class DeposerReclamationTest {
         String finess = "940003858";
         String nom = "EHPAD LE VERGER DE VINCENNES";
         var etablissement = new Etablissement(finess, codeSousCategorieEtablissementIntrouvable, codePostal, nom);
-        var dossierReclamation = new DossierReclamation(numeroDossier, etablissement);
-        when(dematSocialPort.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
-        when(categorieEtablissementPort.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorieEtablissementIntrouvable)).thenReturn(Collections.emptyList());
+        var dossierReclamation = new DossierDeReclamation(numeroDossier, etablissement);
+        when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
+        when(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorieEtablissementIntrouvable)).thenReturn(Collections.emptyList());
         //When Then
         assertThatThrownBy(
                 () -> deposerReclamation.executer(numeroDossier))
@@ -113,9 +92,9 @@ class DeposerReclamationTest {
         String finess = "940003858";
         String nom = "EHPAD LE VERGER DE VINCENNES";
         var etablissement = new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom);
-        var dossierReclamation = new DossierReclamation(numeroDossier, etablissement);
-        when(dematSocialPort.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
-        when(categorieEtablissementPort.recupererAutoriteCompetenteParCodeSousCategorieEtablissement(codeSousCategorieEtablissement)).thenReturn(List.of("ARS"));
+        var dossierReclamation = new DossierDeReclamation(numeroDossier, etablissement);
+        when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
+        when(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorieEtablissement)).thenReturn(List.of("ARS"));
         when(contactsPort.recupererContacts(finess, List.of("ARS"))).thenReturn(Collections.emptyList());
         //When Then
         assertThatThrownBy(
