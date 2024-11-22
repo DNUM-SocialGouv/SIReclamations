@@ -35,19 +35,18 @@ class ReclamationControllerTest {
     @Test
     void lorsqueDeposerReclamationRenvoiAutoriteCompetenteNotFoundException_alorsRenvoiUne404() throws Exception {
         //Given
-        var numeroDossier = "12345";
+        var numeroDossier = 12345;
         var dossierRequest = """
                 {
                     "numeroDossier": "%s"
                 }
                 """.formatted(numeroDossier);
-        given(deposerReclamation.executer("12345"))
+        given(deposerReclamation.executer(numeroDossier))
                 .willThrow(new AutoriteCompetenteNotFoundException("autorite competente not found"));
         //When Then
         mockMvc.perform(post("/api/v1/reclamations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(dossierRequest))
-                .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("autorite competente not found"));
 
@@ -56,19 +55,18 @@ class ReclamationControllerTest {
     @Test
     void lorsqueDeposerReclamationRenvoiContactNotFoundException_alorsRenvoiUne404() throws Exception {
         //Given
-        var numeroDossier = "12345";
+        var numeroDossier = 12345;
         var dossierRequest = """
                 {
                     "numeroDossier": "%s"
                 }
                 """.formatted(numeroDossier);
-        given(deposerReclamation.executer("12345"))
+        given(deposerReclamation.executer(numeroDossier))
                 .willThrow(new ContactNotFoundException("contact not found"));
         //When Then
         mockMvc.perform(post("/api/v1/reclamations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(dossierRequest))
-                .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("contact not found"));
 
@@ -78,15 +76,15 @@ class ReclamationControllerTest {
     @Test
     void lorsqueDeposerReclamationRenvoiBienLaReclamation_alorsRenvoiUne200AvecLesDonneesDeLaReclamationEnBody() throws Exception {
         //Given
-        var numeroDossier = "12345";
+        var numeroDossier = 12345;
         var dossierRequest = """
                 {
                     "numeroDossier": "%s"
                 }
                 """.formatted(numeroDossier);
-        var etablissement = new Etablissement("finess", "500", "78210", "nom etablissement");
+        var etablissement = new Etablissement("78000000", 500, 78210, "nom etablissement");
         var dossierDeReclamation = new DossierDeReclamation(numeroDossier, etablissement);
-        given(deposerReclamation.executer("12345"))
+        given(deposerReclamation.executer(numeroDossier))
                 .willReturn(new Reclamation(
                         dossierDeReclamation,
                         List.of("ARS"),
@@ -96,13 +94,11 @@ class ReclamationControllerTest {
         mockMvc.perform(post("/api/v1/reclamations")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(dossierRequest))
-                .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.numeroDossier").value("12345"))
-                .andExpect(jsonPath("$.codeSousCategorieEtablissement").value("500"))
+                .andExpect(jsonPath("$.numeroDossier").value(12345))
+                .andExpect(jsonPath("$.codeSousCategorieEtablissement").value(500))
                 .andExpect(jsonPath("$.autoritesCompetentes[0]").value("ARS"))
                 .andExpect(jsonPath("$.contacts[0]").value("email@email.fr"));
 
     }
-
 }

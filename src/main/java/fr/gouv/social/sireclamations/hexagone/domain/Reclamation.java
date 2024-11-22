@@ -9,26 +9,21 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class Reclamation {
-    private final String numeroDossier;
-    private final String codeSousCategorieEtablissement;
+    private final int numeroDossier;
+    private final int codeSousCategorieEtablissement;
     private final List<String> autoritesCompetentes;
     private final List<String> contacts;
 
-    private static final Logger logger = LoggerFactory.getLogger(DeposerReclamation.class);
     public Reclamation(DossierDeReclamation dossierDeReclamation, List<String> autoritesCompetentes, List<String> contacts) {
 
         if (autoritesCompetentes.isEmpty()) {
-            var messageErreur = "Aucune autorité compétente trouvée pour le code sous-catégorie d'établissement : " +
-                    dossierDeReclamation.getCodeSousCategorieEtablissement();
-            logger.error(messageErreur);
-            throw new AutoriteCompetenteNotFoundException(messageErreur);
+            throw new AutoriteCompetenteNotFoundException("Aucune autorité compétente trouvée pour le code sous-catégorie d'établissement : " +
+                    dossierDeReclamation.getCodeSousCategorieEtablissement());
         }
         if (contacts.isEmpty()) {
-            var messageErreur = "Aucun contact n'a été trouvé. Autorité(s) compétente(s) : " +
+            throw new ContactNotFoundException("Aucun contact n'a été trouvé. Autorité(s) compétente(s) : " +
                     String.join(", ", autoritesCompetentes) + ",  Code sous-catégorie d'établissement : " +
-                    dossierDeReclamation.getCodeSousCategorieEtablissement();
-            logger.error(messageErreur);
-            throw new ContactNotFoundException(messageErreur);
+                    dossierDeReclamation.getCodeSousCategorieEtablissement());
         }
 
         this.numeroDossier = dossierDeReclamation.getNumeroDossier();
@@ -37,11 +32,11 @@ public class Reclamation {
         this.contacts = contacts;
     }
 
-    public String getNumeroDossier() {
+    public int getNumeroDossier() {
         return numeroDossier;
     }
 
-    public String getCodeSousCategorieEtablissement() {
+    public int getCodeSousCategorieEtablissement() {
         return codeSousCategorieEtablissement;
     }
 

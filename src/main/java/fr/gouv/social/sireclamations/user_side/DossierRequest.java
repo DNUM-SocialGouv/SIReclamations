@@ -1,9 +1,9 @@
 package fr.gouv.social.sireclamations.user_side;
 
 public class DossierRequest {
-    private String numeroDossier;
+    private int numeroDossier;
 
-    public String getNumeroDossier() {
+    public int getNumeroDossier() {
         return numeroDossier;
     }
 }

@@ -13,7 +13,7 @@ import java.util.*;
 @Repository
 public class ReferentielDeCategorieDEtablissementAdapter implements ReferentielDeCategoriesDEtablissements {
 
-    private final Map<String, List<String>> autoritesCompetentesParCodeCategorieEtablissement = new HashMap<>();
+    private final Map<Integer, List<String>> autoritesCompetentesParCodeCategorieEtablissement = new HashMap<>();
 
     public ReferentielDeCategorieDEtablissementAdapter(@Value("${referentiel.categorie.etablissement}") Resource csvResource) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(csvResource.getInputStream()))) {
@@ -23,7 +23,13 @@ public class ReferentielDeCategorieDEtablissementAdapter implements ReferentielD
             while ((ligne = reader.readLine()) != null) {
                 String[] colonnes = ligne.split(";");
                 if (colonnes.length >= 5) {
-                    String codeSousCategorie = colonnes[0].trim();
+                    int codeSousCategorie;
+                    try {
+                        codeSousCategorie = Integer.parseInt(colonnes[0].trim());
+                    } catch (NumberFormatException e) {
+                        // Ignorer les lignes avec une clé non valide
+                        continue;
+                    }
 
                     // Ajoute la première autorité compétente
                     List<String> autorites = new ArrayList<>();
@@ -42,7 +48,7 @@ public class ReferentielDeCategorieDEtablissementAdapter implements ReferentielD
     }
 
     @Override
-    public List<String> recupererAutoritesCompetentesParCodeSousCategorieEtablissement(String codeSousCategorieEtablissement) {
+    public List<String> recupererAutoritesCompetentesParCodeSousCategorieEtablissement(int codeSousCategorieEtablissement) {
         return autoritesCompetentesParCodeCategorieEtablissement.getOrDefault(codeSousCategorieEtablissement, Collections.emptyList());
     }
 }

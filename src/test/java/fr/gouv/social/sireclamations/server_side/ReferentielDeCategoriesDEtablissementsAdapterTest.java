@@ -20,7 +20,7 @@ class ReferentielDeCategoriesDEtablissementsAdapterTest {
     @Test
     void lorsqueLonVeutRecupererAutoriteCompetentePourUnEhpad_alorsRenvoiARSetCD(){
         //Given
-        String codeSousCategorie = "500";
+        var codeSousCategorie = 500;
         //When
         var autoritesCompetentes = referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorie);
         //Then
@@ -30,7 +30,7 @@ class ReferentielDeCategoriesDEtablissementsAdapterTest {
     @Test
     void lorsqueLonVeutRecupererAutoriteCompetentePourUneCategorieEtablissementInexistante_alorsRenvoiNull(){
         //Given
-        String codeSousCategorieInexistant = "12345678910";
+        var codeSousCategorieInexistant = 1234567891;
         //When
         var autoritesCompetentes = referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorieInexistant);
         //Then
