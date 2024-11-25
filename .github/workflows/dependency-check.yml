@@ -1,9 +1,6 @@
 name: Dependency-Check Analysis (SCA)
 
 on:
-  push:
-    branches: [ "develop" ]
-  pull_request:
   schedule:
     - cron: "0 23 * * 0"
 
