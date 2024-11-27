@@ -27,4 +27,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: dependency-check-html-report
-        path: target/dependency-check-report.html
+        path: target/dependency-check-report/dependency-check-report.html
