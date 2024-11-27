@@ -2,13 +2,13 @@ package fr.gouv.social.sireclamations.hexagone.domain;
 
 public class Etablissement {
     private String numeroFiness;
-    private int codeSousCategorieEtablissement;
+    private int codeSousCategorie;
     private int codePostal;
     private String nom;
 
-    public Etablissement(String numeroFiness, int codeEtablissement, int codePostal, String nom) {
+    public Etablissement(String numeroFiness, int codeSousCategorie, int codePostal, String nom) {
         this.numeroFiness = numeroFiness;
-        this.codeSousCategorieEtablissement = codeEtablissement;
+        this.codeSousCategorie = codeSousCategorie;
         this.codePostal = codePostal;
         this.nom = nom;
     }
@@ -17,8 +17,15 @@ public class Etablissement {
         return numeroFiness;
     }
 
-    public int getCodeSousCategorieEtablissement() {
-        return codeSousCategorieEtablissement;
+    public int getCodeSousCategorie() {
+        return codeSousCategorie;
     }
 
+    public int getCodePostal() {
+        return codePostal;
+    }
+
+    public String getNom() {
+        return nom;
+    }
 }

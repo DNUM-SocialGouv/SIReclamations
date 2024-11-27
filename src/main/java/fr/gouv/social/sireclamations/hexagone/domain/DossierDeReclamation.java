@@ -13,12 +13,11 @@ public class DossierDeReclamation {
         return numeroDossier;
     }
 
-    public int getCodeSousCategorieEtablissement() {
-        return etablissement.getCodeSousCategorieEtablissement();
+    public int getCodePostal() {
+        return etablissement.getCodePostal();
     }
 
-
-    public String getNumeroFinessEtablissement() {
-        return etablissement.getNumeroFiness();
+    public Etablissement getEtablissement() {
+        return etablissement;
     }
 }

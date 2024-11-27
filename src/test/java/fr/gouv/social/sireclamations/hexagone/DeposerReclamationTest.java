@@ -1,6 +1,7 @@
 package fr.gouv.social.sireclamations.hexagone;
 
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
+import fr.gouv.social.sireclamations.hexagone.domain.exceptions.DematSocialException;
 import fr.gouv.social.sireclamations.hexagone.domain.port.DematSocial;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,7 +40,7 @@ class DeposerReclamationTest {
     private EmailService emailService;
 
     @Test
-    void lorsqueLonDeposeUneReclamationConcernantUneEHPADsurParis_alorsRenvoiUneReclamationAssociéeEtEnvoiUnMailAuContactDeLARSdeParis(){
+    void lorsqueLonDeposeUneReclamationConcernantUneEHPADsurParis_alorsRenvoiUneReclamationAssociéeEtEnvoiUnMailAuContactDeLARSdeParis() throws IOException {
         //Given
         var numeroDossier = 12345;
         var codeSousCategorieEtablissement = 500;
@@ -64,7 +66,7 @@ class DeposerReclamationTest {
     }
 
     @Test
-    void lorsqueLonDeposeUneReclamationConcernantUneCategorieEtablissementInconnu_alorsAutoriteCompetenteNotFoundException(){
+    void lorsqueLonDeposeUneReclamationConcernantUneCategorieEtablissementInconnu_alorsAutoriteCompetenteNotFoundException() throws IOException {
         //Given
         var numeroDossier = 12345;
         var codeSousCategorieEtablissementIntrouvable = 1234567910;
@@ -84,7 +86,7 @@ class DeposerReclamationTest {
     }
 
     @Test
-    void lorsqueLonDeposeUneReclamationConcernantUneAutoriteSansContactsRenseignés_alorsRetourneContactNotFoundException(){
+    void lorsqueLonDeposeUneReclamationConcernantUneAutoriteSansContactsRenseignés_alorsRetourneContactNotFoundException() throws IOException {
         //Given
         var numeroDossier = 12345;
         var codeSousCategorieEtablissement = 500;
@@ -101,6 +103,19 @@ class DeposerReclamationTest {
                 () -> deposerReclamation.executer(numeroDossier))
                 .isInstanceOf(ContactNotFoundException.class)
                 .hasMessage("Aucun contact n'a été trouvé. Autorité(s) compétente(s) : ARS,  Code sous-catégorie d'établissement : 500");
+
+    }
+
+    @Test
+    void lorsqueLonSouhaiteDeposerUneReclamationConcernantUnDossierNexistantPasChezDematSocial_alorsRetourneDematSocialException() throws IOException {
+        //Given
+        var numeroDossier = 12345;
+        when(dematSocial.recupererDossier(numeroDossier)).thenThrow(new IOException("erreur sur le dossier numero :" + numeroDossier));
+        //When Then
+        assertThatThrownBy(
+                () -> deposerReclamation.executer(numeroDossier))
+                .isInstanceOf(DematSocialException.class)
+                .hasMessage("erreur sur le dossier numero :12345");
 
     }
 }

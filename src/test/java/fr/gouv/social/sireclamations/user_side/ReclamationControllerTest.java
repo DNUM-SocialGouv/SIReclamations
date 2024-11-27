@@ -4,6 +4,7 @@ import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.DeposerReclamation;
+import fr.gouv.social.sireclamations.hexagone.domain.exceptions.DematSocialException;
 import fr.gouv.social.sireclamations.server_side.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.server_side.exceptions.ContactNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,6 @@ import java.util.List;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -69,6 +69,26 @@ class ReclamationControllerTest {
                         .content(dossierRequest))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("contact not found"));
+
+    }
+
+    @Test
+    void lorsqueDeposerReclamationRenvoiDematSocialException_alorsRenvoiUne404() throws Exception {
+        //Given
+        var numeroDossier = 12345;
+        var dossierRequest = """
+                {
+                    "numeroDossier": "%s"
+                }
+                """.formatted(numeroDossier);
+        given(deposerReclamation.executer(numeroDossier))
+                .willThrow(new DematSocialException("dossier not found"));
+        //When Then
+        mockMvc.perform(post("/api/v1/reclamations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(dossierRequest))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("dossier not found"));
 
     }
 
