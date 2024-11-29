@@ -30,11 +30,6 @@ jobs:
     # Runs a single command using the runners shell
     - name: Send greeting
       run: echo "Hello ${{ inputs.name }}"
-    - name: Check
-      shell: bash
-      env:
-        BUILD_PATH: ${{steps.compile.outputs.BUILD_PATH}}
+    - name: List files in the repository
       run: |
-        echo SETTING VALUES TO OUTPUT
-        echo "The build_path is: ${BUILD_PATH}"
-        echo "build_path=${BUILD_PATH}" >> $GITHUB_OUTPUT
+          ls ${{ github.workspace }}
