@@ -40,8 +40,7 @@ public class DematSocialAdapter implements DematSocial {
         Call<ResponseBody> call = dematSocialApi.executeGraphQLQueryRaw(request);
         Response<ResponseBody> response = call.execute();
 
-        var dossierDeReclamation = recupererDossierDeReclamationOuThrowErreurSiLeJsonEstInexploitable(numeroDossier, response);
-        return dossierDeReclamation;
+        return recupererDossierDeReclamationOuThrowErreurSiLeJsonEstInexploitable(numeroDossier, response);
     }
 
     @NotNull
@@ -102,8 +101,8 @@ public class DematSocialAdapter implements DematSocial {
             codePostal = codePostalMatcher.group(1);
         }
 
-        // Expression régulière pour extraire le finess et le codeSousCategorie (dans les parenthèses)
-        Pattern pattern = Pattern.compile("\\((\\d+)\\s*-?\\s*(\\d+)?\\)");
+        // Expression régulière pour extraire le finess et le codeSousCategorie (finess: Habituellement 9 digits, " - ", codeSousCategorie : 3 digits)
+        Pattern pattern = Pattern.compile("\\((\\d{1,9})(?:\\s*-\\s*(\\d{1,3}))?\\)");
         Matcher matcher = pattern.matcher(stringValue);
 
 
