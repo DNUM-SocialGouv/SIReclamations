@@ -40,7 +40,12 @@ public class RetrofitConfiguration {
     // Bean Retrofit pour l'API DematSocial
     @Bean
     public Retrofit dematSocialRetrofit(@Value("${demat.social.graphql-endpoint}") String baseUrl) {
-        String token = dotenv.get("DEMAT_SOCIAL_GRAPHQL_TOKEN");
+        // Vérifie d'abord si la variable d'environnement existe (en CI)
+        String token = System.getenv("DEMAT_SOCIAL_GRAPHQL_TOKEN");
+        // Si la variable d'environnement n'est pas définie, utilise dotenv (en local)
+        if (token == null || token.isEmpty()) {
+            token = dotenv.get("DEMAT_SOCIAL_GRAPHQL_TOKEN");
+        }
         OkHttpClient client = createClient(token);
         return new Retrofit.Builder()
                 .baseUrl(baseUrl)
