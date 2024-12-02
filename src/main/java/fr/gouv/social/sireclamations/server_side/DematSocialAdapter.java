@@ -101,8 +101,12 @@ public class DematSocialAdapter implements DematSocial {
             codePostal = codePostalMatcher.group(1);
         }
 
-        // Expression régulière pour extraire le finess et le codeSousCategorie (finess: Habituellement 9 digits, " - ", codeSousCategorie : 3 digits)
-        Pattern pattern = Pattern.compile("\\((\\d{1,9})(?:\\s*-\\s*(\\d{1,3}))?\\)");
+        // Expression régulière pour extraire le finess et le codeSousCategorie (finess: 9 caractères, puis " - ",puis codeSousCategorie : 3 digits)
+        //        \\d : Le premier caractère est obligatoirement un chiffre.
+        //        [AB|\\d] : Le deuxième caractère peut être :La lettre A ou B, ou un chiffre.
+        //        \\d{0,7} : Jusqu'à 7 chiffres peuvent suivre.
+        //        (?:\\s*-\\s*(\\d{1,3}))? : Partie optionnelle après le tiret, contenant de 1 à 3 chiffres pour le code sous catégorie.
+        Pattern pattern = Pattern.compile("\\((\\d[AB|\\d]\\d{0,7})(?:\\s*-\\s*(\\d{1,3}))?\\)");
         Matcher matcher = pattern.matcher(stringValue);
 
 
