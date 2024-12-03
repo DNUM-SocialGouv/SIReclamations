@@ -33,6 +33,11 @@
 		<tomcat.version>10.1.33</tomcat.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<version>3.4.0</version>
+		</dependency>
 
 		<!--BEGIN : FIX CVE. Dans l'attente que spring-boot-starter-parent intègre des versions plus récentes des dépendances suivantes-->
 		<dependency>
