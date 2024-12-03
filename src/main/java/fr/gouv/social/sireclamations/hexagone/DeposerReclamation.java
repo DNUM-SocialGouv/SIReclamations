@@ -1,5 +1,6 @@
 package fr.gouv.social.sireclamations.hexagone;
 
+import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.port.DematSocial;
 import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDeCategoriesDEtablissements;
@@ -7,9 +8,12 @@ import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDesContacts
 import fr.gouv.social.sireclamations.server_side.EmailService;
 import fr.gouv.social.sireclamations.server_side.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.server_side.exceptions.ContactNotFoundException;
+import fr.gouv.social.sireclamations.hexagone.domain.exceptions.DematSocialException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 @Component
 public class DeposerReclamation {
@@ -30,11 +34,17 @@ public class DeposerReclamation {
         this.emailService = emailService;
     }
 
-    public Reclamation executer(int numeroDossier) throws AutoriteCompetenteNotFoundException, ContactNotFoundException{
-        var dossierReclamation = dematSocial.recupererDossier(numeroDossier);
+    public Reclamation executer(int numeroDossier) throws AutoriteCompetenteNotFoundException, ContactNotFoundException, DematSocialException{
+        DossierDeReclamation dossierReclamation;
+        try {
+            dossierReclamation = dematSocial.recupererDossier(numeroDossier);
+        } catch (IOException e) {
+            logger.error("Erreur lors de la récupération du dossier chez demat social : " + e.getMessage(), e);
+            throw new DematSocialException(e.getMessage());
+        }
         var autoritesCompetentes = referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                dossierReclamation.getCodeSousCategorieEtablissement());
-        var contactsEmail = referentielDesContacts.recupererContacts(dossierReclamation.getNumeroFinessEtablissement(),
+                dossierReclamation.getEtablissement().getCodeSousCategorie());
+        var contactsEmail = referentielDesContacts.recupererContacts(dossierReclamation.getEtablissement().getNumeroFiness(),
                 autoritesCompetentes);
 
         emailService.envoyer(contactsEmail, "vous êtes les autorités responsables.");

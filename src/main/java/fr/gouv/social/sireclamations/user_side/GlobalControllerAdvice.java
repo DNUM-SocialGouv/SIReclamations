@@ -1,6 +1,7 @@
 package fr.gouv.social.sireclamations.user_side;
 
 import fr.gouv.social.sireclamations.hexagone.DeposerReclamation;
+import fr.gouv.social.sireclamations.hexagone.domain.exceptions.DematSocialException;
 import fr.gouv.social.sireclamations.server_side.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.server_side.exceptions.ContactNotFoundException;
 import org.slf4j.Logger;
@@ -29,6 +30,14 @@ public class GlobalControllerAdvice {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     public Map<String, String> handleContactNotFoundException(ContactNotFoundException ex) {
+        logger.error(ex.getMessage());
+        return Map.of("error", ex.getMessage());
+    }
+
+    @ExceptionHandler(DematSocialException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public Map<String, String> handleDematSocialException(DematSocialException ex) {
         logger.error(ex.getMessage());
         return Map.of("error", ex.getMessage());
     }

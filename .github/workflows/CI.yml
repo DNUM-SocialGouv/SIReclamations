@@ -27,6 +27,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+
+    - name: Set environment variable for DEMAT_SOCIAL_GRAPHQL_TOKEN
+      run: echo "DEMAT_SOCIAL_GRAPHQL_TOKEN=${{ secrets.DEMAT_SOCIAL_GRAPHQL_TOKEN }}" >> $GITHUB_ENV
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml
 

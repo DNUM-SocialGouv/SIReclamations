@@ -14,20 +14,26 @@ public class Reclamation {
     private final List<String> autoritesCompetentes;
     private final List<String> contacts;
 
+    private static final Logger logger = LoggerFactory.getLogger(Reclamation.class);
+
     public Reclamation(DossierDeReclamation dossierDeReclamation, List<String> autoritesCompetentes, List<String> contacts) {
 
+        var codeSousCategorieEtablissement = dossierDeReclamation.getEtablissement().getCodeSousCategorie();
         if (autoritesCompetentes.isEmpty()) {
-            throw new AutoriteCompetenteNotFoundException("Aucune autorité compétente trouvée pour le code sous-catégorie d'établissement : " +
-                    dossierDeReclamation.getCodeSousCategorieEtablissement());
+            var messageErreur = "Aucune autorité compétente trouvée pour le code sous-catégorie d'établissement : " + codeSousCategorieEtablissement;
+            logger.info(messageErreur);
+            throw new AutoriteCompetenteNotFoundException(messageErreur);
         }
         if (contacts.isEmpty()) {
-            throw new ContactNotFoundException("Aucun contact n'a été trouvé. Autorité(s) compétente(s) : " +
+            var messageErreur = "Aucun contact n'a été trouvé. Autorité(s) compétente(s) : " +
                     String.join(", ", autoritesCompetentes) + ",  Code sous-catégorie d'établissement : " +
-                    dossierDeReclamation.getCodeSousCategorieEtablissement());
+                    codeSousCategorieEtablissement;
+            logger.info(messageErreur);
+            throw new ContactNotFoundException(messageErreur);
         }
 
         this.numeroDossier = dossierDeReclamation.getNumeroDossier();
-        this.codeSousCategorieEtablissement = dossierDeReclamation.getCodeSousCategorieEtablissement();
+        this.codeSousCategorieEtablissement = codeSousCategorieEtablissement;
         this.autoritesCompetentes = autoritesCompetentes;
         this.contacts = contacts;
     }
