@@ -39,7 +39,7 @@ public class DeposerReclamation {
         try {
             dossierReclamation = dematSocial.recupererDossier(numeroDossier);
         } catch (IOException e) {
-            logger.error("Erreur lors de la récupération du dossier chez demat social : " + e.getMessage());
+            logger.error("Erreur lors de la récupération du dossier chez demat social : " + e.getMessage(), e);
             throw new DematSocialException(e.getMessage());
         }
         var autoritesCompetentes = referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(

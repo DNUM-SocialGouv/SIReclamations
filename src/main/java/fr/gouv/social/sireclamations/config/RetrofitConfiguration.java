@@ -9,8 +9,12 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
+
+import java.util.Objects;
 
 @Configuration
 public class RetrofitConfiguration {
@@ -25,8 +29,13 @@ public class RetrofitConfiguration {
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         Interceptor authInterceptor = chain -> {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(token);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
             Request request = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer " + token)
+                    .addHeader("Authorization", Objects.requireNonNull(headers.getFirst(HttpHeaders.AUTHORIZATION)))
+                    .addHeader("Content-Type", Objects.requireNonNull(headers.getFirst(HttpHeaders.CONTENT_TYPE)))
                     .build();
             return chain.proceed(request);
         };

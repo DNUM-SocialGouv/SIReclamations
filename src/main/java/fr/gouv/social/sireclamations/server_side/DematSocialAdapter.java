@@ -48,16 +48,31 @@ public class DematSocialAdapter implements DematSocial {
         String jsonResponse;
         if (!response.isSuccessful() && response.body() == null) {
             throw new IOException("Erreur API DematSocial : " + (response.errorBody() != null ? response.errorBody().string() : "Réponse vide"));
-        } else {
-            jsonResponse = response.body().string();
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(jsonResponse);
-            if (rootNode.has("errors") && !rootNode.get("errors").isEmpty()) {
-                String errorMessage = rootNode.get("errors").get(0).get("message").asText();
-                throw new IOException("Erreur API DematSocial pour le dossier numéro " + numeroDossier + " : " + errorMessage);
-            }
         }
+        jsonResponse = response.body().string();
+
+        if (!isValidJson(jsonResponse)) {
+            throw new IOException("La réponse de l'API n'est pas un JSON valide : " + jsonResponse);
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(jsonResponse);
+        if (rootNode.has("errors") && !rootNode.get("errors").isEmpty()) {
+            String errorMessage = rootNode.get("errors").get(0).get("message").asText();
+            throw new IOException("Erreur API DematSocial pour le dossier numéro " + numeroDossier + " : " + errorMessage);
+        }
+
         return convertToDossierDeReclamation(jsonResponse);
+    }
+
+    private boolean isValidJson(String jsonResponse) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.readTree(jsonResponse);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private DossierDeReclamation convertToDossierDeReclamation(String jsonResponse) throws IOException {
@@ -104,9 +119,9 @@ public class DematSocialAdapter implements DematSocial {
         // Expression régulière pour extraire le finess et le codeSousCategorie (finess: 9 caractères, puis " - ",puis codeSousCategorie : 3 digits)
         //        \\d : Le premier caractère est obligatoirement un chiffre.
         //        [AB|\\d] : Le deuxième caractère peut être :La lettre A ou B, ou un chiffre.
-        //        \\d{0,7} : Jusqu'à 7 chiffres peuvent suivre.
-        //        (?:\\s*-\\s*(\\d{1,3}))? : Partie optionnelle après le tiret, contenant de 1 à 3 chiffres pour le code sous catégorie.
-        Pattern pattern = Pattern.compile("\\((\\d[AB|\\d]\\d{0,7})(?:\\s*-\\s*(\\d{1,3}))?\\)");
+        //        \\d{7} : 7 chiffres doivent suivre.
+        //        (?:\\s*-\\s*(\\d{3}))? : Partie optionnelle après le tiret, contenant 3 chiffres pour le code sous catégorie.
+        Pattern pattern = Pattern.compile("\\((\\d[AB|\\d]\\d{7})(?:\\s*-\\s*(\\d{3}))?\\)");
         Matcher matcher = pattern.matcher(stringValue);
 
 

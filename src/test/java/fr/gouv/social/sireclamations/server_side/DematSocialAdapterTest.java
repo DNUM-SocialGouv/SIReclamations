@@ -80,4 +80,25 @@ class DematSocialAdapterTest {
             dematSocialAdapter.recupererDossier(178291);
         });
     }
+    @Test
+    void quandApiDematSocialRenvoiUneReponseNonJson_alorsThrowIOException() throws IOException {
+        // Given
+        String invalidJsonResponse = "Ceci n'est pas un JSON valide";
+        ResponseBody responseBody = ResponseBody.create(invalidJsonResponse, null);
+        Response<ResponseBody> response = Response.success(responseBody);
+
+        Call<ResponseBody> call = mock(Call.class);
+        when(call.execute()).thenReturn(response);
+        when(dematSocialApi.executeGraphQLQueryRaw(any())).thenReturn(call);
+
+        // When Then
+        IOException exception = assertThrows(IOException.class, () -> {
+            dematSocialAdapter.recupererDossier(178291);
+        });
+
+        // Vérifier le message de l'exception
+        assertTrue(exception.getMessage().contains("La réponse de l'API n'est pas un JSON valide"));
+        assertTrue(exception.getMessage().contains(invalidJsonResponse));
+    }
+
 }
