@@ -52,7 +52,7 @@ public class DeposerReclamation {
                 dossierReclamation.getEtablissement().getCodeSousCategorie()));
         var codeTypeDuMisEnCause = referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(dossierReclamation.getLibelleDuMisEnCause());
         var autoriteCompetentePourLeMisEnCause = referentielDesAutoritesCompetentesParTypeDeMisEnCause.recupererAutoriteCompetentePourUnTypeDeMisEnCause(codeTypeDuMisEnCause);
-        if (!autoritesCompetentes.contains(autoriteCompetentePourLeMisEnCause) && autoriteCompetentePourLeMisEnCause != null){
+        if (autoriteCompetentePourLeMisEnCause != null && !autoritesCompetentes.contains(autoriteCompetentePourLeMisEnCause)){
             autoritesCompetentes.add(autoriteCompetentePourLeMisEnCause);
         }
         var contactsEmail = referentielDesContacts.recupererContacts(dossierReclamation.getEtablissement().getNumeroFiness(),

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 public class ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseAdapter implements ReferentielDesAutoritesCompetentesParTypeDeMisEnCause {
     @Override
     public String recupererAutoriteCompetentePourUnTypeDeMisEnCause(CodeTypeDuMisEnCause codeTypeDuMisEnCause) {
-        return null;
+        if (codeTypeDuMisEnCause == null) return null;
+
+        return "";
     }
 }

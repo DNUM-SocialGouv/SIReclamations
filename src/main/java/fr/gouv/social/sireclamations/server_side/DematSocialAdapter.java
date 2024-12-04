@@ -133,6 +133,8 @@ public class DematSocialAdapter implements DematSocial {
             numeroFiness = matcher.group(1);
             if (matcher.group(2) != null) { //Si code sous catégorie présente, on la récupère
                 codeSousCategorie = matcher.group(2);
+            }else {
+                //TODO appeler autre api pour récupérer le code sous catégorie
             }
         }
         return new Etablissement(numeroFiness, Integer.parseInt(codeSousCategorie), Integer.parseInt(codePostal), nom);
