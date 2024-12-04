@@ -81,6 +81,7 @@ public class DematSocialAdapter implements DematSocial {
         var dossierId = rootNode.path("data").path("dossier").path("number").asInt();
         JsonNode champsNode = rootNode.path("data").path("dossier").path("champs");
         Etablissement etablissement = null;
+        String libelleDuMisEnCause = "";
 
         // Parcourir la liste des champs
         for (JsonNode champ : champsNode) {
@@ -90,8 +91,11 @@ public class DematSocialAdapter implements DematSocial {
             if ("Q2hhbXAtMTk1MDg=".equals(id)) {
                 etablissement = recupererEtablissement(stringValue);
             }
+            if ("Q2hhbXAtMTk1MTY=".equals(id)) {
+                libelleDuMisEnCause = stringValue;
+            }
         }
-        return new DossierDeReclamation(dossierId, etablissement);
+        return new DossierDeReclamation(dossierId, etablissement, libelleDuMisEnCause);
     }
 
     private Etablissement recupererEtablissement(String stringValue) {

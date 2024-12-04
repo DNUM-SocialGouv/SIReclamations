@@ -103,7 +103,8 @@ class ReclamationControllerTest {
                 }
                 """.formatted(numeroDossier);
         var etablissement = new Etablissement("78000000", 500, 78210, "nom etablissement");
-        var dossierDeReclamation = new DossierDeReclamation(numeroDossier, etablissement);
+        String libelleDuMisEnCause = "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)";
+        var dossierDeReclamation = new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCause);
         given(deposerReclamation.executer(numeroDossier))
                 .willReturn(new Reclamation(
                         dossierDeReclamation,

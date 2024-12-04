@@ -1,12 +1,11 @@
 package fr.gouv.social.sireclamations.hexagone;
 
+import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDuMisEnCause;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.exceptions.DematSocialException;
-import fr.gouv.social.sireclamations.hexagone.domain.port.DematSocial;
+import fr.gouv.social.sireclamations.hexagone.domain.port.*;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
-import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDeCategoriesDEtablissements;
-import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDesContacts;
 import fr.gouv.social.sireclamations.server_side.EmailService;
 import fr.gouv.social.sireclamations.server_side.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.server_side.exceptions.ContactNotFoundException;
@@ -37,20 +36,27 @@ class DeposerReclamationTest {
     @Mock
     private ReferentielDesContacts referentielDesContacts;
     @Mock
+    private ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause;
+    @Mock
+    private ReferentielDesAutoritesCompetentesParTypeDeMisEnCause referentielDesAutoritesCompetentesParTypeDeMisEnCause;
+    @Mock
     private EmailService emailService;
 
     @Test
-    void lorsqueLonDeposeUneReclamationConcernantUneEHPADsurParis_alorsRenvoiUneReclamationAssociéeEtEnvoiUnMailAuContactDeLARSdeParis() throws IOException {
+    void lorsqueLonDeposeUneReclamationConcernantUnEHPADsurParis_alorsRenvoiUneReclamationAssociéeEtEnvoiUnMailAuContactDeLARSdeParis() throws IOException {
         //Given
         var numeroDossier = 12345;
         var codeSousCategorieEtablissement = 500;
         var codePostal = 94300;
         var finess = "940003858";
         String nom = "EHPAD LE VERGER DE VINCENNES";
+        String libelleDuMisEnCauseProvenantDuFormulaire = "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)";
         var etablissement = new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom);
-        var dossierReclamation = new DossierDeReclamation(numeroDossier, etablissement);
+        var dossierReclamation = new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire);
         when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
         when(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorieEtablissement)).thenReturn(List.of("ARS"));
+        when(referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(libelleDuMisEnCauseProvenantDuFormulaire)).thenReturn(CodeTypeDuMisEnCause.PS);
+        when(referentielDesAutoritesCompetentesParTypeDeMisEnCause.recupererAutoriteCompetentePourUnTypeDeMisEnCause(CodeTypeDuMisEnCause.PS)).thenReturn("ARS");
         when(referentielDesContacts.recupererContacts(finess, List.of("ARS"))).thenReturn(List.of("idf@ars.com"));
 
         //When
@@ -66,6 +72,33 @@ class DeposerReclamationTest {
     }
 
     @Test
+    void lorsqueLonDeposeUneReclamationConcernantUnEhpadDeTypeResidencesAutonomieEtUnPsMisEnCause_alorsRenvoilesMailsDeContactDeCDetARS() throws IOException {
+        // Given
+        var numeroDossier = 12345;
+        var codeSousCategorieEtablissement = 202;
+        var codePostal = 94300;
+        var finess = "940003858";
+        String nom = "EHPAD LE VERGER DE VINCENNES";
+        String libelleDuMisEnCauseProvenantDuFormulaire = "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)";
+        var etablissement = new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom);
+        var dossierReclamation = new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire);
+        when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
+        when(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorieEtablissement)).thenReturn(List.of("CD"));
+        when(referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(libelleDuMisEnCauseProvenantDuFormulaire)).thenReturn(CodeTypeDuMisEnCause.PS);
+        when(referentielDesAutoritesCompetentesParTypeDeMisEnCause.recupererAutoriteCompetentePourUnTypeDeMisEnCause(CodeTypeDuMisEnCause.PS)).thenReturn("ARS");
+        when(referentielDesContacts.recupererContacts(finess, List.of("CD","ARS"))).thenReturn(List.of("idf@cd.com", "idf@ars.com"));
+        //When
+        var reclamationActuelle = deposerReclamation.executer(numeroDossier);
+        //Then
+        var reclamationAttendue = new Reclamation(dossierReclamation, List.of("CD", "ARS"), List.of("idf@cd.com", "idf@ars.com"));
+        assertThat(reclamationActuelle).usingRecursiveComparison().isEqualTo(reclamationAttendue);
+        ArgumentCaptor<List<String>> emailsCaptor = ArgumentCaptor.forClass(List.class);
+        var destinatairesEmails = List.of("idf@cd.com", "idf@ars.com");
+        verify(emailService, times(1)).envoyer(emailsCaptor.capture(), any());
+        assertThat(emailsCaptor.getValue()).isEqualTo(destinatairesEmails);
+    }
+
+    @Test
     void lorsqueLonDeposeUneReclamationConcernantUneCategorieEtablissementInconnu_alorsAutoriteCompetenteNotFoundException() throws IOException {
         //Given
         var numeroDossier = 12345;
@@ -73,10 +106,13 @@ class DeposerReclamationTest {
         var codePostal = 94300;
         var finess = "940003858";
         var nom = "EHPAD LE VERGER DE VINCENNES";
+        String libelleDuMisEnCauseProvenantDuFormulaire = "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)";
         var etablissement = new Etablissement(finess, codeSousCategorieEtablissementIntrouvable, codePostal, nom);
-        var dossierReclamation = new DossierDeReclamation(numeroDossier, etablissement);
+        var dossierReclamation = new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire);
         when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
         when(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorieEtablissementIntrouvable)).thenReturn(Collections.emptyList());
+        when(referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(libelleDuMisEnCauseProvenantDuFormulaire)).thenReturn(CodeTypeDuMisEnCause.PS);
+        when(referentielDesAutoritesCompetentesParTypeDeMisEnCause.recupererAutoriteCompetentePourUnTypeDeMisEnCause(CodeTypeDuMisEnCause.PS)).thenReturn(null);
         //When Then
         assertThatThrownBy(
                 () -> deposerReclamation.executer(numeroDossier))
@@ -86,17 +122,20 @@ class DeposerReclamationTest {
     }
 
     @Test
-    void lorsqueLonDeposeUneReclamationConcernantUneAutoriteSansContactsRenseignés_alorsRetourneContactNotFoundException() throws IOException {
+    void lorsqueLonDeposeUneReclamationConcernantUneeAutoriteSansContactsRenseignés_alorsRetourneContactNotFoundException() throws IOException {
         //Given
         var numeroDossier = 12345;
         var codeSousCategorieEtablissement = 500;
         var codePostal = 94300;
         var finess = "940003858";
         var nom = "EHPAD LE VERGER DE VINCENNES";
+        String libelleDuMisEnCauseProvenantDuFormulaire = "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)";
         var etablissement = new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom);
-        var dossierReclamation = new DossierDeReclamation(numeroDossier, etablissement);
+        var dossierReclamation = new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire);
         when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
         when(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorieEtablissement)).thenReturn(List.of("ARS"));
+        when(referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(libelleDuMisEnCauseProvenantDuFormulaire)).thenReturn(CodeTypeDuMisEnCause.PS);
+        when(referentielDesAutoritesCompetentesParTypeDeMisEnCause.recupererAutoriteCompetentePourUnTypeDeMisEnCause(CodeTypeDuMisEnCause.PS)).thenReturn("ARS");
         when(referentielDesContacts.recupererContacts(finess, List.of("ARS"))).thenReturn(Collections.emptyList());
         //When Then
         assertThatThrownBy(
