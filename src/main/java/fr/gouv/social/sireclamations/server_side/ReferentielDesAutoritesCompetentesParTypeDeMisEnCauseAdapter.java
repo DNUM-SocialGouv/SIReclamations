@@ -35,7 +35,7 @@ public class ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseAdapter implem
                     codeTypeToAutorite.put(codeTypeDuMisEnCause, autorite);
                 } catch (IllegalArgumentException e) {
                     // Logger un avertissement pour les codes inconnus
-                    logger.warn("Le referentiel ne prend actuellement pas en charge le type de mis en cause suivant : " + codeType);
+                    logger.warn("Le referentiel ne prend actuellement pas en charge le type de mis en cause suivant : {}", codeType);
                 }
             }
         }
