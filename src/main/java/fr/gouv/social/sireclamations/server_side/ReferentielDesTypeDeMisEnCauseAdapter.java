@@ -33,7 +33,7 @@ public class ReferentielDesTypeDeMisEnCauseAdapter implements ReferentielDesType
                     libelleToCodeTypeMEC.put(libelle, codeTypeMEC);
                 } catch (IllegalArgumentException e) {
                     // Ignorer les codes non valides
-                    logger.error("Le referentiel ne prend actuellement pas en charge le type de mis en cause avec pour libellé : " + libelle);
+                    logger.warn("Le referentiel ne prend actuellement pas en charge le type de mis en cause avec pour libellé : " + libelle);
                 }
             }
         }
