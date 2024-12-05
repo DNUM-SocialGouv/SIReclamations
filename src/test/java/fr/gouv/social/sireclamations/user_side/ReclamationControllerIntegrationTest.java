@@ -25,6 +25,7 @@ class ReclamationControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
     @Test
+    @Tag("localOnly")
     void lorsqueLonDeposeUneReclamationPourUnDossierExistant_alorsRetourne200EtLaReclamationEnBody() throws Exception {
         // Given
         int numeroDossier = 178291;
