@@ -1,12 +1,11 @@
 package fr.gouv.social.sireclamations.server_side;
 import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDesContacts;
+import fr.gouv.social.sireclamations.server_side.utils.CsvReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,33 +15,30 @@ public class ReferentielDesContactsAdapter implements ReferentielDesContacts {
     private final Map<String, Map<String, String>> csvData = new HashMap<>();
 
     public ReferentielDesContactsAdapter(@Value("${referentiel.autorite.contact}") Resource csvResource) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(csvResource.getInputStream()))) {
-            // Lire l'en-tête pour mapper les colonnes
-            String headerLine = reader.readLine();
-            if (headerLine == null) {
-                throw new IllegalArgumentException("Le fichier CSV est vide.");
-            }
-            String[] headers = headerLine.split(";");
-            Map<String, Integer> nomColonnesEtIndex = mapHeaderIndices(headers);
+        List<String[]> lignes = CsvReader.readCsv(csvResource);
+        if (lignes.isEmpty()) {
+            throw new IllegalArgumentException("Le fichier CSV est vide.");
+        }
+        // Lire l'en-tête pour mapper les colonnes
+        String[] headers = lignes.get(0);
+        Map<String, Integer> nomColonnesEtIndex = mapHeaderIndices(headers);
 
-            // Charger les données dans csvData
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] colonnes = line.split(";");
-                if (colonnes.length == 0 || colonnes[0].trim().isEmpty()) continue;
+        // Charger les données dans csvData
+        for (int i = 1; i < lignes.size(); i++) {  // Ignorer la première ligne (en-tête)
+            String[] colonnes = lignes.get(i);
+            if (colonnes.length == 0 || colonnes[0].trim().isEmpty()) continue;
 
-                String code = colonnes[0].trim();
-                Map<String, String> contacts = new HashMap<>();
+            String code = colonnes[0].trim();
+            Map<String, String> contacts = new HashMap<>();
 
-                for (Map.Entry<String, Integer> colonne : nomColonnesEtIndex.entrySet()) {
-                    int indexColonne = colonne.getValue();
-                    String valeurColonne = colonne.getKey();
-                    if (indexColonne < colonnes.length && !colonnes[indexColonne].trim().isEmpty()) {
-                        contacts.put(valeurColonne, colonnes[indexColonne].trim());
-                    }
+            for (Map.Entry<String, Integer> colonne : nomColonnesEtIndex.entrySet()) {
+                int indexColonne = colonne.getValue();
+                String valeurColonne = colonne.getKey();
+                if (indexColonne < colonnes.length && !colonnes[indexColonne].trim().isEmpty()) {
+                    contacts.put(valeurColonne, colonnes[indexColonne].trim());
                 }
-                csvData.put(code, contacts);
             }
+            csvData.put(code, contacts);
         }
     }
 
@@ -113,8 +109,6 @@ public class ReferentielDesContactsAdapter implements ReferentielDesContacts {
             throw new IllegalArgumentException("Code FINESS invalide pour la Corse. Le deuxième caractère doit être 'A' ou 'B'.");
         }
     }
-
-
 
     //map qui associe chaque colonne à son index dans le tableau
     private Map<String, Integer> mapHeaderIndices(String[] headers) {

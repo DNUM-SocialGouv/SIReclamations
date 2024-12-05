@@ -81,6 +81,7 @@ public class DematSocialAdapter implements DematSocial {
         var dossierId = rootNode.path("data").path("dossier").path("number").asInt();
         JsonNode champsNode = rootNode.path("data").path("dossier").path("champs");
         Etablissement etablissement = null;
+        String libelleDuMisEnCause = "";
 
         // Parcourir la liste des champs
         for (JsonNode champ : champsNode) {
@@ -90,8 +91,11 @@ public class DematSocialAdapter implements DematSocial {
             if ("Q2hhbXAtMTk1MDg=".equals(id)) {
                 etablissement = recupererEtablissement(stringValue);
             }
+            if ("Q2hhbXAtMTk1MTY=".equals(id)) {
+                libelleDuMisEnCause = stringValue;
+            }
         }
-        return new DossierDeReclamation(dossierId, etablissement);
+        return new DossierDeReclamation(dossierId, etablissement, libelleDuMisEnCause);
     }
 
     private Etablissement recupererEtablissement(String stringValue) {
@@ -129,6 +133,8 @@ public class DematSocialAdapter implements DematSocial {
             numeroFiness = matcher.group(1);
             if (matcher.group(2) != null) { //Si code sous catégorie présente, on la récupère
                 codeSousCategorie = matcher.group(2);
+            }else {
+                //TODO appeler autre api pour récupérer le code sous catégorie
             }
         }
         return new Etablissement(numeroFiness, Integer.parseInt(codeSousCategorie), Integer.parseInt(codePostal), nom);
