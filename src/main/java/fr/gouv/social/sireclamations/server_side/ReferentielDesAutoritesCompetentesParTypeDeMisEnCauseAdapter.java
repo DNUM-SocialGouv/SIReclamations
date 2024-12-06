@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,7 @@ public class ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseAdapter implem
     private static final Logger logger = LoggerFactory.getLogger(ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseAdapter.class);
     private final Map<CodeTypeDuMisEnCause, String> codeTypeToAutorite = new HashMap<>();
 
-    public ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseAdapter(@Value("${referentiel.autorite.type-mec}") Resource csvResource) throws IOException {
+    public ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseAdapter(@Value("${referentiel.autorite.type-mec}") Resource csvResource){
         List<String[]> lignes = CsvReader.readCsv(csvResource);
 
         // Ignorer la première ligne (en-tête)

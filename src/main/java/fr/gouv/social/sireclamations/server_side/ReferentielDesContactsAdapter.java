@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -14,7 +13,7 @@ public class ReferentielDesContactsAdapter implements ReferentielDesContacts {
 
     private final Map<String, Map<String, String>> csvData = new HashMap<>();
 
-    public ReferentielDesContactsAdapter(@Value("${referentiel.autorite.contact}") Resource csvResource) throws IOException {
+    public ReferentielDesContactsAdapter(@Value("${referentiel.autorite.contact}") Resource csvResource){
         List<String[]> lignes = CsvReader.readCsv(csvResource);
         if (lignes.isEmpty()) {
             throw new IllegalArgumentException("Le fichier CSV est vide.");

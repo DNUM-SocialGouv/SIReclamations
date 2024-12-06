@@ -15,7 +15,7 @@ public class CsvReader {
      * @return Liste de lignes du fichier CSV.
      * @throws IOException En cas de problème de lecture du fichier.
      */
-    public static List<String[]> readCsv(Resource csvResource) throws IOException {
+    public static List<String[]> readCsv(Resource csvResource) {
         List<String[]> lignes = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(csvResource.getInputStream()))) {
@@ -23,6 +23,8 @@ public class CsvReader {
             while ((ligne = reader.readLine()) != null) {
                 lignes.add(ligne.split(";"));
             }
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors de la lecture du CSV",e);
         }
 
         return lignes;

@@ -1,6 +1,7 @@
 package fr.gouv.social.sireclamations.config;
 
 import fr.gouv.social.sireclamations.server_side.DematSocialApi;
+import fr.gouv.social.sireclamations.server_side.OpenDataSoftApi;
 import io.github.cdimascio.dotenv.Dotenv;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -61,6 +62,24 @@ public class RetrofitConfiguration {
                 .addConverterFactory(JacksonConverterFactory.create())
                 .client(client)
                 .build();
+    }
+
+    @Bean
+    public Retrofit openDataSoftRetrofit(@Value("${opendatasoft.base-url}") String baseUrl) {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                .build();
+
+        return new Retrofit.Builder()
+                .baseUrl(baseUrl)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .client(client)
+                .build();
+    }
+
+    @Bean
+    public OpenDataSoftApi openDataSoftApi(Retrofit openDataSoftRetrofit) {
+        return openDataSoftRetrofit.create(OpenDataSoftApi.class);
     }
 
     @Bean

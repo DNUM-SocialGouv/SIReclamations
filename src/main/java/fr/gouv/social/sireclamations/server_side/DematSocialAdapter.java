@@ -22,8 +22,12 @@ import java.util.regex.Pattern;
 public class DematSocialAdapter implements DematSocial {
     private final DematSocialApi dematSocialApi;
 
-    public DematSocialAdapter(Retrofit dematSocialRetrofit) {
+    private final OpenDataSoftApi openDataSoftApi;
+
+
+    public DematSocialAdapter(Retrofit dematSocialRetrofit, OpenDataSoftApi openDataSoftApi) {
         this.dematSocialApi = dematSocialRetrofit.create(DematSocialApi.class);
+        this.openDataSoftApi = openDataSoftApi;
     }
 
     @Override
@@ -98,11 +102,11 @@ public class DematSocialAdapter implements DematSocial {
         return new DossierDeReclamation(dossierId, etablissement, libelleDuMisEnCause);
     }
 
-    private Etablissement recupererEtablissement(String stringValue) {
+    private Etablissement recupererEtablissement(String stringValue) throws IOException {
         String nom = "";
         String codePostal = "";
         String numeroFiness = "";
-        String codeSousCategorie = "500"; // Valeur par défaut pour codeSousCategorie si non trouvé
+        String codeSousCategorie = "";
 
         // Expression régulière pour extraire le nom (avant la première virgule)
         Pattern nomPattern = Pattern.compile("^([A-Za-zÀ-ÿ\\s'.,-]+),");  // Capture tout avant la virgule
@@ -133,10 +137,46 @@ public class DematSocialAdapter implements DematSocial {
             numeroFiness = matcher.group(1);
             if (matcher.group(2) != null) { //Si code sous catégorie présente, on la récupère
                 codeSousCategorie = matcher.group(2);
-            }else {
-                //TODO appeler autre api pour récupérer le code sous catégorie
+            } else {
+                codeSousCategorie = fetchCodeSousCategorieFromAPI(numeroFiness);
             }
         }
         return new Etablissement(numeroFiness, Integer.parseInt(codeSousCategorie), Integer.parseInt(codePostal), nom);
+    }
+
+    private String fetchCodeSousCategorieFromAPI(String numeroFiness) throws IOException {
+        String categetab = "categetab";
+        Call<ResponseBody> call = openDataSoftApi.fetchCodeSousCategorie(
+                categetab, // Sélectionne uniquement la colonne "categetab"
+                "nofinesset:\"" + numeroFiness + "\"", // Condition WHERE
+                2 // Limite
+        );
+
+        Response<ResponseBody> response = call.execute();
+
+        if (!response.isSuccessful() || response.body() == null) {
+            throw new IOException("Erreur lors de l'appel à l'API OpenDataSoft : " +
+                    (response.errorBody() != null ? response.errorBody().string() : "Réponse vide"));
+        }
+
+        String jsonResponse = response.body().string();
+
+        if (!isValidJson(jsonResponse)) {
+            throw new IOException("La réponse de l'API n'est pas un JSON valide : " + jsonResponse);
+        }
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(jsonResponse);
+
+        // Vérification des résultats
+        String results = "results";
+        if (rootNode.has(results) && !rootNode.get(results).isEmpty()) {
+            JsonNode resultsNode = rootNode.get(results).get(0);
+            if (resultsNode.has(categetab)) {
+                return resultsNode.get(categetab).asText();
+            }
+        }
+
+        throw new IOException("Aucun code sous catégorie trouvé dans la réponse de l'API openDataSoft pour le numéro FINESS : " + numeroFiness);
     }
 }

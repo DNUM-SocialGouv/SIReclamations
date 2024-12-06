@@ -28,7 +28,7 @@ class ReclamationControllerIntegrationTest {
     @Tag("localOnly")
     void lorsqueLonDeposeUneReclamationPourUnDossierExistant_alorsRetourne200EtLaReclamationEnBody() throws Exception {
         // Given
-        int numeroDossier = 178291;
+        int numeroDossier = 185631; //Correspond a un dossier existant avec un Ehpad pour établissement
         DeposerReclamationRequest request = new DeposerReclamationRequest();
         request.setNumeroDossier(numeroDossier);
 
