@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
-import fr.gouv.social.sireclamations.hexagone.domain.port.DematSocial;
+import fr.gouv.social.sireclamations.hexagone.domain.ports.DematSocial;
 import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;

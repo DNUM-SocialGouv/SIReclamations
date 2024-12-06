@@ -1,7 +1,7 @@
 package fr.gouv.social.sireclamations.server_side;
 
 import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDuMisEnCause;
-import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDesAutoritesCompetentesParTypeDeMisEnCause;
+import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesAutoritesCompetentesParTypeDeMisEnCause;
 import fr.gouv.social.sireclamations.server_side.utils.CsvReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public class ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseAdapter implements ReferentielDesAutoritesCompetentesParTypeDeMisEnCause {
+public class ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseCsvAdapter implements ReferentielDesAutoritesCompetentesParTypeDeMisEnCause {
 
-    private static final Logger logger = LoggerFactory.getLogger(ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseAdapter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseCsvAdapter.class);
     private final Map<CodeTypeDuMisEnCause, String> codeTypeToAutorite = new HashMap<>();
 
-    public ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseAdapter(@Value("${referentiel.autorite.type-mec}") Resource csvResource){
+    public ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseCsvAdapter(@Value("${referentiel.autorite.type-mec}") Resource csvResource){
         List<String[]> lignes = CsvReader.readCsv(csvResource);
 
         // Ignorer la première ligne (en-tête)

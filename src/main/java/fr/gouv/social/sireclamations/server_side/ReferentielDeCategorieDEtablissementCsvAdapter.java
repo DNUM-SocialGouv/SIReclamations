@@ -1,6 +1,6 @@
 package fr.gouv.social.sireclamations.server_side;
 
-import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDeCategoriesDEtablissements;
+import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDeCategoriesDEtablissements;
 import fr.gouv.social.sireclamations.server_side.utils.CsvReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -9,11 +9,11 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 
 @Repository
-public class ReferentielDeCategorieDEtablissementAdapter implements ReferentielDeCategoriesDEtablissements {
+public class ReferentielDeCategorieDEtablissementCsvAdapter implements ReferentielDeCategoriesDEtablissements {
 
     private final Map<Integer, List<String>> autoritesCompetentesParCodeCategorieEtablissement = new HashMap<>();
 
-    public ReferentielDeCategorieDEtablissementAdapter(@Value("${referentiel.categorie.etablissement}") Resource csvResource){
+    public ReferentielDeCategorieDEtablissementCsvAdapter(@Value("${referentiel.categorie.etablissement}") Resource csvResource){
         List<String[]> lignes = CsvReader.readCsv(csvResource);
         if (lignes.isEmpty()) {
             throw new IllegalArgumentException("Le fichier CSV est vide.");

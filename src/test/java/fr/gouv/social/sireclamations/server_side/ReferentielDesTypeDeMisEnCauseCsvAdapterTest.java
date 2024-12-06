@@ -1,7 +1,7 @@
 package fr.gouv.social.sireclamations.server_side;
 
 import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDuMisEnCause;
-import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDesTypeDeMisEnCause;
+import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesTypeDeMisEnCause;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -9,13 +9,13 @@ import org.springframework.core.io.Resource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ReferentielDesTypeDeMisEnCauseAdapterTest {
+class ReferentielDesTypeDeMisEnCauseCsvAdapterTest {
     private ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause;
 
     @BeforeEach
     void setup() throws Exception {
         Resource csvResource = new ClassPathResource("data/mappingFormulaireV2-typeMEC-test.csv");
-        referentielDesTypeDeMisEnCause = new ReferentielDesTypeDeMisEnCauseAdapter(csvResource);
+        referentielDesTypeDeMisEnCause = new ReferentielDesTypeDeMisEnCauseCsvAdapter(csvResource);
     }
 
     @Test

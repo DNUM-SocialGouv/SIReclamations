@@ -1,4 +1,4 @@
-package fr.gouv.social.sireclamations.server_side.exceptions;
+package fr.gouv.social.sireclamations.hexagone.exceptions;
 
 public class AutoriteCompetenteNotFoundException extends RuntimeException {
     public AutoriteCompetenteNotFoundException(String message) {

@@ -1,7 +1,7 @@
 package fr.gouv.social.sireclamations.server_side;
 
 import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDuMisEnCause;
-import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDesTypeDeMisEnCause;
+import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesTypeDeMisEnCause;
 import fr.gouv.social.sireclamations.server_side.utils.CsvReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public class ReferentielDesTypeDeMisEnCauseAdapter implements ReferentielDesTypeDeMisEnCause {
+public class ReferentielDesTypeDeMisEnCauseCsvAdapter implements ReferentielDesTypeDeMisEnCause {
 
-    private static final Logger logger = LoggerFactory.getLogger(ReferentielDesTypeDeMisEnCauseAdapter.class);
+    private static final Logger logger = LoggerFactory.getLogger(ReferentielDesTypeDeMisEnCauseCsvAdapter.class);
     private final Map<String, CodeTypeDuMisEnCause> libelleToCodeTypeMEC = new HashMap<>();
 
-    public ReferentielDesTypeDeMisEnCauseAdapter(@Value("${referentiel.formulaire.type-mec}") Resource csvResource){
+    public ReferentielDesTypeDeMisEnCauseCsvAdapter(@Value("${referentiel.formulaire.type-mec}") Resource csvResource){
         List<String[]> lignes = CsvReader.readCsv(csvResource);
 
         // Ignorer la première ligne (en-tête)

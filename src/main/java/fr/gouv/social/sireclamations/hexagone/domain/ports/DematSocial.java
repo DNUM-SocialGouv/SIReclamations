@@ -1,4 +1,4 @@
-package fr.gouv.social.sireclamations.hexagone.domain.port;
+package fr.gouv.social.sireclamations.hexagone.domain.ports;
 
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 

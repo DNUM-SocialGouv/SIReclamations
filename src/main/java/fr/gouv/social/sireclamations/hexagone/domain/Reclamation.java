@@ -1,8 +1,7 @@
 package fr.gouv.social.sireclamations.hexagone.domain;
 
-import fr.gouv.social.sireclamations.hexagone.DeposerReclamation;
-import fr.gouv.social.sireclamations.server_side.exceptions.AutoriteCompetenteNotFoundException;
-import fr.gouv.social.sireclamations.server_side.exceptions.ContactNotFoundException;
+import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
+import fr.gouv.social.sireclamations.hexagone.exceptions.ContactNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
