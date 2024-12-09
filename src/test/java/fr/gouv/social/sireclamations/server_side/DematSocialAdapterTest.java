@@ -1,5 +1,6 @@
 package fr.gouv.social.sireclamations.server_side;
 
+import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,9 @@ class DematSocialAdapterTest {
     @Mock
     private DematSocialApi dematSocialApi;
 
+    @Mock
+    private OpenDataSoftApi openDataSoftApi;
+
     private DematSocialAdapter dematSocialAdapter;
 
     @BeforeEach
@@ -26,33 +30,72 @@ class DematSocialAdapterTest {
         MockitoAnnotations.openMocks(this);
         Retrofit retrofit = mock(Retrofit.class);
         when(retrofit.create(DematSocialApi.class)).thenReturn(dematSocialApi);
-        dematSocialAdapter = new DematSocialAdapter(retrofit);
+        when(retrofit.create(OpenDataSoftApi.class)).thenReturn(openDataSoftApi);
+        dematSocialAdapter = new DematSocialAdapter(retrofit, openDataSoftApi);
     }
 
     @Test
     void lorsquunDossierExisteEtConcerneUnEtablissement_alorsRetourneLeDossierEtLesInformationsDeLEtablissement() throws IOException {
         // Given
-        String jsonResponse = """
-        {
-            "data": {
-                "dossier": {
-                    "number": 178291,
-                    "champs": [
-                        {
-                            "id": "Q2hhbXAtMTk1MDg=",
-                            "stringValue": "PHARMACIE DE L'ABBAYE, ST CYR L ECOLE 78210 (780012951 - 500)"
+        mockAppelDematSocialApi("""
+                {
+                    "data": {
+                        "dossier": {
+                            "number": 178291,
+                            "champs": [
+                                {
+                                    "id": "Q2hhbXAtMTk1MDg=",
+                                    "stringValue": "PHARMACIE DE L'ABBAYE, ST CYR L ECOLE 78210 (780012951 - 500)"
+                                }
+                            ]
                         }
-                    ]
+                    }
                 }
-            }
-        }
-        """;
-        ResponseBody responseBody = ResponseBody.create(jsonResponse, null);
-        Response<ResponseBody> response = Response.success(responseBody);
+                """);
 
-        var call = mock(Call.class);
-        when(call.execute()).thenReturn(response);
-        when(dematSocialApi.executeGraphQLQueryRaw(any())).thenReturn(call);
+        // When
+        var dossier = dematSocialAdapter.recupererDossier(178291);
+
+        // Then
+        assertNotNull(dossier);
+        assertEquals(178291, dossier.getNumeroDossier());
+        assertEquals(78210, dossier.getCodePostal());
+        assertEquals("PHARMACIE DE L'ABBAYE", dossier.getEtablissement().getNom());
+        assertEquals("780012951", dossier.getEtablissement().getNumeroFiness());
+        assertEquals(500, dossier.getEtablissement().getCodeSousCategorie());
+    }
+
+    @Test
+    void lorsquunDossierExisteEtConcerneUnEtablissementQuiNeContientPasDeCodeCategorieEtablissementDansSonDossierDematSocial_alorsRetourneLeDossierEtLesInformationsDeLEtablissement() throws IOException {
+        // Given
+        mockAppelDematSocialApi("""
+                {
+                    "data": {
+                        "dossier": {
+                            "number": 178291,
+                            "champs": [
+                                {
+                                    "id": "Q2hhbXAtMTk1MDg=",
+                                    "stringValue": "PHARMACIE DE L'ABBAYE, ST CYR L ECOLE 78210 (780012951)"
+                                }
+                            ]
+                        }
+                    }
+                }
+                """);
+
+        // JSON simulé pour OpenDataSoft
+        mockAppelOpenDataSoftApi("""
+                {
+                   "total_count": 1,
+                   "results": [
+                      {
+                         "categetab": "500"
+                      }
+                   ]
+                }
+                """);
+
 
         // When
         var dossier = dematSocialAdapter.recupererDossier(178291);
@@ -80,6 +123,7 @@ class DematSocialAdapterTest {
             dematSocialAdapter.recupererDossier(178291);
         });
     }
+
     @Test
     void quandApiDematSocialRenvoiUneReponseNonJson_alorsThrowIOException() throws IOException {
         // Given
@@ -99,6 +143,61 @@ class DematSocialAdapterTest {
         // Vérifier le message de l'exception
         assertTrue(exception.getMessage().contains("La réponse de l'API n'est pas un JSON valide"));
         assertTrue(exception.getMessage().contains(invalidJsonResponse));
+    }
+
+    @Test
+    void quandApiOpenDataSoftRenvoiUneReponseNonJson_alorsThrowIOException() throws IOException {
+        // Given
+        mockAppelDematSocialApi("""
+                {
+                    "data": {
+                        "dossier": {
+                            "number": 178291,
+                            "champs": [
+                                {
+                                    "id": "Q2hhbXAtMTk1MDg=",
+                                    "stringValue": "PHARMACIE DE L'ABBAYE, ST CYR L ECOLE 78210 (780012951)"
+                                }
+                            ]
+                        }
+                    }
+                }
+                """);
+
+        String invalidJsonResponse = "Ceci n'est pas un JSON valide";
+        ResponseBody responseBody = ResponseBody.create(invalidJsonResponse, null); // Aucune spécification de type MIME
+        Response<ResponseBody> response = Response.success(responseBody); // Réponse réussie avec le contenu non-JSON
+
+        Call<ResponseBody> call = mock(Call.class); // Mock du call
+        when(call.execute()).thenReturn(response); // Retour de la réponse simulée
+        when(openDataSoftApi.fetchCodeSousCategorie(anyString(), anyString(), anyInt())).thenReturn(call); // Mock du service API
+
+        // When Then
+        IOException exception = assertThrows(IOException.class, () -> {
+            dematSocialAdapter.recupererDossier(178291);
+        });
+
+        // Vérification du message d'erreur
+        assertTrue(exception.getMessage().contains("La réponse de l'API n'est pas un JSON valide"));
+        assertTrue(exception.getMessage().contains(invalidJsonResponse));
+    }
+
+    private void mockAppelDematSocialApi(String jsonResponse) throws IOException {
+        ResponseBody responseDematSocialBody = ResponseBody.create(jsonResponse, null);
+        Response<ResponseBody> responseDematSocial = Response.success(responseDematSocialBody);
+
+        var callDematSocial = mock(Call.class);
+        when(callDematSocial.execute()).thenReturn(responseDematSocial);
+        when(dematSocialApi.executeGraphQLQueryRaw(any())).thenReturn(callDematSocial);
+    }
+
+    private void mockAppelOpenDataSoftApi(String jsonResponse) throws IOException {
+        ResponseBody responseOpenDataSoftBody = ResponseBody.create(jsonResponse, MediaType.get("application/json"));
+        Response<ResponseBody> responseOpenDataSoft = Response.success(responseOpenDataSoftBody);
+        Call<ResponseBody> callOpenDataSoft = mock(Call.class);
+        when(callOpenDataSoft.execute()).thenReturn(responseOpenDataSoft);
+        when(openDataSoftApi.fetchCodeSousCategorie("categetab", "nofinesset:\"780012951\"", 2)).thenReturn(callOpenDataSoft);
+
     }
 
 }

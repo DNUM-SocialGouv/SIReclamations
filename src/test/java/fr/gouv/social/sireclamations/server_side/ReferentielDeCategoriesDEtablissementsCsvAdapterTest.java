@@ -1,6 +1,6 @@
 package fr.gouv.social.sireclamations.server_side;
 
-import fr.gouv.social.sireclamations.hexagone.domain.port.ReferentielDeCategoriesDEtablissements;
+import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDeCategoriesDEtablissements;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -10,12 +10,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ReferentielDeCategoriesDEtablissementsAdapterTest {
+class ReferentielDeCategoriesDEtablissementsCsvAdapterTest {
     private ReferentielDeCategoriesDEtablissements referentielDeCategoriesDEtablissements;
     @BeforeEach
     void setUp() throws Exception {
         Resource csvResource = new ClassPathResource("data/sousCatFINESS-ac-test.csv");
-        referentielDeCategoriesDEtablissements = new ReferentielDeCategorieDEtablissementAdapter(csvResource);
+        referentielDeCategoriesDEtablissements = new ReferentielDeCategorieDEtablissementCsvAdapter(csvResource);
     }
     @Test
     void lorsqueLonVeutRecupererAutoriteCompetentePourUnEhpad_alorsRenvoiARSetCD(){

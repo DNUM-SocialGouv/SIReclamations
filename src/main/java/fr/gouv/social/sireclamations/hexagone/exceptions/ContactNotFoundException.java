@@ -1,4 +1,4 @@
-package fr.gouv.social.sireclamations.server_side.exceptions;
+package fr.gouv.social.sireclamations.hexagone.exceptions;
 
 public class ContactNotFoundException extends RuntimeException {
     public ContactNotFoundException(String message) {
