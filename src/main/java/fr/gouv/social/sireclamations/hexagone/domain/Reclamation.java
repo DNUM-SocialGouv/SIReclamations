@@ -6,33 +6,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Set;
 
 public class Reclamation {
     private final int numeroDossier;
-    private final int codeSousCategorieEtablissement;
-    private final List<String> autoritesCompetentes;
+    private final LieuDeSurvenue lieuDeSurvenue;
+    private final Set<String> autoritesCompetentes;
     private final List<String> contacts;
 
     private static final Logger logger = LoggerFactory.getLogger(Reclamation.class);
 
-    public Reclamation(DossierDeReclamation dossierDeReclamation, List<String> autoritesCompetentes, List<String> contacts) {
+    public Reclamation(DossierDeReclamation dossierDeReclamation, Set<String> autoritesCompetentes, List<String> contacts, LieuDeSurvenue lieuDeSurvenue) {
 
-        var codeSousCategorieEtablissement = dossierDeReclamation.getEtablissement().getCodeSousCategorie();
         if (autoritesCompetentes.isEmpty()) {
-            var messageErreur = "Aucune autorité compétente trouvée pour le code sous-catégorie d'établissement : " + codeSousCategorieEtablissement;
+            var messageErreur = "Aucune autorité compétente n'a été trouvée pour le dossier : " + dossierDeReclamation.getNumeroDossier();
             logger.info(messageErreur);
             throw new AutoriteCompetenteNotFoundException(messageErreur);
         }
         if (contacts.isEmpty()) {
-            var messageErreur = "Aucun contact n'a été trouvé. Autorité(s) compétente(s) : " +
-                    String.join(", ", autoritesCompetentes) + ",  Code sous-catégorie d'établissement : " +
-                    codeSousCategorieEtablissement;
+            var messageErreur = "Aucun contact n'a été trouvé pour le dossier : " + dossierDeReclamation.getNumeroDossier();
             logger.info(messageErreur);
             throw new ContactNotFoundException(messageErreur);
         }
 
         this.numeroDossier = dossierDeReclamation.getNumeroDossier();
-        this.codeSousCategorieEtablissement = codeSousCategorieEtablissement;
+        this.lieuDeSurvenue = lieuDeSurvenue;
         this.autoritesCompetentes = autoritesCompetentes;
         this.contacts = contacts;
     }
@@ -41,11 +39,11 @@ public class Reclamation {
         return numeroDossier;
     }
 
-    public int getCodeSousCategorieEtablissement() {
-        return codeSousCategorieEtablissement;
+    public LieuDeSurvenue getLieuDeSurvenue() {
+        return lieuDeSurvenue;
     }
 
-    public List<String> getAutoritesCompetentes() {
+    public Set<String> getAutoritesCompetentes() {
         return autoritesCompetentes;
     }
 

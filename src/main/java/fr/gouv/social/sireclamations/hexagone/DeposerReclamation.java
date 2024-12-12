@@ -1,18 +1,20 @@
 package fr.gouv.social.sireclamations.hexagone;
 
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
+import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.*;
 import fr.gouv.social.sireclamations.server_side.EmailService;
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.ContactNotFoundException;
-import fr.gouv.social.sireclamations.hexagone.domain.exceptions.DematSocialException;
+import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 public class DeposerReclamation {
@@ -48,14 +50,25 @@ public class DeposerReclamation {
             logger.error("Erreur lors de la récupération du dossier chez demat social : " + e.getMessage(), e);
             throw new DematSocialException(e.getMessage());
         }
-        var autoritesCompetentes = new ArrayList<>(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                dossierReclamation.getEtablissement().getCodeSousCategorie()));
+
+        Set<String> autoritesCompetentes = new HashSet<>();
         var codeTypeDuMisEnCause = referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(dossierReclamation.getLibelleDuMisEnCause());
         var autoriteCompetentePourLeMisEnCause = referentielDesAutoritesCompetentesParTypeDeMisEnCause.recupererAutoriteCompetentePourUnTypeDeMisEnCause(codeTypeDuMisEnCause);
-        if (autoriteCompetentePourLeMisEnCause != null && !autoritesCompetentes.contains(autoriteCompetentePourLeMisEnCause)){
+
+        if (autoriteCompetentePourLeMisEnCause != null)
             autoritesCompetentes.add(autoriteCompetentePourLeMisEnCause);
+
+        var lieuSurvenue = dossierReclamation.getLieuDeSurvenu();
+        if (lieuSurvenue instanceof Etablissement etablissement) {
+            autoritesCompetentes.addAll(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
+                    etablissement.getCodeSousCategorie()));
         }
-        var contactsEmail = referentielDesContacts.recupererContacts(dossierReclamation.getEtablissement().getNumeroFiness(),
+        if (lieuSurvenue instanceof Domicile){
+            autoritesCompetentes.add("CD");
+        }
+
+
+        var contactsEmail = referentielDesContacts.recupererContacts(lieuSurvenue.getCodePostal(),
                 autoritesCompetentes);
 
         emailService.envoyer(contactsEmail, "vous êtes les autorités responsables.");
@@ -63,6 +76,7 @@ public class DeposerReclamation {
         return new Reclamation(
                 dossierReclamation,
                 autoritesCompetentes,
-                contactsEmail);
+                contactsEmail,
+                lieuSurvenue);
     }
 }

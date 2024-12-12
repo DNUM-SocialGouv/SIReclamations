@@ -4,7 +4,7 @@ import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.DeposerReclamation;
-import fr.gouv.social.sireclamations.hexagone.domain.exceptions.DematSocialException;
+import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.ContactNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -108,8 +109,9 @@ class ReclamationControllerTest {
         given(deposerReclamation.executer(numeroDossier))
                 .willReturn(new Reclamation(
                         dossierDeReclamation,
-                        List.of("ARS"),
-                        List.of("email@email.fr"))
+                        Set.of("ARS"),
+                        List.of("email@email.fr"),
+                        etablissement)
                 );
         //When Then
         mockMvc.perform(post("/api/v1/reclamations")
@@ -117,9 +119,10 @@ class ReclamationControllerTest {
                         .content(dossierRequest))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.numeroDossier").value(12345))
-                .andExpect(jsonPath("$.codeSousCategorieEtablissement").value(500))
                 .andExpect(jsonPath("$.autoritesCompetentes[0]").value("ARS"))
-                .andExpect(jsonPath("$.contacts[0]").value("email@email.fr"));
+                .andExpect(jsonPath("$.contacts[0]").value("email@email.fr"))
+                .andExpect(jsonPath("$.lieuDeSurvenue.numeroFiness").value("78000000"));
+
 
     }
 }

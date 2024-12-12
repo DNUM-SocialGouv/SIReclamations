@@ -2,9 +2,12 @@ package fr.gouv.social.sireclamations.server_side;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.gouv.social.sireclamations.hexagone.Domicile;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
+import fr.gouv.social.sireclamations.hexagone.domain.LieuDeSurvenue;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.DematSocial;
+import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -84,7 +87,7 @@ public class DematSocialAdapter implements DematSocial {
         JsonNode rootNode = objectMapper.readTree(jsonResponse);
         var dossierId = rootNode.path("data").path("dossier").path("number").asInt();
         JsonNode champsNode = rootNode.path("data").path("dossier").path("champs");
-        Etablissement etablissement = null;
+        LieuDeSurvenue lieuDeSurvenue = null;
         String libelleDuMisEnCause = "";
 
         // Parcourir la liste des champs
@@ -92,14 +95,54 @@ public class DematSocialAdapter implements DematSocial {
             String id = champ.path("id").asText();
             String stringValue = champ.path("stringValue").asText();
 
-            if ("Q2hhbXAtMTk1MDg=".equals(id)) {
-                etablissement = recupererEtablissement(stringValue);
+
+            if ("Q2hhbXAtMTk1MDg=".equals(id)) { //Si etablissement présent
+                lieuDeSurvenue = recupererEtablissement(stringValue);
             }
-            if ("Q2hhbXAtMTk1MTY=".equals(id)) {
+            if ("Q2hhbXAtMTk1MDY=".equals(id)) { //si domicile présent
+                lieuDeSurvenue = recupererDomicile(champ);
+            }
+            if ("Q2hhbXAtMTk1MTY=".equals(id) || "Q2hhbXAtMTk1MTU=".equals(id)) {
                 libelleDuMisEnCause = stringValue;
             }
         }
-        return new DossierDeReclamation(dossierId, etablissement, libelleDuMisEnCause);
+        return new DossierDeReclamation(dossierId, lieuDeSurvenue, libelleDuMisEnCause);
+    }
+
+    private LieuDeSurvenue recupererDomicile(JsonNode champ) {
+        String adresse = null;
+        String codePostal = null;
+
+        // Vérification si "address" est présent et non null
+        JsonNode addressNode = champ.path("address");
+        if (!addressNode.isMissingNode() && !addressNode.isNull()) {
+            adresse = addressNode.path("streetAddress").asText(null);
+            codePostal = addressNode.path("postalCode").asText(null);
+        }
+        // Si "address" est absent ou incomplet, on utilise "stringValue"
+        if (adresse == null) {
+            adresse = champ.path("stringValue").asText(null); // Fallback vers stringValue
+        }
+        // Extraction du code postal depuis stringValue si absent
+        if (codePostal == null && adresse != null) {
+            codePostal = extraireCodePostalDepuisTexte(adresse);
+        }
+        if (codePostal != null) {
+            return new Domicile(Integer.parseInt(codePostal), adresse);
+        }
+        return new Domicile(null, adresse);
+    }
+
+    private String extraireCodePostalDepuisTexte(String adresse) {
+        // Regex pour capturer les codes postaux français (5 chiffres)
+        Pattern pattern = Pattern.compile("\\b\\d{5}\\b");
+        Matcher matcher = pattern.matcher(adresse);
+
+        if (matcher.find()) {
+            return matcher.group();
+        }
+
+        throw new CodePostalAbsentException("Le code postal n'est pas présent dans l'adresse du lieu de survenue.");
     }
 
     private Etablissement recupererEtablissement(String stringValue) throws IOException {
@@ -138,17 +181,17 @@ public class DematSocialAdapter implements DematSocial {
             if (matcher.group(2) != null) { //Si code sous catégorie présente, on la récupère
                 codeSousCategorie = matcher.group(2);
             } else {
-                codeSousCategorie = fetchCodeSousCategorieFromAPI(numeroFiness);
+                codeSousCategorie = recupererCodeSousCategorieDepuisLApiOpenDataSoft(numeroFiness);
             }
         }
         return new Etablissement(numeroFiness, Integer.parseInt(codeSousCategorie), Integer.parseInt(codePostal), nom);
     }
 
-    private String fetchCodeSousCategorieFromAPI(String numeroFiness) throws IOException {
-        String categetab = "categetab";
+    private String recupererCodeSousCategorieDepuisLApiOpenDataSoft(String numeroFiness) throws IOException {
+        String categetab = "categ_code";
         Call<ResponseBody> call = openDataSoftApi.fetchCodeSousCategorie(
                 categetab, // Sélectionne uniquement la colonne "categetab"
-                "nofinesset:\"" + numeroFiness + "\"", // Condition WHERE
+                "et_finess:\"" + numeroFiness + "\"", // Condition WHERE
                 2 // Limite
         );
 

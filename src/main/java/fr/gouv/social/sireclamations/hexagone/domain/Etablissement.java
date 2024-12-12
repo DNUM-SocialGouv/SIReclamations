@@ -1,6 +1,6 @@
 package fr.gouv.social.sireclamations.hexagone.domain;
 
-public class Etablissement {
+public class Etablissement implements LieuDeSurvenue {
     private String numeroFiness;
     private int codeSousCategorie;
     private int codePostal;
@@ -21,11 +21,18 @@ public class Etablissement {
         return codeSousCategorie;
     }
 
-    public int getCodePostal() {
-        return codePostal;
-    }
 
     public String getNom() {
         return nom;
+    }
+
+    @Override
+    public Integer getCodePostal() {
+        return this.codePostal;
+    }
+
+    @Override
+    public CodeTypeDeLieu getCodeTypeDeLieu() {
+        return CodeTypeDeLieu.ETAB_M;
     }
 }
