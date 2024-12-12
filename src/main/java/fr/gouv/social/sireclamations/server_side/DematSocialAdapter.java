@@ -188,9 +188,9 @@ public class DematSocialAdapter implements DematSocial {
     }
 
     private String recupererCodeSousCategorieDepuisLApiOpenDataSoft(String numeroFiness) throws IOException {
-        String categetab = "categ_code";
+        String categ_code = "categ_code";
         Call<ResponseBody> call = openDataSoftApi.fetchCodeSousCategorie(
-                categetab, // Sélectionne uniquement la colonne "categetab"
+                categ_code, // Sélectionne uniquement la colonne "categ_code"
                 "et_finess:\"" + numeroFiness + "\"", // Condition WHERE
                 2 // Limite
         );
@@ -215,8 +215,8 @@ public class DematSocialAdapter implements DematSocial {
         String results = "results";
         if (rootNode.has(results) && !rootNode.get(results).isEmpty()) {
             JsonNode resultsNode = rootNode.get(results).get(0);
-            if (resultsNode.has(categetab)) {
-                return resultsNode.get(categetab).asText();
+            if (resultsNode.has(categ_code)) {
+                return resultsNode.get(categ_code).asText();
             }
         }
 

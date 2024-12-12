@@ -1,7 +1,9 @@
 package fr.gouv.social.sireclamations.server_side;
 
+import fr.gouv.social.sireclamations.hexagone.Domicile;
 import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
+import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeEach;
@@ -105,7 +107,7 @@ class DematSocialAdapterTest {
                    "total_count": 1,
                    "results": [
                       {
-                         "categetab": "500"
+                         "categ_code": "500"
                       }
                    ]
                 }
@@ -125,6 +127,123 @@ class DematSocialAdapterTest {
     }
 
     //TODO test domicile
+    @Test
+    void lorsquunDossierExisteEtConcerneUnDomicileDontLadresseEstComplètementRenseignée_alorsRetourneLeDossierEtLesInformationsDuDomicile() throws IOException {
+        // Given
+        mockAppelDematSocialApi("""
+                {
+                    "data": {
+                        "dossier": {
+                            "number": 178291,
+                            "champs": [
+                                {
+                                     "id": "Q2hhbXAtMTk1MDU=",
+                                     "__typename": "TextChamp",
+                                     "label": "Où a eu lieu le problème ?",
+                                     "stringValue": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)"
+                                 },
+                                 {
+                                     "id": "Q2hhbXAtMTk1MDY=",
+                                     "__typename": "AddressChamp",
+                                     "label": "Renseignez l'adresse où a eu lieu le problème :",
+                                     "stringValue": "81 Avenue Pierre Curie 78210 Saint-Cyr-l'École",
+                                     "address": {
+                                         "label": "81 Avenue Pierre Curie 78210 Saint-Cyr-l'École",
+                                         "type": "housenumber",
+                                         "streetAddress": "81 Avenue Pierre Curie",
+                                         "streetNumber": "81",
+                                         "streetName": "Avenue Pierre Curie",
+                                         "postalCode": "78210",
+                                         "cityName": "Saint-Cyr-l'École",
+                                         "cityCode": "78545",
+                                         "departmentName": "Yvelines",
+                                         "departmentCode": "78",
+                                         "regionName": "Île-de-France",
+                                         "regionCode": "11"
+                                     }
+                                 }
+                            ]
+                        }
+                    }
+                }
+                """);
+        // When
+        var dossier = dematSocialAdapter.recupererDossier(178291);
+        // Then
+        var lieuDeSurvenuAttendu = new Domicile(78210, "81 Avenue Pierre Curie");
+        assertNotNull(dossier);
+        assertEquals(178291, dossier.getNumeroDossier());
+        assertEquals(78210, dossier.getCodePostal());
+        assertThat(dossier.getLieuDeSurvenu()).usingRecursiveComparison().isEqualTo(lieuDeSurvenuAttendu);
+    }
+
+    @Test
+    void lorsquunDossierExisteEtConcerneUnDomicileDontLadresseEstIncompleteMaisContientLeCodePostal_alorsRetourneLeDossierEtLesInformationsDuDomicile() throws IOException {
+        // Given
+        mockAppelDematSocialApi("""
+                {
+                    "data": {
+                        "dossier": {
+                            "number": 178291,
+                            "champs": [
+                                {
+                                     "id": "Q2hhbXAtMTk1MDU=",
+                                     "__typename": "TextChamp",
+                                     "label": "Où a eu lieu le problème ?",
+                                     "stringValue": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)"
+                                 },
+                                 {
+                                     "id": "Q2hhbXAtMTk1MDY=",
+                                     "__typename": "AddressChamp",
+                                     "label": "Renseignez l'adresse où a eu lieu le problème :",
+                                     "stringValue": "81 Avenue Pierre Curie 78210"
+                                 }
+                            ]
+                        }
+                    }
+                }
+                """);
+        // When
+        var dossier = dematSocialAdapter.recupererDossier(178291);
+        // Then
+        var lieuDeSurvenuAttendu = new Domicile(78210, "81 Avenue Pierre Curie 78210");
+        assertNotNull(dossier);
+        assertEquals(178291, dossier.getNumeroDossier());
+        assertEquals(78210, dossier.getCodePostal());
+        assertThat(dossier.getLieuDeSurvenu()).usingRecursiveComparison().isEqualTo(lieuDeSurvenuAttendu);
+    }
+
+    @Test
+    void lorsquunDossierExisteEtConcerneUnDomicileDontLadresseNeContientPasDeCodePostal_alorsThrowCodePostalAbsentException() throws IOException {
+        // Given
+        mockAppelDematSocialApi("""
+                {
+                    "data": {
+                        "dossier": {
+                            "number": 178291,
+                            "champs": [
+                                {
+                                     "id": "Q2hhbXAtMTk1MDU=",
+                                     "__typename": "TextChamp",
+                                     "label": "Où a eu lieu le problème ?",
+                                     "stringValue": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)"
+                                 },
+                                 {
+                                     "id": "Q2hhbXAtMTk1MDY=",
+                                     "__typename": "AddressChamp",
+                                     "label": "Renseignez l'adresse où a eu lieu le problème :",
+                                     "stringValue": "81 Avenue Pierre Curie"
+                                 }
+                            ]
+                        }
+                    }
+                }
+                """);
+        // When Then
+        assertThrows(CodePostalAbsentException.class, () -> {
+            dematSocialAdapter.recupererDossier(178291);
+        });
+    }
     @Test
     void quandApiDematSocialNeRenvoiRien_alorsThrowDematSocialException() throws IOException {
         // Given
@@ -221,7 +340,6 @@ class DematSocialAdapterTest {
         when(openDataSoftApi.fetchCodeSousCategorie("categ_code", "et_finess:\"780012951\"", 2)).thenReturn(callOpenDataSoft);
 
     }
-
 
 
 }

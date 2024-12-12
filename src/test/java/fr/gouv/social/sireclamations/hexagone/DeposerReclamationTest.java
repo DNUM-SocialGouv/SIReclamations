@@ -196,9 +196,9 @@ class DeposerReclamationTest {
             var etablissement = new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom);
             var dossierReclamation = new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire);
             when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
-            when(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorieEtablissement)).thenReturn(List.of("ARS"));
             when(referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(libelleDuMisEnCauseProvenantDuFormulaire)).thenReturn(CodeTypeDuMisEnCause.PS);
             when(referentielDesAutoritesCompetentesParTypeDeMisEnCause.recupererAutoriteCompetentePourUnTypeDeMisEnCause(CodeTypeDuMisEnCause.PS)).thenReturn("ARS");
+            when(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorieEtablissement)).thenReturn(List.of("ARS"));
             when(referentielDesContacts.recupererContacts(codePostal, Set.of("ARS"))).thenReturn(Collections.emptyList());
             //When Then
             assertThatThrownBy(

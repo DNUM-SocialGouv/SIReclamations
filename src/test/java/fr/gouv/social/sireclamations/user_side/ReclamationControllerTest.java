@@ -4,14 +4,19 @@ import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.DeposerReclamation;
+import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.ContactNotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,8 +35,21 @@ class ReclamationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    DeposerReclamation deposerReclamation;
+    @Autowired
+    private DeposerReclamation deposerReclamation;
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public DeposerReclamation deposerReclamation() {
+            return Mockito.mock(DeposerReclamation.class);
+        }
+    }
+
+    @BeforeEach
+    void resetMocks() {
+        Mockito.reset(deposerReclamation);
+    }
 
     @Test
     void lorsqueDeposerReclamationRenvoiAutoriteCompetenteNotFoundException_alorsRenvoiUne404() throws Exception {
@@ -74,6 +92,7 @@ class ReclamationControllerTest {
     }
 
     @Test
+
     void lorsqueDeposerReclamationRenvoiDematSocialException_alorsRenvoiUne404() throws Exception {
         //Given
         var numeroDossier = 12345;
@@ -90,6 +109,25 @@ class ReclamationControllerTest {
                         .content(dossierRequest))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("dossier not found"));
+
+    }
+    @Test
+    void lorsqueDeposerReclamationRenvoiCodePostalAbsentException_alorsRenvoiUne404() throws Exception {
+        //Given
+        var numeroDossier = 12345;
+        var dossierRequest = """
+                {
+                    "numeroDossier": "%s"
+                }
+                """.formatted(numeroDossier);
+        given(deposerReclamation.executer(numeroDossier))
+                .willThrow(new CodePostalAbsentException("code postal absent"));
+        //When Then
+        mockMvc.perform(post("/api/v1/reclamations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(dossierRequest))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("code postal absent"));
 
     }
 
