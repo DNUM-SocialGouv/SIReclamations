@@ -1,5 +1,6 @@
 package fr.gouv.social.sireclamations.hexagone;
 
+import fr.gouv.social.sireclamations.hexagone.domain.AutoriteCompetente;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
@@ -13,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class DeposerReclamation {
@@ -51,20 +52,32 @@ public class DeposerReclamation {
             throw new DematSocialException(e.getMessage());
         }
 
-        Set<String> autoritesCompetentes = new HashSet<>();
+        Set<AutoriteCompetente> autoritesCompetentes = new HashSet<>();
         var codeTypeDuMisEnCause = referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(dossierReclamation.getLibelleDuMisEnCause());
         var autoriteCompetentePourLeMisEnCause = referentielDesAutoritesCompetentesParTypeDeMisEnCause.recupererAutoriteCompetentePourUnTypeDeMisEnCause(codeTypeDuMisEnCause);
 
         if (autoriteCompetentePourLeMisEnCause != null)
-            autoritesCompetentes.add(autoriteCompetentePourLeMisEnCause);
+            autoritesCompetentes.add(AutoriteCompetente.valueOf(autoriteCompetentePourLeMisEnCause));
 
         var lieuSurvenue = dossierReclamation.getLieuDeSurvenu();
         if (lieuSurvenue instanceof Etablissement etablissement) {
-            autoritesCompetentes.addAll(referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                    etablissement.getCodeSousCategorie()));
+            List<String> codesAutorites = referentielDeCategoriesDEtablissements
+                    .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(etablissement.getCodeSousCategorie());
+
+            if (codesAutorites != null) {
+                autoritesCompetentes.addAll(
+                        codesAutorites.stream()
+                                .filter(Objects::nonNull) // Évite les valeurs null
+                                .filter(code -> Arrays.stream(AutoriteCompetente.values())
+                                        .anyMatch(enumValue -> enumValue.name().equals(code))) // Vérifie que le code est valide
+                                .map(AutoriteCompetente::valueOf) // Convertit en AutoriteCompetente
+                                .collect(Collectors.toSet()) // Collecte les nouvelles valeurs valides dans un Set
+                );
+            }
+
         }
         if (lieuSurvenue instanceof Domicile){
-            autoritesCompetentes.add("CD");
+            autoritesCompetentes.add(AutoriteCompetente.CD);
         }
 
 

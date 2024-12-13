@@ -1,8 +1,8 @@
 package fr.gouv.social.sireclamations.server_side;
 
+import fr.gouv.social.sireclamations.hexagone.domain.AutoriteCompetente;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesContacts;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -24,7 +24,7 @@ class ReferentielDesContactsCsvAdapterTest {
     void lorsqueCodePostalEstMarseilleEtAutoriteCompetenteARS_alorsRenvoiEmailContactDeARSetAutres() {
         //Given
         var codePostal = 13000;
-        var autoritesCompetentes = Set.of("ARS");
+        var autoritesCompetentes = Set.of(AutoriteCompetente.ARS);
         //When
         var result = contactsPort.recupererContacts(codePostal, autoritesCompetentes);
         //Then
@@ -36,7 +36,7 @@ class ReferentielDesContactsCsvAdapterTest {
     void lorsqueCodePostalEstDeBastiaEtAutoriteCompetenteARSetCD_alorsRenvoiEmailContactDeARSetCDetAutres() {
         //Given
         var codePostal = 20200;
-        var autoritesCompetentes = Set.of("ARS", "CD");
+        var autoritesCompetentes = Set.of(AutoriteCompetente.ARS, AutoriteCompetente.CD);
         //When
         var result = contactsPort.recupererContacts(codePostal, autoritesCompetentes);
         //Then
@@ -48,7 +48,7 @@ class ReferentielDesContactsCsvAdapterTest {
     void lorsqueCodePostalEstDeAjaccioEtAutoriteCompetenteCD_alorsRenvoiEmailContactDeCDetAutres() {
         //Given
         var codePostal = 20000;
-        var autoritesCompetentes = Set.of("CD");
+        var autoritesCompetentes = Set.of(AutoriteCompetente.CD);
         //When
         var result = contactsPort.recupererContacts(codePostal, autoritesCompetentes);
         //Then
@@ -60,7 +60,7 @@ class ReferentielDesContactsCsvAdapterTest {
     void lorsqueCodePostalEstDeMayotteEtAutoriteCompetenteDDETS_alorsRenvoiEmailContactDeDDETSetAutres() {
         //Given
         var codePostal = 97600;
-        var autoritesCompetentes = Set.of("DDETS");
+        var autoritesCompetentes = Set.of(AutoriteCompetente.DDETS);
         //When
         var result = contactsPort.recupererContacts(codePostal, autoritesCompetentes);
         //Then
@@ -72,7 +72,7 @@ class ReferentielDesContactsCsvAdapterTest {
     void lorsqueCodePostalEstDeLaReunionEtAutoritesCompetentesARSetCDetDDETS_alorsRenvoiEmailContactDeARSetCDetDDETSetAutres() {
         //Given
         var codePostal = 97400;
-        var autoritesCompetentes = Set.of("ARS", "CD", "DDETS");
+        var autoritesCompetentes = Set.of(AutoriteCompetente.ARS, AutoriteCompetente.CD, AutoriteCompetente.DDETS);
         //When
         var result = contactsPort.recupererContacts(codePostal, autoritesCompetentes);
         //Then

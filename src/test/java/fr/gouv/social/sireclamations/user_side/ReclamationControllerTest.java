@@ -1,5 +1,6 @@
 package fr.gouv.social.sireclamations.user_side;
 
+import fr.gouv.social.sireclamations.hexagone.domain.AutoriteCompetente;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -147,7 +147,7 @@ class ReclamationControllerTest {
         given(deposerReclamation.executer(numeroDossier))
                 .willReturn(new Reclamation(
                         dossierDeReclamation,
-                        Set.of("ARS"),
+                        Set.of(AutoriteCompetente.ARS),
                         List.of("email@email.fr"),
                         etablissement)
                 );

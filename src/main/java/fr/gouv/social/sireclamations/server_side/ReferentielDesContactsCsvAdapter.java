@@ -1,4 +1,5 @@
 package fr.gouv.social.sireclamations.server_side;
+import fr.gouv.social.sireclamations.hexagone.domain.AutoriteCompetente;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesContacts;
 import fr.gouv.social.sireclamations.server_side.utils.CsvReader;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +43,7 @@ public class ReferentielDesContactsCsvAdapter implements ReferentielDesContacts 
     }
 
     @Override
-    public List<String> recupererContacts(Integer codePostal, Set<String> autoriteCompetente) {
+    public List<String> recupererContacts(Integer codePostal, Set<AutoriteCompetente> autoriteCompetente) {
         if(codePostal == null) return Collections.emptyList();
         String codeDepartement = extraireCodeDepartement(codePostal);
         // Si pas de contacts pour ce département return liste vide
@@ -54,10 +55,10 @@ public class ReferentielDesContactsCsvAdapter implements ReferentielDesContacts 
         List<String> emails = new ArrayList<>();
 
         // Étape 3 : Récupérer les emails des colonnes spécifiées
-        for (String autorite : autoriteCompetente) {
-            String nomDeLaColonneDeContactParAutoritéRecherchée = "contacts" + autorite.toUpperCase();
-            if (contactsParAutorite.containsKey(nomDeLaColonneDeContactParAutoritéRecherchée)) {
-                emails.addAll(Arrays.asList(contactsParAutorite.get(nomDeLaColonneDeContactParAutoritéRecherchée).split("\\|")));
+        for (AutoriteCompetente autorite : autoriteCompetente) {
+            String nomDeLaColonneDeContactParAutoriteRecherchee = "contacts" + autorite.name().toUpperCase();
+            if (contactsParAutorite.containsKey(nomDeLaColonneDeContactParAutoriteRecherchee)) {
+                emails.addAll(Arrays.asList(contactsParAutorite.get(nomDeLaColonneDeContactParAutoriteRecherchee).split("\\|")));
             }
         }
 

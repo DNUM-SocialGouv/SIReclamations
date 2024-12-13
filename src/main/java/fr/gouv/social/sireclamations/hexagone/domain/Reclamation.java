@@ -11,12 +11,12 @@ import java.util.Set;
 public class Reclamation {
     private final int numeroDossier;
     private final LieuDeSurvenue lieuDeSurvenue;
-    private final Set<String> autoritesCompetentes;
+    private final Set<AutoriteCompetente> autoritesCompetentes;
     private final List<String> contacts;
 
     private static final Logger logger = LoggerFactory.getLogger(Reclamation.class);
 
-    public Reclamation(DossierDeReclamation dossierDeReclamation, Set<String> autoritesCompetentes, List<String> contacts, LieuDeSurvenue lieuDeSurvenue) {
+    public Reclamation(DossierDeReclamation dossierDeReclamation, Set<AutoriteCompetente> autoritesCompetentes, List<String> contacts, LieuDeSurvenue lieuDeSurvenue) {
 
         if (autoritesCompetentes.isEmpty()) {
             var messageErreur = "Aucune autorité compétente n'a été trouvée pour le dossier : " + dossierDeReclamation.getNumeroDossier();
@@ -43,7 +43,7 @@ public class Reclamation {
         return lieuDeSurvenue;
     }
 
-    public Set<String> getAutoritesCompetentes() {
+    public Set<AutoriteCompetente> getAutoritesCompetentes() {
         return autoritesCompetentes;
     }
 

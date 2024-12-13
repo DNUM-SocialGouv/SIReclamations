@@ -1,7 +1,6 @@
 package fr.gouv.social.sireclamations.server_side;
 
 import fr.gouv.social.sireclamations.hexagone.Domicile;
-import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import okhttp3.MediaType;
@@ -126,7 +125,6 @@ class DematSocialAdapterTest {
 
     }
 
-    //TODO test domicile
     @Test
     void lorsquunDossierExisteEtConcerneUnDomicileDontLadresseEstComplètementRenseignée_alorsRetourneLeDossierEtLesInformationsDuDomicile() throws IOException {
         // Given

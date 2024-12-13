@@ -1,6 +1,6 @@
 package fr.gouv.social.sireclamations.user_side;
 
-import fr.gouv.social.sireclamations.hexagone.domain.LieuDeSurvenue;
+import fr.gouv.social.sireclamations.hexagone.domain.AutoriteCompetente;
 
 import java.util.List;
 import java.util.Set;
@@ -8,11 +8,11 @@ import java.util.Set;
 public class ReclamationApiResponse {
     private int numeroDossier;
     private LieuDeSurvenueApiResponse lieuDeSurvenue;
-    private Set<String> autoritesCompetentes;
+    private Set<AutoriteCompetente> autoritesCompetentes;
     private List<String> contacts;
 
     public ReclamationApiResponse(int numeroDossier,
-                                  Set<String> autoritesCompetentes,
+                                  Set<AutoriteCompetente> autoritesCompetentes,
                                   List<String> contacts,
                                   LieuDeSurvenueApiResponse lieuDeSurvenue) {
         this.numeroDossier = numeroDossier;
@@ -29,7 +29,7 @@ public class ReclamationApiResponse {
         return lieuDeSurvenue;
     }
 
-    public Set<String> getAutoritesCompetentes() {
+    public Set<AutoriteCompetente> getAutoritesCompetentes() {
         return autoritesCompetentes;
     }
 
