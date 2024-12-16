@@ -7,7 +7,7 @@ import retrofit2.http.Query;
 
 public interface OpenDataSoftApi {
 
-    @GET("finess-et-data-gouv/records")
+    @GET("t_finess/records")
     Call<ResponseBody> fetchCodeSousCategorie(
             @Query("select") String select,
             @Query("where") String where,

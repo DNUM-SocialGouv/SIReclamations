@@ -2,12 +2,12 @@ package fr.gouv.social.sireclamations.hexagone.domain;
 
 public class DossierDeReclamation {
     private int numeroDossier;
-    private Etablissement etablissement;
+    private LieuDeSurvenue lieuDeSurvenue;
     private String libelleDuMisEnCause;
 
-    public DossierDeReclamation(int numeroDossier, Etablissement etablissement, String libelleDuMisEnCause) {
+    public DossierDeReclamation(int numeroDossier, LieuDeSurvenue lieuDeSurvenue, String libelleDuMisEnCause) {
         this.numeroDossier = numeroDossier;
-        this.etablissement = etablissement;
+        this.lieuDeSurvenue = lieuDeSurvenue;
         this.libelleDuMisEnCause = libelleDuMisEnCause;
     }
 
@@ -16,11 +16,11 @@ public class DossierDeReclamation {
     }
 
     public int getCodePostal() {
-        return etablissement.getCodePostal();
+        return lieuDeSurvenue.getCodePostal();
     }
 
-    public Etablissement getEtablissement() {
-        return etablissement;
+    public LieuDeSurvenue getLieuDeSurvenu() {
+        return lieuDeSurvenue;
     }
 
     public String getLibelleDuMisEnCause() {return libelleDuMisEnCause;}

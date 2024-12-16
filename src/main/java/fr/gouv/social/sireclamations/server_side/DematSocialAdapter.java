@@ -2,9 +2,13 @@ package fr.gouv.social.sireclamations.server_side;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import fr.gouv.social.sireclamations.hexagone.Domicile;
+import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
+import fr.gouv.social.sireclamations.hexagone.domain.LieuDeSurvenue;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.DematSocial;
+import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import okhttp3.ResponseBody;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -12,8 +16,8 @@ import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,10 +28,14 @@ public class DematSocialAdapter implements DematSocial {
 
     private final OpenDataSoftApi openDataSoftApi;
 
+    private final ReferentielDuTypeDeLieux referentielDuTypeDeLieux;
 
-    public DematSocialAdapter(Retrofit dematSocialRetrofit, OpenDataSoftApi openDataSoftApi) {
+    private static final String STRING_VALUE = "stringValue";
+
+    public DematSocialAdapter(Retrofit dematSocialRetrofit, OpenDataSoftApi openDataSoftApi, ReferentielDuTypeDeLieux referentielDuTypeDeLieux) {
         this.dematSocialApi = dematSocialRetrofit.create(DematSocialApi.class);
         this.openDataSoftApi = openDataSoftApi;
+        this.referentielDuTypeDeLieux = referentielDuTypeDeLieux;
     }
 
     @Override
@@ -84,22 +92,79 @@ public class DematSocialAdapter implements DematSocial {
         JsonNode rootNode = objectMapper.readTree(jsonResponse);
         var dossierId = rootNode.path("data").path("dossier").path("number").asInt();
         JsonNode champsNode = rootNode.path("data").path("dossier").path("champs");
-        Etablissement etablissement = null;
+        LieuDeSurvenue lieuDeSurvenue = null;
         String libelleDuMisEnCause = "";
-
-        // Parcourir la liste des champs
+        CodeTypeDeLieu codeTypeDeLieux = null;
+        Map<String, JsonNode> mapDesChampsDuDossier = new HashMap<>();
+        // Parcourir la liste des champs et stock les JsonNode dans une map associé a la clé du node
         for (JsonNode champ : champsNode) {
             String id = champ.path("id").asText();
-            String stringValue = champ.path("stringValue").asText();
-
-            if ("Q2hhbXAtMTk1MDg=".equals(id)) {
-                etablissement = recupererEtablissement(stringValue);
-            }
-            if ("Q2hhbXAtMTk1MTY=".equals(id)) {
-                libelleDuMisEnCause = stringValue;
-            }
+            mapDesChampsDuDossier.put(id, champ);
         }
-        return new DossierDeReclamation(dossierId, etablissement, libelleDuMisEnCause);
+
+        if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MDU=")) {
+            String stringValue = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MDU=").path(STRING_VALUE).asText();
+            codeTypeDeLieux = referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(stringValue); //DOM,ETAB_ ,CAB_M, ETAB_A, INST
+        }
+
+        lieuDeSurvenue = recupererLieuDeSurvenue(codeTypeDeLieux, mapDesChampsDuDossier);
+
+        if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MTY=")) {
+            libelleDuMisEnCause = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MTY=").path(STRING_VALUE).asText();
+        } else if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MTU=")) {
+            libelleDuMisEnCause = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MTU=").path(STRING_VALUE).asText();
+        }
+        return new DossierDeReclamation(dossierId, lieuDeSurvenue, libelleDuMisEnCause);
+    }
+
+    private LieuDeSurvenue recupererLieuDeSurvenue(CodeTypeDeLieu codeTypeDeLieux, Map<String, JsonNode> champsMap) throws IOException {
+        LieuDeSurvenue lieuDeSurvenue = null;
+        if (CodeTypeDeLieu.ETAB_M.equals(codeTypeDeLieux) && champsMap.containsKey("Q2hhbXAtMTk1MDg=")) { //Si etablissement présent
+            String stringValue = champsMap.get("Q2hhbXAtMTk1MDg=").path(STRING_VALUE).asText();
+            lieuDeSurvenue = recupererEtablissement(stringValue);
+        }
+
+        if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieux) && champsMap.containsKey("Q2hhbXAtMTk1MDY=")) { //si domicile présent
+            JsonNode domicileChamp = champsMap.get("Q2hhbXAtMTk1MDY=");
+            lieuDeSurvenue = recupererDomicile(domicileChamp);
+        }
+        return lieuDeSurvenue;
+    }
+
+    private LieuDeSurvenue recupererDomicile(JsonNode champ) {
+        String adresse = null;
+        String codePostal = null;
+
+        // Vérification si "address" est présent et non null
+        JsonNode addressNode = champ.path("address");
+        if (!addressNode.isMissingNode() && !addressNode.isNull()) {
+            adresse = addressNode.path("streetAddress").asText(null);
+            codePostal = addressNode.path("postalCode").asText(null);
+        }
+        // Si "address" est absent ou incomplet, on utilise "stringValue"
+        if (adresse == null) {
+            adresse = champ.path(STRING_VALUE).asText(null); // Fallback vers stringValue
+        }
+        // Extraction du code postal depuis stringValue si absent
+        if (codePostal == null && adresse != null) {
+            codePostal = extraireCodePostalDepuisTexte(adresse);
+        }
+        if (codePostal != null) {
+            return new Domicile(Integer.parseInt(codePostal), adresse);
+        }
+        return new Domicile(null, adresse);
+    }
+
+    private String extraireCodePostalDepuisTexte(String adresse) {
+        // Regex pour capturer les codes postaux français (5 chiffres)
+        Pattern pattern = Pattern.compile("\\b\\d{5}\\b");
+        Matcher matcher = pattern.matcher(adresse);
+
+        if (matcher.find()) {
+            return matcher.group();
+        }
+
+        throw new CodePostalAbsentException("Le code postal n'est pas présent dans l'adresse du lieu de survenue.");
     }
 
     private Etablissement recupererEtablissement(String stringValue) throws IOException {
@@ -138,17 +203,17 @@ public class DematSocialAdapter implements DematSocial {
             if (matcher.group(2) != null) { //Si code sous catégorie présente, on la récupère
                 codeSousCategorie = matcher.group(2);
             } else {
-                codeSousCategorie = fetchCodeSousCategorieFromAPI(numeroFiness);
+                codeSousCategorie = recupererCodeSousCategorieDepuisLApiOpenDataSoft(numeroFiness);
             }
         }
         return new Etablissement(numeroFiness, Integer.parseInt(codeSousCategorie), Integer.parseInt(codePostal), nom);
     }
 
-    private String fetchCodeSousCategorieFromAPI(String numeroFiness) throws IOException {
-        String categetab = "categetab";
+    private String recupererCodeSousCategorieDepuisLApiOpenDataSoft(String numeroFiness) throws IOException {
+        String codeCategorie = "categ_code";
         Call<ResponseBody> call = openDataSoftApi.fetchCodeSousCategorie(
-                categetab, // Sélectionne uniquement la colonne "categetab"
-                "nofinesset:\"" + numeroFiness + "\"", // Condition WHERE
+                codeCategorie, // Sélectionne uniquement la colonne "categ_code"
+                String.format("et_finess:\"%s\"", numeroFiness), // Condition WHERE
                 2 // Limite
         );
 
@@ -172,8 +237,8 @@ public class DematSocialAdapter implements DematSocial {
         String results = "results";
         if (rootNode.has(results) && !rootNode.get(results).isEmpty()) {
             JsonNode resultsNode = rootNode.get(results).get(0);
-            if (resultsNode.has(categetab)) {
-                return resultsNode.get(categetab).asText();
+            if (resultsNode.has(codeCategorie)) {
+                return resultsNode.get(codeCategorie).asText();
             }
         }
 

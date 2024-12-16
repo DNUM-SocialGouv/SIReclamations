@@ -13,7 +13,7 @@ class ReferentielDesTypeDeMisEnCauseCsvAdapterTest {
     private ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause;
 
     @BeforeEach
-    void setup() throws Exception {
+    void setup() {
         Resource csvResource = new ClassPathResource("data/mappingFormulaireV2-typeMEC-test.csv");
         referentielDesTypeDeMisEnCause = new ReferentielDesTypeDeMisEnCauseCsvAdapter(csvResource);
     }

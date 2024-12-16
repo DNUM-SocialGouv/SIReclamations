@@ -1,0 +1,31 @@
+package fr.gouv.social.sireclamations.server_side;
+
+import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class ReferentielDuTypeDeLieuxTest {
+
+    private ReferentielDuTypeDeLieux referentielDuTypeDeLieux;
+
+    @BeforeEach
+     void setup() {
+        Resource csvResource = new ClassPathResource("data/mappingFormulaireV2-typeLieux-test.csv");
+        referentielDuTypeDeLieux = new ReferentielDuTypeDeLieux(csvResource);
+    }
+
+    @Test
+    void lorsqueLonVeutRecupererLeCodeTypeDeLieuPourUnEtablissementDeSante_alorsRetourneETAB_M(){
+        // Given
+        var libelleDuLieu = "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)";
+
+        // When
+        var codeTypeLieux = referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleDuLieu);
+        // Then
+        assertEquals(CodeTypeDeLieu.ETAB_M, codeTypeLieux);
+    }
+}

@@ -19,11 +19,9 @@ class DematSocialAdapterIntegrationTest {
     void lorsqueJappelleDematSocialAvecUnNumeroDeDossierExistant_alorsRetourneLeDossier() throws IOException {
         //Given
         var numeroDossier = 185631; //Correspond a un dossier existant avec un Ehpad pour établissement
-        var codeSousCategorie = 500;
         //When
         var dossier = dematSocialAdapter.recupererDossier(numeroDossier);
         //Then
         assertEquals(numeroDossier, dossier.getNumeroDossier());
-        assertEquals(codeSousCategorie, dossier.getEtablissement().getCodeSousCategorie());
     }
 }

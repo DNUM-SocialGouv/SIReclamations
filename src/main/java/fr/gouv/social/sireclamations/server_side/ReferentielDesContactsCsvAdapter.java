@@ -1,4 +1,5 @@
 package fr.gouv.social.sireclamations.server_side;
+import fr.gouv.social.sireclamations.hexagone.domain.AutoriteCompetente;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesContacts;
 import fr.gouv.social.sireclamations.server_side.utils.CsvReader;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,9 +43,9 @@ public class ReferentielDesContactsCsvAdapter implements ReferentielDesContacts 
     }
 
     @Override
-    public List<String> recupererContacts(String finess, List<String> autoriteCompetente) {
-        String codeDepartement = extraireCodeDepartement(finess);
-
+    public List<String> recupererContacts(Integer codePostal, Set<AutoriteCompetente> autoriteCompetente) {
+        if(codePostal == null) return Collections.emptyList();
+        String codeDepartement = extraireCodeDepartement(codePostal);
         // Si pas de contacts pour ce département return liste vide
         if (!csvData.containsKey(codeDepartement)) {
             return Collections.emptyList();
@@ -54,10 +55,10 @@ public class ReferentielDesContactsCsvAdapter implements ReferentielDesContacts 
         List<String> emails = new ArrayList<>();
 
         // Étape 3 : Récupérer les emails des colonnes spécifiées
-        for (String autorite : autoriteCompetente) {
-            String nomDeLaColonneDeContactParAutoritéRecherchée = "contacts" + autorite.toUpperCase();
-            if (contactsParAutorite.containsKey(nomDeLaColonneDeContactParAutoritéRecherchée)) {
-                emails.addAll(Arrays.asList(contactsParAutorite.get(nomDeLaColonneDeContactParAutoritéRecherchée).split("\\|")));
+        for (AutoriteCompetente autorite : autoriteCompetente) {
+            String nomDeLaColonneDeContactParAutoriteRecherchee = "contacts" + autorite.name().toUpperCase();
+            if (contactsParAutorite.containsKey(nomDeLaColonneDeContactParAutoriteRecherchee)) {
+                emails.addAll(Arrays.asList(contactsParAutorite.get(nomDeLaColonneDeContactParAutoriteRecherchee).split("\\|")));
             }
         }
 
@@ -72,41 +73,26 @@ public class ReferentielDesContactsCsvAdapter implements ReferentielDesContacts 
                 .collect(Collectors.toList());
     }
 
-    private String extraireCodeDepartement(String finess) {
-        String codeDepartement = finess.substring(0, 2);
+    private String extraireCodeDepartement(int codePostal) {
+        var codePostalString = Integer.toString(codePostal);
+        var codeDepartement = codePostalString.substring(0, 2);
 
         if (codeDepartement.equals("97")) {
-            codeDepartement = getCodeOutreMer(finess.charAt(3));
+            codeDepartement = codePostalString.substring(0, 3);
+        } else if (codeDepartement.startsWith("2")) {
+            codeDepartement = getCodeCorseParCodePostal(codePostalString);
         }
-        else if (codeDepartement.equals("98")) {
-            codeDepartement = "976";
-        }
-        else if (codeDepartement.startsWith("2")) {
-            codeDepartement = getCodeCorse(finess.charAt(1));
-        }
-
         return codeDepartement;
     }
 
-    private String getCodeOutreMer(char caractereQuatriemePosition) {
-        switch (caractereQuatriemePosition) {
-            case '1': return "971";
-            case '2': return "972";
-            case '3': return "973";
-            case '4': return "974";
-            case '5': return "975";
-            default: throw new IllegalArgumentException("Département d'outremer non reconnu.");
-        }
-    }
-
-    private String getCodeCorse(char deuxiemeCaractere) {
-        if (deuxiemeCaractere == 'A') {
-            return "2A";
-        } else if (deuxiemeCaractere == 'B') {
-            return "2B";
-        } else {
-            throw new IllegalArgumentException("Code FINESS invalide pour la Corse. Le deuxième caractère doit être 'A' ou 'B'.");
-        }
+    private String getCodeCorseParCodePostal(String codePostalString) {
+            int code = Integer.parseInt(codePostalString);
+            if (code >= 20000 && code <= 20190) {
+                return "2A";
+            } else if (code >= 20200 && code <= 20620) {
+                return "2B";
+            }
+        return "Code postal non valide ou hors de Corse";
     }
 
     //map qui associe chaque colonne à son index dans le tableau

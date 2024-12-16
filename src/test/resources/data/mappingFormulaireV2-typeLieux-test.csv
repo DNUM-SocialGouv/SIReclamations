@@ -1,0 +1,9 @@
+﻿label;typeLieu;codeTypeLieu
+Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant);Domicile;DOM
+Dans un établissement de santé (hôpital, clinique, pharmacie, ...);Etablissement;ETAB_M
+Dans un établissement pour personnes âgées (maison de retraite EHPAD ou EHPA);Etablissement;ETAB_M
+Dans un établissement pour personnes handicapées;Etablissement;ETAB_M
+Dans un établissement social (centre d'accueil pour demandeurs d'asile, MJPM, Foyer d'accueil);Etablissement;ETAB_M
+Dans un cabinet médical;Cabinet médical;CAB_M
+Dans un autre établissement (école, entreprise);Autre établissement;ETAB_A
+Dans un institut d'esthétique ou salon de tatouage;Institut;INST

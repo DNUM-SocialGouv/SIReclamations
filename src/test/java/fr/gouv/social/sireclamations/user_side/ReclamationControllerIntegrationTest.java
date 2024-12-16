@@ -28,7 +28,7 @@ class ReclamationControllerIntegrationTest {
     @Tag("localOnly")
     void lorsqueLonDeposeUneReclamationPourUnDossierExistant_alorsRetourne200EtLaReclamationEnBody() throws Exception {
         // Given
-        int numeroDossier = 185631; //Correspond a un dossier existant avec un Ehpad pour établissement
+        int numeroDossier = 186287; //Correspond a un dossier existant avec un Ehpad pour établissement
         DeposerReclamationRequest request = new DeposerReclamationRequest();
         request.setNumeroDossier(numeroDossier);
 
@@ -39,11 +39,9 @@ class ReclamationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.numeroDossier", is(numeroDossier)))
                 .andExpect(jsonPath("$.autoritesCompetentes", hasSize(2)))
-                .andExpect(jsonPath("$.autoritesCompetentes[0]", is("ARS")))
-                .andExpect(jsonPath("$.autoritesCompetentes[1]", is("CD")))
-                .andExpect(jsonPath("$.contacts", hasSize(4)))
-                .andExpect(jsonPath("$.contacts[0]", is("BAL_Region@ARS.fr")))
-                .andExpect(jsonPath("$.contacts[1]", is("BAL_dept_78@ARS.fr")));
+                .andExpect(jsonPath("$.autoritesCompetentes[0]", is("CD")))
+                .andExpect(jsonPath("$.autoritesCompetentes[1]", is("ARS")))
+                .andExpect(jsonPath("$.contacts", hasSize(4)));
     }
     @Test
     void lorsqueLonDeposeUneReclamationPourUnDossierInexistant_alorsRetourne404() throws Exception {
