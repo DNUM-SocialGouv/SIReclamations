@@ -3,6 +3,7 @@ package fr.gouv.social.sireclamations.server_side;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.gouv.social.sireclamations.hexagone.Domicile;
+import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.LieuDeSurvenue;
@@ -15,8 +16,8 @@ import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,10 +28,14 @@ public class DematSocialAdapter implements DematSocial {
 
     private final OpenDataSoftApi openDataSoftApi;
 
+    private final ReferentielDuTypeDeLieux referentielDuTypeDeLieux;
 
-    public DematSocialAdapter(Retrofit dematSocialRetrofit, OpenDataSoftApi openDataSoftApi) {
+    private static final String STRING_VALUE = "stringValue";
+
+    public DematSocialAdapter(Retrofit dematSocialRetrofit, OpenDataSoftApi openDataSoftApi, ReferentielDuTypeDeLieux referentielDuTypeDeLieux) {
         this.dematSocialApi = dematSocialRetrofit.create(DematSocialApi.class);
         this.openDataSoftApi = openDataSoftApi;
+        this.referentielDuTypeDeLieux = referentielDuTypeDeLieux;
     }
 
     @Override
@@ -89,24 +94,41 @@ public class DematSocialAdapter implements DematSocial {
         JsonNode champsNode = rootNode.path("data").path("dossier").path("champs");
         LieuDeSurvenue lieuDeSurvenue = null;
         String libelleDuMisEnCause = "";
-
-        // Parcourir la liste des champs
+        CodeTypeDeLieu codeTypeDeLieux = null;
+        Map<String, JsonNode> mapDesChampsDuDossier = new HashMap<>();
+        // Parcourir la liste des champs et stock les JsonNode dans une map associé a la clé du node
         for (JsonNode champ : champsNode) {
             String id = champ.path("id").asText();
-            String stringValue = champ.path("stringValue").asText();
+            mapDesChampsDuDossier.put(id, champ);
+        }
 
+        if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MDU=")) {
+            String stringValue = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MDU=").path(STRING_VALUE).asText();
+            codeTypeDeLieux = referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(stringValue); //DOM,ETAB_ ,CAB_M, ETAB_A, INST
+        }
 
-            if ("Q2hhbXAtMTk1MDg=".equals(id)) { //Si etablissement présent
-                lieuDeSurvenue = recupererEtablissement(stringValue);
-            }
-            if ("Q2hhbXAtMTk1MDY=".equals(id)) { //si domicile présent
-                lieuDeSurvenue = recupererDomicile(champ);
-            }
-            if ("Q2hhbXAtMTk1MTY=".equals(id) || "Q2hhbXAtMTk1MTU=".equals(id)) {
-                libelleDuMisEnCause = stringValue;
-            }
+        lieuDeSurvenue = recupererLieuDeSurvenue(codeTypeDeLieux, mapDesChampsDuDossier);
+
+        if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MTY=")) {
+            libelleDuMisEnCause = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MTY=").path(STRING_VALUE).asText();
+        } else if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MTU=")) {
+            libelleDuMisEnCause = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MTU=").path(STRING_VALUE).asText();
         }
         return new DossierDeReclamation(dossierId, lieuDeSurvenue, libelleDuMisEnCause);
+    }
+
+    private LieuDeSurvenue recupererLieuDeSurvenue(CodeTypeDeLieu codeTypeDeLieux, Map<String, JsonNode> champsMap) throws IOException {
+        LieuDeSurvenue lieuDeSurvenue = null;
+        if (CodeTypeDeLieu.ETAB_M.equals(codeTypeDeLieux) && champsMap.containsKey("Q2hhbXAtMTk1MDg=")) { //Si etablissement présent
+            String stringValue = champsMap.get("Q2hhbXAtMTk1MDg=").path(STRING_VALUE).asText();
+            lieuDeSurvenue = recupererEtablissement(stringValue);
+        }
+
+        if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieux) && champsMap.containsKey("Q2hhbXAtMTk1MDY=")) { //si domicile présent
+            JsonNode domicileChamp = champsMap.get("Q2hhbXAtMTk1MDY=");
+            lieuDeSurvenue = recupererDomicile(domicileChamp);
+        }
+        return lieuDeSurvenue;
     }
 
     private LieuDeSurvenue recupererDomicile(JsonNode champ) {
@@ -121,7 +143,7 @@ public class DematSocialAdapter implements DematSocial {
         }
         // Si "address" est absent ou incomplet, on utilise "stringValue"
         if (adresse == null) {
-            adresse = champ.path("stringValue").asText(null); // Fallback vers stringValue
+            adresse = champ.path(STRING_VALUE).asText(null); // Fallback vers stringValue
         }
         // Extraction du code postal depuis stringValue si absent
         if (codePostal == null && adresse != null) {

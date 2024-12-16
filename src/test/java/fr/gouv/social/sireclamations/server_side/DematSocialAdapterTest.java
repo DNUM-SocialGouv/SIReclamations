@@ -1,6 +1,7 @@
 package fr.gouv.social.sireclamations.server_side;
 
 import fr.gouv.social.sireclamations.hexagone.Domicile;
+import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import okhttp3.MediaType;
@@ -27,6 +28,9 @@ class DematSocialAdapterTest {
     @Mock
     private OpenDataSoftApi openDataSoftApi;
 
+    @Mock
+    private ReferentielDuTypeDeLieux referentielDuTypeDeLieux;
+
     private DematSocialAdapter dematSocialAdapter;
 
     @BeforeEach
@@ -35,7 +39,7 @@ class DematSocialAdapterTest {
         Retrofit retrofit = mock(Retrofit.class);
         when(retrofit.create(DematSocialApi.class)).thenReturn(dematSocialApi);
         when(retrofit.create(OpenDataSoftApi.class)).thenReturn(openDataSoftApi);
-        dematSocialAdapter = new DematSocialAdapter(retrofit, openDataSoftApi);
+        dematSocialAdapter = new DematSocialAdapter(retrofit, openDataSoftApi, referentielDuTypeDeLieux);
     }
 
     @Test
@@ -63,6 +67,8 @@ class DematSocialAdapterTest {
                 }
                 """);
 
+        var libelleTypeLieu = "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)";
+        when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu)).thenReturn(CodeTypeDeLieu.ETAB_M);
         // When
         var dossier = dematSocialAdapter.recupererDossier(178291);
 
@@ -112,6 +118,8 @@ class DematSocialAdapterTest {
                 }
                 """);
 
+        var libelleTypeLieu = "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)";
+        when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu)).thenReturn(CodeTypeDeLieu.ETAB_M);
         // When
         var dossier = dematSocialAdapter.recupererDossier(178291);
 
@@ -165,6 +173,8 @@ class DematSocialAdapterTest {
                     }
                 }
                 """);
+        var libelleTypeLieu = "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)";
+        when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu)).thenReturn(CodeTypeDeLieu.DOM);
         // When
         var dossier = dematSocialAdapter.recupererDossier(178291);
         // Then
@@ -201,6 +211,8 @@ class DematSocialAdapterTest {
                     }
                 }
                 """);
+        var libelleTypeLieu = "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)";
+        when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu)).thenReturn(CodeTypeDeLieu.DOM);
         // When
         var dossier = dematSocialAdapter.recupererDossier(178291);
         // Then
@@ -237,6 +249,8 @@ class DematSocialAdapterTest {
                     }
                 }
                 """);
+        var libelleTypeLieu = "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)";
+        when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu)).thenReturn(CodeTypeDeLieu.DOM);
         // When Then
         assertThrows(CodePostalAbsentException.class, () -> {
             dematSocialAdapter.recupererDossier(178291);
@@ -302,6 +316,8 @@ class DematSocialAdapterTest {
                     }
                 }
                 """);
+        var libelleTypeLieu = "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)";
+        when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu)).thenReturn(CodeTypeDeLieu.ETAB_M);
 
         String invalidJsonResponse = "Ceci n'est pas un JSON valide";
         ResponseBody responseBody = ResponseBody.create(invalidJsonResponse, null); // Aucune spécification de type MIME
