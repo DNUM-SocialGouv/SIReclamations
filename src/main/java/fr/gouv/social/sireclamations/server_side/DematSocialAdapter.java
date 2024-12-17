@@ -92,52 +92,59 @@ public class DematSocialAdapter implements DematSocial {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(jsonResponse);
         var dossierId = rootNode.path("data").path("dossier").path("number").asInt();
-        JsonNode champsNode = rootNode.path("data").path("dossier").path("champs");
-        LieuDeSurvenue lieuDeSurvenue = null;
-        String libelleDuMisEnCause = "";
-        CodeTypeDeLieu codeTypeDeLieux = null;
-        Map<String, JsonNode> mapDesChampsDuDossier = new HashMap<>();
-        // Parcourir la liste des champs et stock les JsonNode dans une map associé a la clé du node
-        for (JsonNode champ : champsNode) {
-            String id = champ.path("id").asText();
-            mapDesChampsDuDossier.put(id, champ);
-        }
+        JsonNode champsDuDossierJson = rootNode.path("data").path("dossier").path("champs");
+        Map<String, JsonNode> mapDesChampsDuDossier = extraireChampsDuDossier(champsDuDossierJson);
+        Map<ChampsArbreDeDecision, String> champsPourArbre = referentielDesChampsDuFormulaire.getChampsPourArbreDeDecision();
 
-        var mapDesChampsPourArbreDeDecision = referentielDesChampsDuFormulaire.getChampsPourArbreDeDecision();
-        var idChampTypeDeLieu = mapDesChampsPourArbreDeDecision.get(ChampsArbreDeDecision.TYPE_DE_LIEU);
+        CodeTypeDeLieu codeTypeDeLieu = recupererCodeTypeDeLieu(mapDesChampsDuDossier, champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_LIEU));
+        LieuDeSurvenue lieuDeSurvenue = recupererLieuDeSurvenue(codeTypeDeLieu, mapDesChampsDuDossier, champsPourArbre);
+        String libelleMisEnCause = recupererLibelleMisEnCause(mapDesChampsDuDossier, champsPourArbre);
 
-        if (mapDesChampsDuDossier.containsKey(idChampTypeDeLieu)) {
-            String stringValue = mapDesChampsDuDossier.get(idChampTypeDeLieu).path(STRING_VALUE).asText();
-            codeTypeDeLieux = referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(stringValue); //DOM,ETAB_ ,CAB_M, ETAB_A, INST
-        }
-
-        var idChampLieuEtablissement = mapDesChampsPourArbreDeDecision.get(ChampsArbreDeDecision.LIEU_ETAB);
-        var idChampLieuDomicile = mapDesChampsPourArbreDeDecision.get(ChampsArbreDeDecision.LIEU_DOM);
-        lieuDeSurvenue = recupererLieuDeSurvenue(codeTypeDeLieux, mapDesChampsDuDossier, idChampLieuEtablissement, idChampLieuDomicile);
-
-
-        var idChampMisEnCauseEtablissement = mapDesChampsPourArbreDeDecision.get(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB);
-        var idChampMisEnCauseDomicile = mapDesChampsPourArbreDeDecision.get(ChampsArbreDeDecision.TYPE_DE_MEC_DOM);
-        if (mapDesChampsDuDossier.containsKey(idChampMisEnCauseEtablissement)) {
-            libelleDuMisEnCause = mapDesChampsDuDossier.get(idChampMisEnCauseEtablissement).path(STRING_VALUE).asText();
-        } else if (mapDesChampsDuDossier.containsKey(idChampMisEnCauseDomicile)) {
-            libelleDuMisEnCause = mapDesChampsDuDossier.get(idChampMisEnCauseDomicile).path(STRING_VALUE).asText();
-        }
-        return new DossierDeReclamation(dossierId, lieuDeSurvenue, libelleDuMisEnCause);
+        return new DossierDeReclamation(dossierId, lieuDeSurvenue, libelleMisEnCause);
     }
 
-    private LieuDeSurvenue recupererLieuDeSurvenue(CodeTypeDeLieu codeTypeDeLieux, Map<String, JsonNode> champsMap, String idChampLieuEtablissement, String idChampLieuDomicile) throws IOException {
-        LieuDeSurvenue lieuDeSurvenue = null;
-        if (CodeTypeDeLieu.ETAB_M.equals(codeTypeDeLieux) && champsMap.containsKey(idChampLieuEtablissement)) { //Si etablissement présent
-            String stringValue = champsMap.get(idChampLieuEtablissement).path(STRING_VALUE).asText();
-            lieuDeSurvenue = recupererEtablissement(stringValue);
+    private Map<String, JsonNode> extraireChampsDuDossier(JsonNode champsNode) {
+        Map<String, JsonNode> map = new HashMap<>();
+        champsNode.forEach(champ -> map.put(champ.path("id").asText(), champ));
+        return map;
+    }
+
+    private CodeTypeDeLieu recupererCodeTypeDeLieu(Map<String, JsonNode> champsMap, String idChampTypeDeLieu) {
+        if (champsMap.containsKey(idChampTypeDeLieu)) {
+            String stringValue = champsMap.get(idChampTypeDeLieu).path(STRING_VALUE).asText();
+            return referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(stringValue);
+        }
+        return null;
+    }
+
+    private String recupererLibelleMisEnCause(Map<String, JsonNode> champsMap, Map<ChampsArbreDeDecision, String> champsPourArbre) {
+        String idChampMisEnCauseEtablissement = champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB);
+        String idChampMisEnCauseDomicile = champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_MEC_DOM);
+
+        if (champsMap.containsKey(idChampMisEnCauseEtablissement)) {
+            return champsMap.get(idChampMisEnCauseEtablissement).path(STRING_VALUE).asText();
+        } else if (champsMap.containsKey(idChampMisEnCauseDomicile)) {
+            return champsMap.get(idChampMisEnCauseDomicile).path(STRING_VALUE).asText();
         }
 
-        if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieux) && champsMap.containsKey(idChampLieuDomicile)) { //si domicile présent
-            JsonNode domicileChamp = champsMap.get(idChampLieuDomicile);
-            lieuDeSurvenue = recupererDomicile(domicileChamp);
+        return "";
+    }
+
+    private LieuDeSurvenue recupererLieuDeSurvenue(CodeTypeDeLieu codeTypeDeLieu, Map<String, JsonNode> mapDesChampsDuDossier, Map<ChampsArbreDeDecision, String> champsPourArbre) throws IOException {
+        String idChampLieuEtablissement = champsPourArbre.get(ChampsArbreDeDecision.LIEU_ETAB);
+        String idChampLieuDomicile = champsPourArbre.get(ChampsArbreDeDecision.LIEU_DOM);
+
+        if (CodeTypeDeLieu.ETAB_M.equals(codeTypeDeLieu) && mapDesChampsDuDossier.containsKey(idChampLieuEtablissement)) {
+            String stringValue = mapDesChampsDuDossier.get(idChampLieuEtablissement).path(STRING_VALUE).asText();
+            return recupererEtablissement(stringValue);
         }
-        return lieuDeSurvenue;
+
+        if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieu) && mapDesChampsDuDossier.containsKey(idChampLieuDomicile)) {
+            JsonNode domicileChamp = mapDesChampsDuDossier.get(idChampLieuDomicile);
+            return recupererDomicile(domicileChamp);
+        }
+
+        return null;
     }
 
     private LieuDeSurvenue recupererDomicile(JsonNode champ) {
