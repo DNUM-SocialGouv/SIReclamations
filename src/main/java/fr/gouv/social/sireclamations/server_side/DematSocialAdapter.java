@@ -3,10 +3,7 @@ package fr.gouv.social.sireclamations.server_side;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.gouv.social.sireclamations.hexagone.Domicile;
-import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
-import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
-import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
-import fr.gouv.social.sireclamations.hexagone.domain.LieuDeSurvenue;
+import fr.gouv.social.sireclamations.hexagone.domain.*;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.DematSocial;
 import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import okhttp3.ResponseBody;
@@ -30,12 +27,16 @@ public class DematSocialAdapter implements DematSocial {
 
     private final ReferentielDuTypeDeLieux referentielDuTypeDeLieux;
 
-    private static final String STRING_VALUE = "stringValue";
+    private static final String STRING_ERRORS = "errors";
 
-    public DematSocialAdapter(Retrofit dematSocialRetrofit, OpenDataSoftApi openDataSoftApi, ReferentielDuTypeDeLieux referentielDuTypeDeLieux) {
+    private static final String STRING_VALUE = "stringValue";
+    private final ReferentielDesChampsDuFormulaire referentielDesChampsDuFormulaire;
+
+    public DematSocialAdapter(Retrofit dematSocialRetrofit, OpenDataSoftApi openDataSoftApi, ReferentielDuTypeDeLieux referentielDuTypeDeLieux, ReferentielDesChampsDuFormulaire referentielDesChampsDuFormulaire) {
         this.dematSocialApi = dematSocialRetrofit.create(DematSocialApi.class);
         this.openDataSoftApi = openDataSoftApi;
         this.referentielDuTypeDeLieux = referentielDuTypeDeLieux;
+        this.referentielDesChampsDuFormulaire = referentielDesChampsDuFormulaire;
     }
 
     @Override
@@ -69,8 +70,8 @@ public class DematSocialAdapter implements DematSocial {
 
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(jsonResponse);
-        if (rootNode.has("errors") && !rootNode.get("errors").isEmpty()) {
-            String errorMessage = rootNode.get("errors").get(0).get("message").asText();
+        if (rootNode.has(STRING_ERRORS) && !rootNode.get(STRING_ERRORS).isEmpty()) {
+            String errorMessage = rootNode.get(STRING_ERRORS).get(0).get("message").asText();
             throw new IOException("Erreur API DematSocial pour le dossier numéro " + numeroDossier + " : " + errorMessage);
         }
 
@@ -102,30 +103,38 @@ public class DematSocialAdapter implements DematSocial {
             mapDesChampsDuDossier.put(id, champ);
         }
 
-        if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MDU=")) {
-            String stringValue = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MDU=").path(STRING_VALUE).asText();
+        var mapDesChampsPourArbreDeDecision = referentielDesChampsDuFormulaire.getChampsPourArbreDeDecision();
+        var idChampTypeDeLieu = mapDesChampsPourArbreDeDecision.get(ChampsArbreDeDecision.TYPE_DE_LIEU);
+
+        if (mapDesChampsDuDossier.containsKey(idChampTypeDeLieu)) {
+            String stringValue = mapDesChampsDuDossier.get(idChampTypeDeLieu).path(STRING_VALUE).asText();
             codeTypeDeLieux = referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(stringValue); //DOM,ETAB_ ,CAB_M, ETAB_A, INST
         }
 
-        lieuDeSurvenue = recupererLieuDeSurvenue(codeTypeDeLieux, mapDesChampsDuDossier);
+        var idChampLieuEtablissement = mapDesChampsPourArbreDeDecision.get(ChampsArbreDeDecision.LIEU_ETAB);
+        var idChampLieuDomicile = mapDesChampsPourArbreDeDecision.get(ChampsArbreDeDecision.LIEU_DOM);
+        lieuDeSurvenue = recupererLieuDeSurvenue(codeTypeDeLieux, mapDesChampsDuDossier, idChampLieuEtablissement, idChampLieuDomicile);
 
-        if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MTY=")) {
-            libelleDuMisEnCause = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MTY=").path(STRING_VALUE).asText();
-        } else if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MTU=")) {
-            libelleDuMisEnCause = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MTU=").path(STRING_VALUE).asText();
+
+        var idChampMisEnCauseEtablissement = mapDesChampsPourArbreDeDecision.get(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB);
+        var idChampMisEnCauseDomicile = mapDesChampsPourArbreDeDecision.get(ChampsArbreDeDecision.TYPE_DE_MEC_DOM);
+        if (mapDesChampsDuDossier.containsKey(idChampMisEnCauseEtablissement)) {
+            libelleDuMisEnCause = mapDesChampsDuDossier.get(idChampMisEnCauseEtablissement).path(STRING_VALUE).asText();
+        } else if (mapDesChampsDuDossier.containsKey(idChampMisEnCauseDomicile)) {
+            libelleDuMisEnCause = mapDesChampsDuDossier.get(idChampMisEnCauseDomicile).path(STRING_VALUE).asText();
         }
         return new DossierDeReclamation(dossierId, lieuDeSurvenue, libelleDuMisEnCause);
     }
 
-    private LieuDeSurvenue recupererLieuDeSurvenue(CodeTypeDeLieu codeTypeDeLieux, Map<String, JsonNode> champsMap) throws IOException {
+    private LieuDeSurvenue recupererLieuDeSurvenue(CodeTypeDeLieu codeTypeDeLieux, Map<String, JsonNode> champsMap, String idChampLieuEtablissement, String idChampLieuDomicile) throws IOException {
         LieuDeSurvenue lieuDeSurvenue = null;
-        if (CodeTypeDeLieu.ETAB_M.equals(codeTypeDeLieux) && champsMap.containsKey("Q2hhbXAtMTk1MDg=")) { //Si etablissement présent
-            String stringValue = champsMap.get("Q2hhbXAtMTk1MDg=").path(STRING_VALUE).asText();
+        if (CodeTypeDeLieu.ETAB_M.equals(codeTypeDeLieux) && champsMap.containsKey(idChampLieuEtablissement)) { //Si etablissement présent
+            String stringValue = champsMap.get(idChampLieuEtablissement).path(STRING_VALUE).asText();
             lieuDeSurvenue = recupererEtablissement(stringValue);
         }
 
-        if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieux) && champsMap.containsKey("Q2hhbXAtMTk1MDY=")) { //si domicile présent
-            JsonNode domicileChamp = champsMap.get("Q2hhbXAtMTk1MDY=");
+        if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieux) && champsMap.containsKey(idChampLieuDomicile)) { //si domicile présent
+            JsonNode domicileChamp = champsMap.get(idChampLieuDomicile);
             lieuDeSurvenue = recupererDomicile(domicileChamp);
         }
         return lieuDeSurvenue;

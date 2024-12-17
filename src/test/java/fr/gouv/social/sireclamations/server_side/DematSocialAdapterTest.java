@@ -1,6 +1,7 @@
 package fr.gouv.social.sireclamations.server_side;
 
 import fr.gouv.social.sireclamations.hexagone.Domicile;
+import fr.gouv.social.sireclamations.hexagone.domain.ChampsArbreDeDecision;
 import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
@@ -15,6 +16,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,6 +33,9 @@ class DematSocialAdapterTest {
     @Mock
     private ReferentielDuTypeDeLieux referentielDuTypeDeLieux;
 
+    @Mock
+    private ReferentielDesChampsDuFormulaire referentielDesChampsDuFormulaire;
+
     private DematSocialAdapter dematSocialAdapter;
 
     @BeforeEach
@@ -39,7 +44,15 @@ class DematSocialAdapterTest {
         Retrofit retrofit = mock(Retrofit.class);
         when(retrofit.create(DematSocialApi.class)).thenReturn(dematSocialApi);
         when(retrofit.create(OpenDataSoftApi.class)).thenReturn(openDataSoftApi);
-        dematSocialAdapter = new DematSocialAdapter(retrofit, openDataSoftApi, referentielDuTypeDeLieux);
+        dematSocialAdapter = new DematSocialAdapter(retrofit, openDataSoftApi, referentielDuTypeDeLieux, referentielDesChampsDuFormulaire);
+        Map<ChampsArbreDeDecision, String> champsArbreDeDecision = Map.ofEntries(
+                Map.entry(ChampsArbreDeDecision.TYPE_DE_LIEU, "Q2hhbXAtMTk1MDU="),
+                Map.entry(ChampsArbreDeDecision.LIEU_ETAB, "Q2hhbXAtMTk1MDg="),
+                Map.entry(ChampsArbreDeDecision.LIEU_DOM, "Q2hhbXAtMTk1MDY="),
+                Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB, "Q2hhbXAtMTk1MTY="),
+                Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_DOM, "Q2hhbXAtMTk1MTU=")
+        );
+        when(referentielDesChampsDuFormulaire.getChampsPourArbreDeDecision()).thenReturn(champsArbreDeDecision);
     }
 
     @Test
