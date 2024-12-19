@@ -1,8 +1,8 @@
 package fr.gouv.social.sireclamations.server_side;
 
-import fr.gouv.social.sireclamations.hexagone.Domicile;
 import fr.gouv.social.sireclamations.hexagone.domain.ChampsArbreDeDecision;
 import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
+import fr.gouv.social.sireclamations.hexagone.domain.Domicile;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import okhttp3.MediaType;
@@ -147,7 +147,7 @@ class DematSocialAdapterTest {
     }
 
     @Test
-    void lorsquunDossierExisteEtConcerneUnDomicileDontLadresseEstComplètementRenseignée_alorsRetourneLeDossierEtLesInformationsDuDomicile() throws IOException {
+    void lorsquunDossierExisteEtConcerneUnDomicileDontLadresseEstCompletementRenseignee_alorsRetourneLeDossierEtLesInformationsDuDomicile() throws IOException {
         // Given
         mockAppelDematSocialApi("""
                 {
@@ -265,9 +265,7 @@ class DematSocialAdapterTest {
         var libelleTypeLieu = "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)";
         when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu)).thenReturn(CodeTypeDeLieu.DOM);
         // When Then
-        assertThrows(CodePostalAbsentException.class, () -> {
-            dematSocialAdapter.recupererDossier(178291);
-        });
+        assertThrows(CodePostalAbsentException.class, () -> dematSocialAdapter.recupererDossier(178291));
     }
     @Test
     void quandApiDematSocialNeRenvoiRien_alorsThrowDematSocialException() throws IOException {
@@ -279,9 +277,7 @@ class DematSocialAdapterTest {
         when(dematSocialApi.executeGraphQLQueryRaw(any())).thenReturn(call);
 
         // When Then
-        assertThrows(IOException.class, () -> {
-            dematSocialAdapter.recupererDossier(178291);
-        });
+        assertThrows(IOException.class, () -> dematSocialAdapter.recupererDossier(178291));
     }
 
     @Test
@@ -296,9 +292,7 @@ class DematSocialAdapterTest {
         when(dematSocialApi.executeGraphQLQueryRaw(any())).thenReturn(call);
 
         // When Then
-        IOException exception = assertThrows(IOException.class, () -> {
-            dematSocialAdapter.recupererDossier(178291);
-        });
+        IOException exception = assertThrows(IOException.class, () -> dematSocialAdapter.recupererDossier(178291));
 
         // Vérifier le message de l'exception
         assertTrue(exception.getMessage().contains("La réponse de l'API n'est pas un JSON valide"));
@@ -341,9 +335,7 @@ class DematSocialAdapterTest {
         when(openDataSoftApi.fetchCodeSousCategorie(anyString(), anyString(), anyInt())).thenReturn(call); // Mock du service API
 
         // When Then
-        IOException exception = assertThrows(IOException.class, () -> {
-            dematSocialAdapter.recupererDossier(178291);
-        });
+        IOException exception = assertThrows(IOException.class, () -> dematSocialAdapter.recupererDossier(178291));
 
         // Vérification du message d'erreur
         assertTrue(exception.getMessage().contains("La réponse de l'API n'est pas un JSON valide"));

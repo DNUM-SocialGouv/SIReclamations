@@ -1,6 +1,6 @@
 package fr.gouv.social.sireclamations.user_side;
 
-import fr.gouv.social.sireclamations.hexagone.Domicile;
+import fr.gouv.social.sireclamations.hexagone.domain.Domicile;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.LieuDeSurvenue;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;

@@ -9,8 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,8 +38,7 @@ class ReclamationControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.numeroDossier", is(numeroDossier)))
                 .andExpect(jsonPath("$.autoritesCompetentes", hasSize(2)))
-                .andExpect(jsonPath("$.autoritesCompetentes[0]", is("CD")))
-                .andExpect(jsonPath("$.autoritesCompetentes[1]", is("ARS")))
+                .andExpect(jsonPath("$.autoritesCompetentes", containsInAnyOrder("CD", "ARS")))
                 .andExpect(jsonPath("$.contacts", hasSize(4)));
     }
     @Test

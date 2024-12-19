@@ -1,14 +1,11 @@
 package fr.gouv.social.sireclamations.hexagone;
 
-import fr.gouv.social.sireclamations.hexagone.domain.AutoriteCompetente;
-import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
-import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
-import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
+import fr.gouv.social.sireclamations.hexagone.domain.*;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.*;
-import fr.gouv.social.sireclamations.server_side.EmailService;
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.ContactNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
+import fr.gouv.social.sireclamations.server_side.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,7 +25,6 @@ public class DeposerReclamation {
     private final EmailService emailService;
     private static final Logger logger = LoggerFactory.getLogger(DeposerReclamation.class);
 
-
     public DeposerReclamation(DematSocial dematSocial,
                               ReferentielDeCategoriesDEtablissements referentielDeCategoriesDEtablissements,
                               ReferentielDesContacts referentielDesContacts,
@@ -43,53 +39,58 @@ public class DeposerReclamation {
         this.emailService = emailService;
     }
 
-    public Reclamation executer(int numeroDossier) throws AutoriteCompetenteNotFoundException, ContactNotFoundException, DematSocialException{
-        DossierDeReclamation dossierReclamation;
+    public Reclamation executer(int numeroDossier) throws AutoriteCompetenteNotFoundException, ContactNotFoundException, DematSocialException {
+        DossierDeReclamation dossier = recupererDossier(numeroDossier);
+        Set<AutoriteCompetente> autorites = determinerAutoritesCompetentes(dossier);
+        List<String> contacts = recupererContacts(autorites, dossier.getLieuDeSurvenu().getCodePostal());
+        envoyerEmail(contacts);
+
+        return new Reclamation(dossier, autorites, contacts, dossier.getLieuDeSurvenu());
+    }
+
+    private DossierDeReclamation recupererDossier(int numeroDossier) throws DematSocialException {
         try {
-            dossierReclamation = dematSocial.recupererDossier(numeroDossier);
+            return dematSocial.recupererDossier(numeroDossier);
         } catch (IOException e) {
             logger.error("Erreur lors de la récupération du dossier chez demat social : " + e.getMessage(), e);
             throw new DematSocialException(e.getMessage());
         }
+    }
 
-        Set<AutoriteCompetente> autoritesCompetentes = new HashSet<>();
-        var codeTypeDuMisEnCause = referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(dossierReclamation.getLibelleDuMisEnCause());
-        var autoriteCompetentePourLeMisEnCause = referentielDesAutoritesCompetentesParTypeDeMisEnCause.recupererAutoriteCompetentePourUnTypeDeMisEnCause(codeTypeDuMisEnCause);
+    private Set<AutoriteCompetente> determinerAutoritesCompetentes(DossierDeReclamation dossier) {
+        Set<AutoriteCompetente> autorites = new HashSet<>();
+        var typeMisEnCause = referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(dossier.getLibelleDuMisEnCause());
+        var autoriteParType = referentielDesAutoritesCompetentesParTypeDeMisEnCause.recupererAutoriteCompetentePourUnTypeDeMisEnCause(typeMisEnCause);
 
-        if (autoriteCompetentePourLeMisEnCause != null)
-            autoritesCompetentes.add(AutoriteCompetente.valueOf(autoriteCompetentePourLeMisEnCause));
-
-        var lieuSurvenue = dossierReclamation.getLieuDeSurvenu();
-        if (lieuSurvenue instanceof Etablissement etablissement) {
-            List<String> codesAutorites = referentielDeCategoriesDEtablissements
-                    .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(etablissement.getCodeSousCategorie());
-
-            if (codesAutorites != null) {
-                autoritesCompetentes.addAll(
-                        codesAutorites.stream()
-                                .filter(Objects::nonNull) // Évite les valeurs null
-                                .filter(code -> Arrays.stream(AutoriteCompetente.values())
-                                        .anyMatch(enumValue -> enumValue.name().equals(code))) // Vérifie que le code est valide
-                                .map(AutoriteCompetente::valueOf) // Convertit en AutoriteCompetente
-                                .collect(Collectors.toSet()) // Collecte les nouvelles valeurs valides dans un Set
-                );
-            }
-
-        }
-        if (lieuSurvenue instanceof Domicile){
-            autoritesCompetentes.add(AutoriteCompetente.CD);
+        if (autoriteParType != null) {
+            autorites.add(AutoriteCompetente.valueOf(autoriteParType));
         }
 
+        if (dossier.getLieuDeSurvenu() instanceof Etablissement etablissement) {
+            autorites.addAll(convertirCodesAutorites(
+                    referentielDeCategoriesDEtablissements.recupererAutoritesCompetentesParCodeSousCategorieEtablissement(etablissement.getCodeSousCategorie())
+            ));
+        } else if (dossier.getLieuDeSurvenu() instanceof Domicile) {
+            autorites.add(AutoriteCompetente.CD);
+        }
 
-        var contactsEmail = referentielDesContacts.recupererContacts(lieuSurvenue.getCodePostal(),
-                autoritesCompetentes);
+        return autorites;
+    }
 
-        emailService.envoyer(contactsEmail, "vous êtes les autorités responsables.");
+    private Set<AutoriteCompetente> convertirCodesAutorites(List<String> codesAutorites) {
+        return codesAutorites.stream()
+                .filter(Objects::nonNull)
+                .filter(code -> Arrays.stream(AutoriteCompetente.values()).anyMatch(a -> a.name().equals(code)))
+                .map(AutoriteCompetente::valueOf)
+                .collect(Collectors.toSet());
+    }
+
+    private List<String> recupererContacts(Set<AutoriteCompetente> autorites, Integer codePostal) {
+        return referentielDesContacts.recupererContacts(codePostal, autorites);
+    }
+
+    private void envoyerEmail(List<String> contacts) {
+        emailService.envoyer(contacts, "vous êtes les autorités responsables.");
         logger.info("email envoyé");
-        return new Reclamation(
-                dossierReclamation,
-                autoritesCompetentes,
-                contactsEmail,
-                lieuSurvenue);
     }
 }

@@ -2,12 +2,10 @@ package fr.gouv.social.sireclamations.server_side;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.gouv.social.sireclamations.hexagone.Domicile;
 import fr.gouv.social.sireclamations.hexagone.domain.*;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.DematSocial;
 import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import okhttp3.ResponseBody;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -53,17 +51,17 @@ public class DematSocialAdapter implements DematSocial {
         Call<ResponseBody> call = dematSocialApi.executeGraphQLQueryRaw(request);
         Response<ResponseBody> response = call.execute();
 
-        return recupererDossierDeReclamationOuThrowErreurSiLeJsonEstInexploitable(numeroDossier, response);
+        if (!response.isSuccessful() || response.body() == null) {
+            throw new IOException("Erreur API DematSocial : " +
+                    (response.errorBody() != null ? response.errorBody().string() : "Réponse vide"));
+        }
+
+        String jsonResponse = response.body().string();
+        throwErreurSiLeJsonEstInexploitable(numeroDossier, jsonResponse);
+        return convertToDossierDeReclamation(jsonResponse);
     }
 
-    @NotNull
-    private DossierDeReclamation recupererDossierDeReclamationOuThrowErreurSiLeJsonEstInexploitable(int numeroDossier, Response<ResponseBody> response) throws IOException {
-        String jsonResponse;
-        if (!response.isSuccessful() && response.body() == null) {
-            throw new IOException("Erreur API DematSocial : " + (response.errorBody() != null ? response.errorBody().string() : "Réponse vide"));
-        }
-        jsonResponse = response.body().string();
-
+    private void throwErreurSiLeJsonEstInexploitable(int numeroDossier, String jsonResponse) throws IOException {
         if (!isValidJson(jsonResponse)) {
             throw new IOException("La réponse de l'API n'est pas un JSON valide : " + jsonResponse);
         }
@@ -74,8 +72,6 @@ public class DematSocialAdapter implements DematSocial {
             String errorMessage = rootNode.get(STRING_ERRORS).get(0).get("message").asText();
             throw new IOException("Erreur API DematSocial pour le dossier numéro " + numeroDossier + " : " + errorMessage);
         }
-
-        return convertToDossierDeReclamation(jsonResponse);
     }
 
     private boolean isValidJson(String jsonResponse) {
@@ -89,16 +85,16 @@ public class DematSocialAdapter implements DematSocial {
     }
 
     private DossierDeReclamation convertToDossierDeReclamation(String jsonResponse) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(jsonResponse);
+        var objectMapper = new ObjectMapper();
+        var rootNode = objectMapper.readTree(jsonResponse);
         var dossierId = rootNode.path("data").path("dossier").path("number").asInt();
-        JsonNode champsDuDossierJson = rootNode.path("data").path("dossier").path("champs");
-        Map<String, JsonNode> mapDesChampsDuDossier = extraireChampsDuDossier(champsDuDossierJson);
-        Map<ChampsArbreDeDecision, String> champsPourArbre = referentielDesChampsDuFormulaire.getChampsPourArbreDeDecision();
+        var champsDuDossierJson = rootNode.path("data").path("dossier").path("champs");
+        var mapDesChampsDuDossier = extraireChampsDuDossier(champsDuDossierJson);
+        var champsPourArbreDeDecision = referentielDesChampsDuFormulaire.getChampsPourArbreDeDecision();
 
-        CodeTypeDeLieu codeTypeDeLieu = recupererCodeTypeDeLieu(mapDesChampsDuDossier, champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_LIEU));
-        LieuDeSurvenue lieuDeSurvenue = recupererLieuDeSurvenue(codeTypeDeLieu, mapDesChampsDuDossier, champsPourArbre);
-        String libelleMisEnCause = recupererLibelleMisEnCause(mapDesChampsDuDossier, champsPourArbre);
+        var codeTypeDeLieu = recupererCodeTypeDeLieu(mapDesChampsDuDossier, champsPourArbreDeDecision.get(ChampsArbreDeDecision.TYPE_DE_LIEU));
+        var lieuDeSurvenue = recupererLieuDeSurvenue(codeTypeDeLieu, mapDesChampsDuDossier, champsPourArbreDeDecision);
+        var libelleMisEnCause = recupererLibelleMisEnCause(mapDesChampsDuDossier, champsPourArbreDeDecision);
 
         return new DossierDeReclamation(dossierId, lieuDeSurvenue, libelleMisEnCause);
     }
@@ -257,7 +253,6 @@ public class DematSocialAdapter implements DematSocial {
                 return resultsNode.get(codeCategorie).asText();
             }
         }
-
         throw new IOException("Aucun code sous catégorie trouvé dans la réponse de l'API openDataSoft pour le numéro FINESS : " + numeroFiness);
     }
 }

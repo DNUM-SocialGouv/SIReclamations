@@ -1,7 +1,4 @@
-package fr.gouv.social.sireclamations.hexagone;
-
-import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
-import fr.gouv.social.sireclamations.hexagone.domain.LieuDeSurvenue;
+package fr.gouv.social.sireclamations.hexagone.domain;
 
 public class Domicile implements LieuDeSurvenue {
     private final Integer codePostal;
