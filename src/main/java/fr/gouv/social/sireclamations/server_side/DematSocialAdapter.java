@@ -2,15 +2,10 @@ package fr.gouv.social.sireclamations.server_side;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fr.gouv.social.sireclamations.hexagone.Domicile;
-import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
-import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
-import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
-import fr.gouv.social.sireclamations.hexagone.domain.LieuDeSurvenue;
+import fr.gouv.social.sireclamations.hexagone.domain.*;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.DematSocial;
 import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import okhttp3.ResponseBody;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -30,12 +25,16 @@ public class DematSocialAdapter implements DematSocial {
 
     private final ReferentielDuTypeDeLieux referentielDuTypeDeLieux;
 
-    private static final String STRING_VALUE = "stringValue";
+    private static final String STRING_ERRORS = "errors";
 
-    public DematSocialAdapter(Retrofit dematSocialRetrofit, OpenDataSoftApi openDataSoftApi, ReferentielDuTypeDeLieux referentielDuTypeDeLieux) {
+    private static final String STRING_VALUE = "stringValue";
+    private final ReferentielDesChampsDuFormulaire referentielDesChampsDuFormulaire;
+
+    public DematSocialAdapter(Retrofit dematSocialRetrofit, OpenDataSoftApi openDataSoftApi, ReferentielDuTypeDeLieux referentielDuTypeDeLieux, ReferentielDesChampsDuFormulaire referentielDesChampsDuFormulaire) {
         this.dematSocialApi = dematSocialRetrofit.create(DematSocialApi.class);
         this.openDataSoftApi = openDataSoftApi;
         this.referentielDuTypeDeLieux = referentielDuTypeDeLieux;
+        this.referentielDesChampsDuFormulaire = referentielDesChampsDuFormulaire;
     }
 
     @Override
@@ -52,29 +51,27 @@ public class DematSocialAdapter implements DematSocial {
         Call<ResponseBody> call = dematSocialApi.executeGraphQLQueryRaw(request);
         Response<ResponseBody> response = call.execute();
 
-        return recupererDossierDeReclamationOuThrowErreurSiLeJsonEstInexploitable(numeroDossier, response);
+        if (!response.isSuccessful() || response.body() == null) {
+            throw new IOException("Erreur API DematSocial : " +
+                    (response.errorBody() != null ? response.errorBody().string() : "Réponse vide"));
+        }
+
+        String jsonResponse = response.body().string();
+        throwErreurSiLeJsonEstInexploitable(numeroDossier, jsonResponse);
+        return convertToDossierDeReclamation(jsonResponse);
     }
 
-    @NotNull
-    private DossierDeReclamation recupererDossierDeReclamationOuThrowErreurSiLeJsonEstInexploitable(int numeroDossier, Response<ResponseBody> response) throws IOException {
-        String jsonResponse;
-        if (!response.isSuccessful() && response.body() == null) {
-            throw new IOException("Erreur API DematSocial : " + (response.errorBody() != null ? response.errorBody().string() : "Réponse vide"));
-        }
-        jsonResponse = response.body().string();
-
+    private void throwErreurSiLeJsonEstInexploitable(int numeroDossier, String jsonResponse) throws IOException {
         if (!isValidJson(jsonResponse)) {
             throw new IOException("La réponse de l'API n'est pas un JSON valide : " + jsonResponse);
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode rootNode = objectMapper.readTree(jsonResponse);
-        if (rootNode.has("errors") && !rootNode.get("errors").isEmpty()) {
-            String errorMessage = rootNode.get("errors").get(0).get("message").asText();
+        if (rootNode.has(STRING_ERRORS) && !rootNode.get(STRING_ERRORS).isEmpty()) {
+            String errorMessage = rootNode.get(STRING_ERRORS).get(0).get("message").asText();
             throw new IOException("Erreur API DematSocial pour le dossier numéro " + numeroDossier + " : " + errorMessage);
         }
-
-        return convertToDossierDeReclamation(jsonResponse);
     }
 
     private boolean isValidJson(String jsonResponse) {
@@ -88,47 +85,62 @@ public class DematSocialAdapter implements DematSocial {
     }
 
     private DossierDeReclamation convertToDossierDeReclamation(String jsonResponse) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(jsonResponse);
+        var objectMapper = new ObjectMapper();
+        var rootNode = objectMapper.readTree(jsonResponse);
         var dossierId = rootNode.path("data").path("dossier").path("number").asInt();
-        JsonNode champsNode = rootNode.path("data").path("dossier").path("champs");
-        LieuDeSurvenue lieuDeSurvenue = null;
-        String libelleDuMisEnCause = "";
-        CodeTypeDeLieu codeTypeDeLieux = null;
-        Map<String, JsonNode> mapDesChampsDuDossier = new HashMap<>();
-        // Parcourir la liste des champs et stock les JsonNode dans une map associé a la clé du node
-        for (JsonNode champ : champsNode) {
-            String id = champ.path("id").asText();
-            mapDesChampsDuDossier.put(id, champ);
-        }
+        var champsDuDossierJson = rootNode.path("data").path("dossier").path("champs");
+        var mapDesChampsDuDossier = extraireChampsDuDossier(champsDuDossierJson);
+        var champsPourArbreDeDecision = referentielDesChampsDuFormulaire.getChampsPourArbreDeDecision();
 
-        if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MDU=")) {
-            String stringValue = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MDU=").path(STRING_VALUE).asText();
-            codeTypeDeLieux = referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(stringValue); //DOM,ETAB_ ,CAB_M, ETAB_A, INST
-        }
+        var codeTypeDeLieu = recupererCodeTypeDeLieu(mapDesChampsDuDossier, champsPourArbreDeDecision.get(ChampsArbreDeDecision.TYPE_DE_LIEU));
+        var lieuDeSurvenue = recupererLieuDeSurvenue(codeTypeDeLieu, mapDesChampsDuDossier, champsPourArbreDeDecision);
+        var libelleMisEnCause = recupererLibelleMisEnCause(mapDesChampsDuDossier, champsPourArbreDeDecision);
 
-        lieuDeSurvenue = recupererLieuDeSurvenue(codeTypeDeLieux, mapDesChampsDuDossier);
-
-        if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MTY=")) {
-            libelleDuMisEnCause = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MTY=").path(STRING_VALUE).asText();
-        } else if (mapDesChampsDuDossier.containsKey("Q2hhbXAtMTk1MTU=")) {
-            libelleDuMisEnCause = mapDesChampsDuDossier.get("Q2hhbXAtMTk1MTU=").path(STRING_VALUE).asText();
-        }
-        return new DossierDeReclamation(dossierId, lieuDeSurvenue, libelleDuMisEnCause);
+        return new DossierDeReclamation(dossierId, lieuDeSurvenue, libelleMisEnCause);
     }
 
-    private LieuDeSurvenue recupererLieuDeSurvenue(CodeTypeDeLieu codeTypeDeLieux, Map<String, JsonNode> champsMap) throws IOException {
-        LieuDeSurvenue lieuDeSurvenue = null;
-        if (CodeTypeDeLieu.ETAB_M.equals(codeTypeDeLieux) && champsMap.containsKey("Q2hhbXAtMTk1MDg=")) { //Si etablissement présent
-            String stringValue = champsMap.get("Q2hhbXAtMTk1MDg=").path(STRING_VALUE).asText();
-            lieuDeSurvenue = recupererEtablissement(stringValue);
+    private Map<String, JsonNode> extraireChampsDuDossier(JsonNode champsNode) {
+        Map<String, JsonNode> map = new HashMap<>();
+        champsNode.forEach(champ -> map.put(champ.path("id").asText(), champ));
+        return map;
+    }
+
+    private CodeTypeDeLieu recupererCodeTypeDeLieu(Map<String, JsonNode> champsMap, String idChampTypeDeLieu) {
+        if (champsMap.containsKey(idChampTypeDeLieu)) {
+            String stringValue = champsMap.get(idChampTypeDeLieu).path(STRING_VALUE).asText();
+            return referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(stringValue);
+        }
+        return null;
+    }
+
+    private String recupererLibelleMisEnCause(Map<String, JsonNode> champsMap, Map<ChampsArbreDeDecision, String> champsPourArbre) {
+        String idChampMisEnCauseEtablissement = champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB);
+        String idChampMisEnCauseDomicile = champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_MEC_DOM);
+
+        if (champsMap.containsKey(idChampMisEnCauseEtablissement)) {
+            return champsMap.get(idChampMisEnCauseEtablissement).path(STRING_VALUE).asText();
+        } else if (champsMap.containsKey(idChampMisEnCauseDomicile)) {
+            return champsMap.get(idChampMisEnCauseDomicile).path(STRING_VALUE).asText();
         }
 
-        if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieux) && champsMap.containsKey("Q2hhbXAtMTk1MDY=")) { //si domicile présent
-            JsonNode domicileChamp = champsMap.get("Q2hhbXAtMTk1MDY=");
-            lieuDeSurvenue = recupererDomicile(domicileChamp);
+        return "";
+    }
+
+    private LieuDeSurvenue recupererLieuDeSurvenue(CodeTypeDeLieu codeTypeDeLieu, Map<String, JsonNode> mapDesChampsDuDossier, Map<ChampsArbreDeDecision, String> champsPourArbre) throws IOException {
+        String idChampLieuEtablissement = champsPourArbre.get(ChampsArbreDeDecision.LIEU_ETAB);
+        String idChampLieuDomicile = champsPourArbre.get(ChampsArbreDeDecision.LIEU_DOM);
+
+        if (CodeTypeDeLieu.ETAB_M.equals(codeTypeDeLieu) && mapDesChampsDuDossier.containsKey(idChampLieuEtablissement)) {
+            String stringValue = mapDesChampsDuDossier.get(idChampLieuEtablissement).path(STRING_VALUE).asText();
+            return recupererEtablissement(stringValue);
         }
-        return lieuDeSurvenue;
+
+        if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieu) && mapDesChampsDuDossier.containsKey(idChampLieuDomicile)) {
+            JsonNode domicileChamp = mapDesChampsDuDossier.get(idChampLieuDomicile);
+            return recupererDomicile(domicileChamp);
+        }
+
+        return null;
     }
 
     private LieuDeSurvenue recupererDomicile(JsonNode champ) {
@@ -241,7 +253,6 @@ public class DematSocialAdapter implements DematSocial {
                 return resultsNode.get(codeCategorie).asText();
             }
         }
-
         throw new IOException("Aucun code sous catégorie trouvé dans la réponse de l'API openDataSoft pour le numéro FINESS : " + numeroFiness);
     }
 }
