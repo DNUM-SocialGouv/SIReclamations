@@ -31,5 +31,5 @@ Pour automatiser l'application du codeStyle nous utilisons Lefthook.
 Lefthook est un outil permettant d'automatiser et gérer les hooks Git (scripts exécutés automatiquement à chaque étape clé, comme avant un commit ou un push).  
 
 1. Installer Lefthook sur son poste : `brew install lefthook`
-2. Aller à la racine du projet et installer lefthook : `lefthook install`
+2. Aller à la racine du projet et installer lefthook : `lefthook install`  
  
