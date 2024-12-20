@@ -1,0 +1,9 @@
+pre-commit:
+  commands:
+    spotless:
+      run: |
+        echo "Checking Maven Path..."
+        which mvn
+        echo "Running Spotless..."
+        mvn spotless:apply 
+        git diff --exit-code || (echo "Spotless a appliqué des changements de formatage. Veuillez vérifier les modifications, les valider et réessayer de commiter." && exit 1)
