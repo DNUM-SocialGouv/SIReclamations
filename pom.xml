@@ -127,7 +127,7 @@
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
-				<version>11.1.0</version> <!-- Vérifiez pour obtenir la dernière version -->
+				<version>11.1.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -170,12 +170,39 @@
 					<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
 					</generateGitPropertiesFilename>
 					<failOnNoGitDirectory>false</failOnNoGitDirectory>
-					<!-- Filtrer les propriétés Git pour inclure uniquement celles nécessaires -->
 					<includeOnlyProperties>
 						<includeOnlyProperty>git.commit.id.abbrev</includeOnlyProperty>
 						<includeOnlyProperty>git.commit.time</includeOnlyProperty>
 						<includeOnlyProperty>git.branch</includeOnlyProperty>
 					</includeOnlyProperties>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.diffplug.spotless</groupId>
+				<artifactId>spotless-maven-plugin</artifactId>
+				<version>2.38.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>apply</goal>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<java>
+						<googleJavaFormat>
+							<style>GOOGLE</style>
+						</googleJavaFormat>
+						<includes>
+							<include>**/*.java</include>
+						</includes>
+						<excludes>
+							<exclude>**/*.md</exclude>
+							<exclude>**/*.txt</exclude>
+							<exclude>**/*.xml</exclude>
+						</excludes>
+					</java>
 				</configuration>
 			</plugin>
 		</plugins>

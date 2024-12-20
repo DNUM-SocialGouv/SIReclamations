@@ -7,11 +7,7 @@ import retrofit2.http.Query;
 
 public interface OpenDataSoftApi {
 
-    @GET("t_finess/records")
-    Call<ResponseBody> fetchCodeSousCategorie(
-            @Query("select") String select,
-            @Query("where") String where,
-            @Query("limit") int limit
-    );
+  @GET("t_finess/records")
+  Call<ResponseBody> fetchCodeSousCategorie(
+      @Query("select") String select, @Query("where") String where, @Query("limit") int limit);
 }
-
