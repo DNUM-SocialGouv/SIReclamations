@@ -78,33 +78,3 @@ mvn spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_
 ## Architecture projet
 
 Le projet applique les concepts de [l'architecture hexagonale](https://blog.octo.com/architecture-hexagonale-trois-principes-et-un-exemple-dimplementation)
-
-
-## Standards d'équipe
-### Flow de développement
-
-1. Organiser un "3 amigos" avec un PO pour clarifier le besoin du ticket.
-2. Prendre le ticket de la colonne `à faire` et le déplacer vers `en cours`
-3. Créer une branche de développement (voir rubrique [Git](#git))
-4. Une fois les développements terminés, ouvrir une [Pull Request](#pull-request) et demander une
-   revue de code via le canal d'équipe.  
-   _(Si les développements ont été réalisés en pair/mob il est possible de ne pas demander de
-   revue)._
-5. Traiter les retours de revue dans un commit dédié.
-6. Fusionner la pull request si elle est approuvée par au moins une personne.
-
-### Git
-
-Toute nouvelle branche de développement doit respecter les critères suivants :
-1. Être créée à partir de la dernière version de develop.
-2. Suivre la convention de nommage : `simal-N°ticket-nom-de-la-branche.`
-   Le préfixe `simal-numeroTicket` est essentiel pour permettre la liaison entre les tickets
-   Jira et les branches de développement.
-
-### Pull Request
-
-1. Le titre de la pull request doit respecter la convention suivante : `Simal-N° : pitch du ticket`
-   exemple : `Simal-17 : Création de documentation via le fichier README`
-   En respectant cette convention, le ticket JIRA sera directement lié a la pull request.
-2. Dans la description de la pull request, ajoutez une courte explication ou insérez le lien
-   vers le ticket Jira correspondant.
