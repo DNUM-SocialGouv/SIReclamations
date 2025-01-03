@@ -7,7 +7,15 @@ appliqué grâce à [google-java-format](https://github.com/google/google-java-f
 est appliqué sur les fichiers Java grâce au plugin
 Maven [Spotless](https://github.com/diffplug/spotless/tree/main/plugin-maven).
 
-Pour vérifier si le code respecte le formatage requis :
+La CI vérifie que chaque fichier modifié dans une merge request respecte le codestyle. Pour cela, 
+l'étape suivante a été ajouter dans le fichier `CI.yml` après le build with Maven afin d'exécute le
+plugin Spotless et vérifier que tout le code respecte les règles définies dans la configuration Spotless :
+```
+   - name: Run Spotless Check
+      run: mvn spotless:check
+```
+
+Pour vérifier manuellement si le code respecte le formatage requis :
 
 ```
 mvn spotless:check
