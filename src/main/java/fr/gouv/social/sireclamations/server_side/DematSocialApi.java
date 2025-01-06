@@ -8,8 +8,7 @@ import retrofit2.http.POST;
 
 public interface DematSocialApi {
 
-    @POST("api/v2/graphql")
-    @Headers("Content-Type: application/json")
-    Call<ResponseBody> executeGraphQLQueryRaw(@Body GraphQLRequest request);
+  @POST("api/v2/graphql")
+  @Headers("Content-Type: application/json")
+  Call<ResponseBody> executeGraphQLQueryRaw(@Body GraphQLRequest request);
 }
-

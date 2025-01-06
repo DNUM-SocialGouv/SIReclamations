@@ -8,13 +8,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class SireclamationsApplication {
 
-	private static final Logger logger = LoggerFactory.getLogger(SireclamationsApplication.class);
+  private static final Logger logger = LoggerFactory.getLogger(SireclamationsApplication.class);
 
+  public static void main(String[] args) {
 
-	public static void main(String[] args) {
+    SpringApplication.run(SireclamationsApplication.class, args);
 
-		SpringApplication.run(SireclamationsApplication.class, args);
-
-		logger.info("SIReclamations Application instanciée !");
-	}
+    logger.info("SIReclamations Application instanciée !");
+  }
 }
