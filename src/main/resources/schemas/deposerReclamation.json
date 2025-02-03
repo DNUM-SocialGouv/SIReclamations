@@ -1,0 +1,1121 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0",
+    "title": "DeposerReclamation",
+    "summary": "API destinée à la plateforme téléphonique d'écoute des situations de maltraitance pour déposer des réclamations ",
+    "description": "Dans le cadre de l’application de la Loi « bien vieillir », promulguée le 8 avril 2024 et sur son volet permettant de « mieux signaler les maltraitances » et en vertu du 4 de l’article L1432-1 du code de la santé publique relatif aux cellules de recueil, cette API à vocation à couvrir le recueil pour l’affectation des demandes aux autorités compétentes.",
+    "contact": {
+      "name": "",
+      "email": ""
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": ""
+    }
+  ],
+  "paths": {
+    "/api/v1/reclamation": {
+      "post": {
+        "summary": "Déposer une réclamation",
+        "description": "Dans le cadre de l’application de la Loi « bien vieillir », promulguée le 8 avril 2024 et sur son volet permettant de « mieux signaler les maltraitances » et en vertu du 4 de l’article L1432-1 du code de la santé publique relatif aux cellules de recueil, cette API à vocation à couvir le recueil et l’affectation des demandes. ",
+        "operationId": "post-api-v1-reclamation",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "description": "API key",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Soumission d'une réclamation",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reclamation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reponseSuccesDepotReclamation"
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "status": 201,
+                      "message": "Réclamation reçue et transférée à X et Y"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reponseEchecDepotReclamation",
+                  "x-examples": {
+                    "Example 1": {
+                      "status": 400,
+                      "message": "Validation failed",
+                      "errors": [
+                        {
+                          "field": "propertyName",
+                          "errorCode": "ERROR_CODE",
+                          "message": "Human-readable description of the error",
+                          "rejectedValue": "valueProvided",
+                          "additionalInfo": {
+                            "hint": "Possible fix or additional context for debugging"
+                          }
+                        },
+                        {
+                          "field": "nestedObject.subProperty",
+                          "errorCode": "ANOTHER_ERROR_CODE",
+                          "message": "Another error description",
+                          "rejectedValue": "anotherValue",
+                          "additionalInfo": null
+                        }
+                      ]
+                    }
+                  }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "status": 400,
+                      "message": "La validation de la réclamation a échoué",
+                      "errors": [
+                        {
+                          "field": "email",
+                          "errorCode": "NON_VIDE",
+                          "message": "L'adresse mail du déclarant est requise"
+                        },
+                        {
+                          "field": "majeur",
+                          "errorCode": "NON_MINEUR",
+                          "message": "Le dépôt de réclamation concerne les personnes majeurs uniquement"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/reponseNonAuthorise",
+                  "x-examples": {
+                    "Example 1": {
+                      "status": 401,
+                      "message": "Authentication required",
+                      "errorCode": "UNAUTHORIZED",
+                      "details": "You must provide a valid access token to access this resource."
+                    }
+                  }
+                },
+                "examples": {
+                  "Example 1": {
+                    "value": {
+                      "status": 401,
+                      "message": "Authentication required",
+                      "errorCode": "TOKEN_MISSING",
+                      "details": "The access token is missing from the Authorization header."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "x-api-key": []
+          }
+        ],
+        "servers": [
+          {
+            "url": "",
+            "description": ""
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "requestBodies": {
+      "reclamation": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Reclamation"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "x-api-key": {
+        "type": "apiKey",
+        "name": "apiKey",
+        "in": "header"
+      }
+    },
+    "responses": {
+      "succes": {
+        "description": "Réclamation reçue et affectée",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/reponseSuccesDepotReclamation",
+              "x-examples": {
+                "Example 1": {
+                  "status": 201,
+                  "message": "Réclamation reçue et transférée à X et Y"
+                }
+              }
+            },
+            "examples": {
+              "Example 1": {
+                "value": {
+                  "status": 201,
+                  "message": "Réclamation reçue et transférée à X et Y"
+                }
+              }
+            }
+          }
+        }
+      },
+      "echec": {
+        "description": "Example response",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/reponseEchecDepotReclamation"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Reclamation": {
+        "type": "object",
+        "title": "Reclamation",
+        "description": "Modèle servant à la soumission d'une réclamation",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifiant technique ou métier du référentiel source permettant d'établir la relation entre les SI."
+          },
+          "declarant": {
+            "$ref": "#/components/schemas/declarant",
+            "description": "Identité du déposant"
+          },
+          "victime": {
+            "$ref": "#/components/schemas/victime"
+          },
+          "lieuSurvenue": {
+            "$ref": "#/components/schemas/lieuSurvenue",
+            "description": "Précisions du lieu de survenue"
+          },
+          "misEnCause": {
+            "$ref": "#/components/schemas/misEnCause",
+            "description": "Type et identité du mis en cause"
+          },
+          "description": {
+            "$ref": "#/components/schemas/details",
+            "description": "Description du problème"
+          },
+          "demarches": {
+            "$ref": "#/components/schemas/demarches",
+            "description": "Démarches déjà engagées"
+          }
+        },
+        "required": [
+          "id",
+          "declarant",
+          "victime",
+          "lieuSurvenue",
+          "misEnCause",
+          "description"
+        ],
+        "x-internal": true,
+        "examples": [
+          {
+            "id": "string",
+            "declarant": {
+              "civilite": "M.",
+              "nom": "string",
+              "prenom": "string",
+              "email": "user@example.com",
+              "telephone": "string",
+              "estLaVictime": true,
+              "langueEtrangere": true,
+              "lienVictime": "Famille",
+              "profession": "string",
+              "victimeInformeeDemarche": "oui",
+              "anonymatVictimeDemande": true,
+              "anonymatMisEnCauseDemande": true,
+              "suiviDemande": true
+            },
+            "victime": {
+              "civilite": "M.",
+              "nom": "string",
+              "prenom": "string",
+              "email": "user@example.com",
+              "telephone": "string",
+              "trancheAge": "-18",
+              "enSituationDeHandicap": true,
+              "anonymatMisEnCauseDemande": "Oui",
+              "autresPersonnesVictimes": "Oui"
+            },
+            "lieuSurvenue": {
+              "codePostal": "string",
+              "commune": "string",
+              "natureLieu": "domicile",
+              "etablissementSanitaireEtSocial": {
+                "et_finess": "string",
+                "nomEtablissement": "string"
+              },
+              "domicile": {
+                "adresse": "string",
+                "serviceADomicile": "Hospitalisation à domicile"
+              },
+              "trajet": {
+                "typeDeTransport": "Ambulance de secours et de soins d'urgence",
+                "nomSociete": "string"
+              },
+              "cabinetMedical": {
+                "nom": "string",
+                "adresse": "string"
+              }
+            },
+            "misEnCause": {
+              "typeMiseEnCause": "Une personne externe à l'établissement",
+              "rpps": "string",
+              "civilite": "M.",
+              "nom": "string",
+              "prenom": "string",
+              "profession": "string"
+            },
+            "description": {
+              "dateSurvenue": "2019-08-24",
+              "typeDeMaltraitance": "Maltraitance physique",
+              "consequenceSurLaVictime": "Sur ma santé physique et/ou psychique",
+              "situationToujoursActuelle": "Oui",
+              "dateDeFin": "2019-08-24",
+              "description": "string"
+            },
+            "demarches": {
+              "organismesDejaSaisis": false,
+              "organismesSaisis": [
+                "Préfecture"
+              ],
+              "autreOrganisme": "string",
+              "contactForcesDeLOrdre": {
+                "juridiction": "string",
+                "dateDemarche": "2019-08-24"
+              }
+            }
+          }
+        ]
+      },
+      "declarant": {
+        "type": "object",
+        "title": "declarant",
+        "required": [
+          "civilite",
+          "nom",
+          "prenom",
+          "telephone",
+          "estLaVictime",
+          "lienVictime",
+          "victimeInformeeDemarche",
+          "anonymatVictimeDemande",
+          "anonymatMisEnCauseDemande",
+          "suiviDemande"
+        ],
+        "properties": {
+          "civilite": {
+            "type": "string",
+            "enum": [
+              "M.",
+              "Mme",
+              "Mx"
+            ]
+          },
+          "nom": {
+            "type": "string"
+          },
+          "prenom": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "telephone": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "estLaVictime": {
+            "type": "boolean",
+            "description": "Le déclarant est la victime"
+          },
+          "langueEtrangere": {
+            "type": "boolean"
+          },
+          "lienVictime": {
+            "type": "string",
+            "enum": [
+              "Famille",
+              "Proche",
+              "Professionnel",
+              "Autre"
+            ],
+            "description": "Lien avec la victime"
+          },
+          "profession": {
+            "type": "string"
+          },
+          "victimeInformeeDemarche": {
+            "type": "string",
+            "enum": [
+              "oui",
+              "non",
+              "non connu"
+            ],
+            "description": "Est-ce que la victime est informée de la démarche ?"
+          },
+          "anonymatVictimeDemande": {
+            "type": "boolean",
+            "description": "Le déclarant souhaite rester anonyme vis à vis de la victime"
+          },
+          "anonymatMisEnCauseDemande": {
+            "type": "boolean",
+            "description": "Le déclarant souhaite rester anonyme vis à vis du mis en cause"
+          },
+          "suiviDemande": {
+            "type": "boolean",
+            "description": "Le déclarant souhaite être contacté pour le suivi"
+          }
+        },
+        "examples": [
+          {
+            "civilite": "M.",
+            "nom": "string",
+            "prenom": "string",
+            "email": "user@example.com",
+            "telephone": "string",
+            "estLaVictime": true,
+            "langueEtrangere": true,
+            "lienVictime": "Famille",
+            "profession": "string",
+            "victimeInformeeDemarche": "oui",
+            "anonymatVictimeDemande": true,
+            "anonymatMisEnCauseDemande": true,
+            "suiviDemande": true
+          }
+        ]
+      },
+      "victime": {
+        "type": "object",
+        "title": "victime",
+        "description": "Identité de la victime présumée",
+        "required": [
+          "civilite",
+          "nom",
+          "prenom",
+          "trancheAge",
+          "enSituationDeHandicap",
+          "anonymatMisEnCauseDemande",
+          "autresPersonnesVictimes"
+        ],
+        "properties": {
+          "civilite": {
+            "type": "string",
+            "enum": [
+              "M.",
+              "Mme",
+              "Mx"
+            ]
+          },
+          "nom": {
+            "type": "string"
+          },
+          "prenom": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "telephone": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "trancheAge": {
+            "type": "string",
+            "enum": [
+              "-18",
+              "18-29",
+              "30-59",
+              "60-79",
+              ">= 80",
+              "Inconnu"
+            ]
+          },
+          "enSituationDeHandicap": {
+            "type": "boolean"
+          },
+          "anonymatMisEnCauseDemande": {
+            "type": "string",
+            "enum": [
+              "Oui",
+              "Non",
+              "Inconnu"
+            ],
+            "description": "La victime souhaite rester anonyme vis à vis du mis en cause"
+          },
+          "autresPersonnesVictimes": {
+            "type": "string",
+            "enum": [
+              "Oui",
+              "Non",
+              "Inconnu"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "civilite": "M.",
+            "nom": "string",
+            "prenom": "string",
+            "email": "user@example.com",
+            "telephone": "string",
+            "trancheAge": "-18",
+            "enSituationDeHandicap": true,
+            "anonymatMisEnCauseDemande": "Oui",
+            "autresPersonnesVictimes": "Oui"
+          }
+        ]
+      },
+      "lieuSurvenue": {
+        "type": "object",
+        "title": "lieuSurvenue",
+        "description": "Lieu du problème",
+        "required": [
+          "codePostal",
+          "commune",
+          "natureLieu"
+        ],
+        "properties": {
+          "codePostal": {
+            "type": "string",
+            "pattern": "/^(?:0[1-9]|[1-8]\\d|9[0-8])\\d{3}$/"
+          },
+          "commune": {
+            "type": "string"
+          },
+          "natureLieu": {
+            "type": "string",
+            "enum": [
+              "domicile",
+              "établissement de santé",
+              "établissement d'hébergement",
+              "établissement social et services sociaux",
+              "cabinet médical",
+              "durant le trajet",
+              "autre"
+            ]
+          },
+          "etablissementSanitaireEtSocial": {
+            "$ref": "#/components/schemas/etablissementSanitaireEtSocial"
+          },
+          "domicile": {
+            "$ref": "#/components/schemas/domicile"
+          },
+          "trajet": {
+            "$ref": "#/components/schemas/trajet"
+          },
+          "cabinetMedical": {
+            "$ref": "#/components/schemas/cabinetMedical"
+          }
+        },
+        "examples": [
+          {
+            "codePostal": "string",
+            "commune": "string",
+            "natureLieu": "domicile",
+            "etablissementSanitaireEtSocial": {
+              "et_finess": "string",
+              "nomEtablissement": "string"
+            },
+            "domicile": {
+              "adresse": "string",
+              "serviceADomicile": "Hospitalisation à domicile"
+            },
+            "trajet": {
+              "typeDeTransport": "Ambulance de secours et de soins d'urgence",
+              "nomSociete": "string"
+            },
+            "cabinetMedical": {
+              "nom": "string",
+              "adresse": "string"
+            }
+          }
+        ]
+      },
+      "lieu": {
+        "type": "object",
+        "title": "lieu",
+        "properties": {
+          "codePostal": {
+            "type": "string",
+            "pattern": "/^(?:0[1-9]|[1-8]\\d|9[0-8])\\d{3}$/"
+          },
+          "commune": {
+            "type": "string"
+          },
+          "adresse": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "codePostal",
+          "commune"
+        ],
+        "examples": [
+          {
+            "codePostal": "string",
+            "commune": "string",
+            "adresse": "string"
+          }
+        ]
+      },
+      "etablissementSanitaireEtSocial": {
+        "type": "object",
+        "title": "etablissementSanitaireEtSocial",
+        "description": "Précise l'établissement sanitaire et social où a eu lieu de le problème. Le service est nécessaire SEULEMENT SI l'établissement mis en cause est un établissement de santé (hôpitaux, cliniques ...).",
+        "properties": {
+          "et_finess": {
+            "type": "string",
+            "description": "Numéro FINESS du site géographique. Source de données : https://arssante.opendatasoft.com/explore/dataset/t_finess/api/",
+            "pattern": "d[AB|\\d]\\d{7}"
+          },
+          "nomEtablissement": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "et_finess"
+        ],
+        "examples": [
+          {
+            "et_finess": "string",
+            "nomEtablissement": "string"
+          }
+        ]
+      },
+      "cabinetMedical": {
+        "type": "object",
+        "title": "cabinetMedical",
+        "description": "Informations sur le cabinet médical",
+        "required": [
+          "nom"
+        ],
+        "properties": {
+          "nom": {
+            "type": "string"
+          },
+          "adresse": {
+            "type": "string"
+          }
+        },
+        "examples": [
+          {
+            "nom": "string",
+            "adresse": "string"
+          }
+        ]
+      },
+      "misEnCause": {
+        "type": "object",
+        "title": "misEnCause",
+        "description": "Identité du mis en cause",
+        "required": [
+          "typeMiseEnCause",
+          "civilite"
+        ],
+        "properties": {
+          "typeMiseEnCause": {
+            "type": "string",
+            "enum": [
+              "Une personne externe à l'établissement",
+              "Un autre résident ou un autre patient",
+              "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
+              "Un professionnel du soin (coiffeur, esthéticienne, naturopathe, ...)",
+              "Un autre professionnel de l'établissement ou de service de santé",
+              "Une équipe ou un service spécifique",
+              "Un mandataire judiciaire",
+              "Un membre de la famille",
+              "Un proche (ami, voisin)",
+              "Autre"
+            ],
+            "description": "Avec qui a eu lieu le problème ?"
+          },
+          "rpps": {
+            "type": "string",
+            "description": "Identifiant unique de référence permettant d’identifier le professionnel de santé. Source : https://arssante.opendatasoft.com/explore/dataset/ps_libreacces_personne_activite/api/",
+            "pattern": "^\\d{9}$"
+          },
+          "civilite": {
+            "type": "string",
+            "enum": [
+              "M.",
+              "Mme",
+              "Mx"
+            ]
+          },
+          "nom": {
+            "type": "string"
+          },
+          "prenom": {
+            "type": "string"
+          },
+          "profession": {
+            "type": "string"
+          }
+        },
+        "examples": [
+          {
+            "typeMiseEnCause": "Une personne externe à l'établissement",
+            "rpps": "string",
+            "civilite": "M.",
+            "nom": "string",
+            "prenom": "string",
+            "profession": "string"
+          }
+        ]
+      },
+      "details": {
+        "type": "object",
+        "title": "details",
+        "description": "Modèle permettant de préciser et décrire la réclamation",
+        "x-internal": false,
+        "required": [
+          "dateSurvenue",
+          "typeDeMaltraitance",
+          "consequenceSurLaVictime",
+          "situationToujoursActuelle",
+          "description"
+        ],
+        "properties": {
+          "dateSurvenue": {
+            "type": "string",
+            "format": "date"
+          },
+          "typeDeMaltraitance": {
+            "type": "string",
+            "enum": [
+              "Maltraitance physique",
+              "Maltraitance sexuelle",
+              "Maltraitance psychologique",
+              "Maltraitance matérielles et financières",
+              "Négligence, abandon, privation",
+              "Discrimination",
+              "Violence institutionnelle",
+              "Autre type de maltraitance"
+            ]
+          },
+          "consequenceSurLaVictime": {
+            "type": "string",
+            "enum": [
+              "Sur ma santé physique et/ou psychique",
+              "Sur mes droits",
+              "Sur mes besoins fondamentaux et spécifiques",
+              "Sur mon développement, ma participation sociale",
+              "Autre conséquence"
+            ]
+          },
+          "situationToujoursActuelle": {
+            "type": "string",
+            "enum": [
+              "Oui",
+              "Non",
+              "Ne sais pas"
+            ]
+          },
+          "dateDeFin": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string",
+            "description": "Quel est le problème ? Que s’est-il passé ? Qui était présent ? Ce que vous avez fait ? Décrivez : La conversation, la situation, l’environnement …",
+            "minLength": 1,
+            "maxLength": 10000
+          }
+        },
+        "examples": [
+          {
+            "dateSurvenue": "2019-08-24",
+            "typeDeMaltraitance": "Maltraitance physique",
+            "consequenceSurLaVictime": "Sur ma santé physique et/ou psychique",
+            "situationToujoursActuelle": "Oui",
+            "dateDeFin": "2019-08-24",
+            "description": "string"
+          }
+        ]
+      },
+      "demarches": {
+        "type": "object",
+        "title": "demarches",
+        "description": "Modèle définissant les démarches déjà engagées",
+        "required": [
+          "organismesDejaSaisis"
+        ],
+        "properties": {
+          "organismesDejaSaisis": {
+            "type": "boolean",
+            "default": false
+          },
+          "organismesSaisis": {
+            "type": "array",
+            "minItems": 0,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "Préfecture",
+                "Commission régionale de conciliation et d’indemnisation (CRCI)",
+                "Conseil départemental ou de la métropole ou ou de la collectivité",
+                "Ministère de la santé",
+                "Présidence de la république",
+                "Conseil départemental de l’ordre du professionnel concerné",
+                "Procureur de la République",
+                "Autres organisme"
+              ]
+            }
+          },
+          "autreOrganisme": {
+            "type": "string"
+          },
+          "contactForcesDeLOrdre": {
+            "$ref": "#/components/schemas/demarcheForcesOrdre",
+            "description": "Avez-vous engagé des démarches auprès de la gendarmerie et/ou du commissariat ?"
+          }
+        },
+        "examples": [
+          {
+            "organismesDejaSaisis": false,
+            "organismesSaisis": [
+              "Préfecture"
+            ],
+            "autreOrganisme": "string",
+            "contactForcesDeLOrdre": {
+              "juridiction": "string",
+              "dateDemarche": "2019-08-24"
+            }
+          }
+        ]
+      },
+      "demarcheEtablissementOuProfessionnel": {
+        "type": "object",
+        "title": "demarcheEtablissementOuProfessionnel",
+        "description": "Modèle qui précise qu'un contact est déjà pris avec l’établissement ou le professionnel concerné",
+        "properties": {
+          "dateDemarche": {
+            "type": "string",
+            "format": "date"
+          },
+          "réponseObtenue": {
+            "type": "boolean",
+            "default": false
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "dateDemarche",
+          "réponseObtenue"
+        ],
+        "examples": [
+          {
+            "dateDemarche": "2019-08-24",
+            "réponseObtenue": false,
+            "description": "string"
+          }
+        ]
+      },
+      "demarcheAutresOrganismes": {
+        "type": "object",
+        "title": "demarcheAutresOrganismes",
+        "description": "Modèle qui permet de définir les Organismes saisis",
+        "properties": {
+          "organismesSaisis": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "Préfecture",
+                "Commission régionale de conciliation et d’indemnisation (CRCI)",
+                "Conseil départemental ou de la métropole ou ou de la collectivité",
+                "Ministère de la santé",
+                "Présidence de la république",
+                "Conseil départemental de l’ordre du professionnel concerné",
+                "Procureur de la République",
+                "Autres organisme"
+              ]
+            }
+          }
+        },
+        "required": [
+          "organismesSaisis"
+        ],
+        "examples": [
+          {
+            "organismesSaisis": [
+              "Préfecture"
+            ]
+          }
+        ]
+      },
+      "demarcheForcesOrdre": {
+        "type": "object",
+        "title": "demarcheForcesOrdre",
+        "description": "Modèle qui précise les démarches auprès de la gendarmerie et/ou du commissariat",
+        "properties": {
+          "juridiction": {
+            "type": "string",
+            "description": "Juridiction saisie",
+            "maxLength": 100
+          },
+          "dateDemarche": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "juridiction",
+          "dateDemarche"
+        ],
+        "examples": [
+          {
+            "juridiction": "string",
+            "dateDemarche": "2019-08-24"
+          }
+        ]
+      },
+      "reponseSuccesDepotReclamation": {
+        "type": "object",
+        "description": "Réponse de succès lors dépôt d'une réclamation",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "examples": [
+          {
+            "status": 201,
+            "message": "Réclamation reçue et transférée à X et Y"
+          }
+        ],
+        "x-examples": {
+          "Example 1": {
+            "status": 201,
+            "message": "Réclamation reçue et transférée à X et Y"
+          }
+        }
+      },
+      "reponseEchecDepotReclamation": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "errorCode": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "examples": [
+          {
+            "status": 400,
+            "message": "La validation de la réclamation a échoué",
+            "errors": [
+              {
+                "field": "email",
+                "errorCode": "NON_VIDE",
+                "message": "L'adresse mail du déclarant est requise"
+              },
+              {
+                "field": "majeur",
+                "errorCode": "NON_MINEUR",
+                "message": "Le dépôt de réclamation concerne les personnes majeurs uniquement"
+              }
+            ]
+          }
+        ],
+        "x-examples": {
+          "Example 1": {
+            "status": 400,
+            "message": "Validation failed",
+            "errors": [
+              {
+                "field": "name",
+                "errorCode": "NOT_EMPTY",
+                "message": "The name field cannot be empty",
+                "rejectedValue": "",
+                "additionalInfo": {
+                  "hint": "Provide a non-empty value for the name"
+                }
+              },
+              {
+                "field": "age",
+                "errorCode": "INVALID_RANGE",
+                "message": "The age must be greater than 0",
+                "rejectedValue": -1,
+                "additionalInfo": null
+              },
+              {
+                "field": "address.street",
+                "errorCode": "NOT_NULL",
+                "message": "The street field cannot be null",
+                "rejectedValue": null,
+                "additionalInfo": null
+              }
+            ]
+          }
+        }
+      },
+      "reponseNonAuthorise": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "message": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        },
+        "examples": [
+          {
+            "status": 401,
+            "message": "Authentication required",
+            "errorCode": "UNAUTHORIZED",
+            "details": "You must provide a valid access token to access this resource."
+          }
+        ],
+        "x-examples": {
+          "Example 1": {
+            "status": 401,
+            "message": "Authentication required",
+            "errorCode": "UNAUTHORIZED",
+            "details": "You must provide a valid access token to access this resource."
+          }
+        }
+      },
+      "domicile": {
+        "title": "domicile",
+        "type": "object",
+        "required": [
+          "adresse",
+          "serviceADomicile"
+        ],
+        "properties": {
+          "adresse": {
+            "type": "string",
+            "description": "Source : https://adresse.data.gouv.fr/\nExemple : https://api-adresse.data.gouv.fr/search?q=34%20Avenue%20de%20l%27opera&limit=5"
+          },
+          "serviceADomicile": {
+            "type": "string",
+            "enum": [
+              "Hospitalisation à domicile",
+              "Service d'éducation spéciale et de soins",
+              "Service d'aide ménagère",
+              "Service de repas",
+              "Traitements spécialisés",
+              "Structure dispensatrice d'oxygène à usage médical",
+              "Service d'aide et d'accompagnement aux familles (SAADF)",
+              "Service Mandataire Juidiciaire à la Protection des Majeurs (MJPM)",
+              "Autre"
+            ]
+          }
+        }
+      },
+      "trajet": {
+        "title": "domicile",
+        "type": "object",
+        "required": [
+          "typeDeTransport"
+        ],
+        "properties": {
+          "typeDeTransport": {
+            "type": "string",
+            "enum": [
+              "Ambulance de secours et de soins d'urgence",
+              "Voiture de secours aux asphyxiés et blessés",
+              "Ambulance",
+              "Véhicule sanitaire léger",
+              "Chauffeur de taxi",
+              "Autre type de transport"
+            ]
+          },
+          "nomSociete": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "x-api-key": []
+    }
+  ]
+}
