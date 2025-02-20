@@ -22,7 +22,7 @@ public class ReferentielDesAutoritesCompetentesParServiceADomicileCsvAdapter
   private final Map<String, String> serviceToAutorite = new HashMap<>();
 
   public ReferentielDesAutoritesCompetentesParServiceADomicileCsvAdapter(
-      @Value("${referentiel.services-domicile}") Resource csvResource) {
+      @Value("${referentiel.domicile.services}") Resource csvResource) {
     try (BufferedReader reader =
         new BufferedReader(
             new InputStreamReader(csvResource.getInputStream(), StandardCharsets.UTF_8))) {
