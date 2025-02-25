@@ -15,14 +15,14 @@ class ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseCsvAdapterTest {
       referentielDesAutoritesCompetentesParTypeDeMisEnCause;
 
   @BeforeEach
-  void setup() throws Exception {
+  void setup() {
     Resource csvResource = new ClassPathResource("data/typeMEC-ac-test.csv");
     referentielDesAutoritesCompetentesParTypeDeMisEnCause =
         new ReferentielDesAutoritesCompetentesParTypeDeMisEnCauseCsvAdapter(csvResource);
   }
 
   @Test
-  void lorsqueLeMisEnCauseEstUnPersonnelDeSanté_alorsOnRetourneArsCommeAutoriteCompetente() {
+  void lorsqueLeMisEnCauseEstUnPersonnelDeSante_alorsOnRetourneArsCommeAutoriteCompetente() {
     // Given
     var misEnCauseDeTypePs = CodeTypeDuMisEnCause.PS;
     // When
