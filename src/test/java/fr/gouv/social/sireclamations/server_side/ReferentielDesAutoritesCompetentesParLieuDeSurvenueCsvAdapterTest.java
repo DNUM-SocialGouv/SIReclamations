@@ -7,15 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-class ReferentielDesLieuxDeSurvenueCsvAdapterTest {
+class ReferentielDesAutoritesCompetentesParLieuDeSurvenueCsvAdapterTest {
 
-  private ReferentielDesLieuxDeSurvenueCsvAdapter referentielDesLieuxDeSurvenueCsvAdapter;
+  private ReferentielDesAutoritesCompetentesParLieuDeSurvenueCsvAdapter
+      referentielDesLieuxDeSurvenueCsvAdapter;
 
   @BeforeEach
   void setup() {
     Resource csvResource = new ClassPathResource("data/autoriteCompetenteLieuDeSurvenue-test.csv");
     referentielDesLieuxDeSurvenueCsvAdapter =
-        new ReferentielDesLieuxDeSurvenueCsvAdapter(csvResource);
+        new ReferentielDesAutoritesCompetentesParLieuDeSurvenueCsvAdapter(csvResource);
   }
 
   @Test

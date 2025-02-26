@@ -27,7 +27,11 @@ class DeposerReclamationTest {
 
   @InjectMocks DeposerReclamation deposerReclamation;
   @Mock DematSocial dematSocial;
-  @Mock private ReferentielDeCategoriesDEtablissements referentielDeCategoriesDEtablissements;
+
+  @Mock
+  private ReferentielDesAutoritesCompetentesParCategoriesDEtablissements
+      referentielDesAutoritesCompetentesParCategoriesDEtablissements;
+
   @Mock private ReferentielDesContacts referentielDesContacts;
   @Mock private ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause;
 
@@ -57,7 +61,7 @@ class DeposerReclamationTest {
           new DossierDeReclamation(
               numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire);
       when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
-      when(referentielDeCategoriesDEtablissements
+      when(referentielDesAutoritesCompetentesParCategoriesDEtablissements
               .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
                   codeSousCategorieEtablissement))
           .thenReturn(List.of("ARS"));
@@ -107,7 +111,7 @@ class DeposerReclamationTest {
           new DossierDeReclamation(
               numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire);
       when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
-      when(referentielDeCategoriesDEtablissements
+      when(referentielDesAutoritesCompetentesParCategoriesDEtablissements
               .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
                   codeSousCategorieEtablissement))
           .thenReturn(List.of("CD"));
@@ -237,7 +241,7 @@ class DeposerReclamationTest {
           new DossierDeReclamation(
               numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire);
       when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
-      when(referentielDeCategoriesDEtablissements
+      when(referentielDesAutoritesCompetentesParCategoriesDEtablissements
               .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
                   codeSousCategorieEtablissementIntrouvable))
           .thenReturn(Collections.emptyList());
@@ -279,7 +283,7 @@ class DeposerReclamationTest {
       when(referentielDesAutoritesCompetentesParTypeDeMisEnCause
               .recupererAutoriteCompetentePourUnTypeDeMisEnCause(CodeTypeDuMisEnCause.PS))
           .thenReturn("ARS");
-      when(referentielDeCategoriesDEtablissements
+      when(referentielDesAutoritesCompetentesParCategoriesDEtablissements
               .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
                   codeSousCategorieEtablissement))
           .thenReturn(List.of("ARS"));

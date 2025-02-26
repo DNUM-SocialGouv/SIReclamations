@@ -2,21 +2,22 @@ package fr.gouv.social.sireclamations.server_side;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDeCategoriesDEtablissements;
+import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesAutoritesCompetentesParCategoriesDEtablissements;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-class ReferentielDeCategoriesDEtablissementsCsvAdapterTest {
-  private ReferentielDeCategoriesDEtablissements referentielDeCategoriesDEtablissements;
+class ReferentielDesAutoritesCompetentesParCategoriesDEtablissementsCsvAdapterTest {
+  private ReferentielDesAutoritesCompetentesParCategoriesDEtablissements
+      referentielDesAutoritesCompetentesParCategoriesDEtablissements;
 
   @BeforeEach
   void setUp() throws Exception {
     Resource csvResource = new ClassPathResource("data/sousCatFINESS-ac-test.csv");
-    referentielDeCategoriesDEtablissements =
-        new ReferentielDeCategorieDEtablissementCsvAdapter(csvResource);
+    referentielDesAutoritesCompetentesParCategoriesDEtablissements =
+        new ReferentielDesAutoritesCompetentesParCategorieDEtablissementCsvAdapter(csvResource);
   }
 
   @Test
@@ -25,7 +26,7 @@ class ReferentielDeCategoriesDEtablissementsCsvAdapterTest {
     var codeSousCategorie = 500;
     // When
     var autoritesCompetentes =
-        referentielDeCategoriesDEtablissements
+        referentielDesAutoritesCompetentesParCategoriesDEtablissements
             .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(codeSousCategorie);
     // Then
     assertEquals(List.of("ARS", "CD"), autoritesCompetentes);
@@ -38,7 +39,7 @@ class ReferentielDeCategoriesDEtablissementsCsvAdapterTest {
     var codeSousCategorieInexistant = 1234567891;
     // When
     var autoritesCompetentes =
-        referentielDeCategoriesDEtablissements
+        referentielDesAutoritesCompetentesParCategoriesDEtablissements
             .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
                 codeSousCategorieInexistant);
     // Then

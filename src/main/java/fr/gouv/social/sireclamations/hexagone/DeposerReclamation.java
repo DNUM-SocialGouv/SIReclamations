@@ -17,7 +17,8 @@ import org.springframework.stereotype.Component;
 public class DeposerReclamation {
 
   private final DematSocial dematSocial;
-  private final ReferentielDeCategoriesDEtablissements referentielDeCategoriesDEtablissements;
+  private final ReferentielDesAutoritesCompetentesParCategoriesDEtablissements
+      referentielDesAutoritesCompetentesParCategoriesDEtablissements;
   private final ReferentielDesContacts referentielDesContacts;
   private final ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause;
   private final ReferentielDesAutoritesCompetentesParTypeDeMisEnCause
@@ -27,14 +28,16 @@ public class DeposerReclamation {
 
   public DeposerReclamation(
       DematSocial dematSocial,
-      ReferentielDeCategoriesDEtablissements referentielDeCategoriesDEtablissements,
+      ReferentielDesAutoritesCompetentesParCategoriesDEtablissements
+          referentielDesAutoritesCompetentesParCategoriesDEtablissements,
       ReferentielDesContacts referentielDesContacts,
       ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause,
       ReferentielDesAutoritesCompetentesParTypeDeMisEnCause
           referentielDesAutoritesCompetentesParTypeDeMisEnCause,
       EmailService emailService) {
     this.dematSocial = dematSocial;
-    this.referentielDeCategoriesDEtablissements = referentielDeCategoriesDEtablissements;
+    this.referentielDesAutoritesCompetentesParCategoriesDEtablissements =
+        referentielDesAutoritesCompetentesParCategoriesDEtablissements;
     this.referentielDesContacts = referentielDesContacts;
     this.referentielDesTypeDeMisEnCause = referentielDesTypeDeMisEnCause;
     this.referentielDesAutoritesCompetentesParTypeDeMisEnCause =
@@ -78,7 +81,7 @@ public class DeposerReclamation {
     if (dossier.getLieuDeSurvenu() instanceof Etablissement etablissement) {
       autorites.addAll(
           convertirCodesAutorites(
-              referentielDeCategoriesDEtablissements
+              referentielDesAutoritesCompetentesParCategoriesDEtablissements
                   .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
                       etablissement.getCodeSousCategorie())));
     } else if (dossier.getLieuDeSurvenu() instanceof Domicile) {
