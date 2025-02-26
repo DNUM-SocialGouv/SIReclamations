@@ -12,9 +12,7 @@ import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
-import fr.gouv.social.sireclamations.hexagone.exceptions.ContactNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
-import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,30 +68,6 @@ class ReclamationControllerTest {
                 .param("updated_at", dateDepot))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.message").value("autorite competente not found"));
-  }
-
-  @Test
-  void lorsqueDeposerReclamationRenvoiContactNotFoundException_alorsRenvoiUne404()
-      throws Exception {
-    // Given
-    int numeroDemarche = 1;
-    int numeroDossier = 12345;
-    String etat = "en_construction";
-    String dateDepot = "2025-03-07 19:39:42 +0100";
-
-    given(deposerReclamation.executer(numeroDossier))
-        .willThrow(new ContactNotFoundException("contact not found"));
-    // When Then
-    mockMvc
-        .perform(
-            post("/api/v1/reclamations")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                .param("procedure_id", String.valueOf(numeroDemarche))
-                .param("dossier_id", String.valueOf(numeroDossier))
-                .param("state", etat)
-                .param("updated_at", dateDepot))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.message").value("contact not found"));
   }
 
   @Test
@@ -160,11 +134,7 @@ class ReclamationControllerTest {
         new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCause);
     given(deposerReclamation.executer(numeroDossier))
         .willReturn(
-            new Reclamation(
-                dossierDeReclamation,
-                Set.of(AutoriteCompetente.ARS),
-                List.of("email@email.fr"),
-                etablissement));
+            new Reclamation(dossierDeReclamation, Set.of(AutoriteCompetente.ARS), etablissement));
     // When Then
     mockMvc
         .perform(
@@ -177,7 +147,6 @@ class ReclamationControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.output.numeroDossier").value(12345))
         .andExpect(jsonPath("$.output.autoritesCompetentes[0]").value("ARS"))
-        .andExpect(jsonPath("$.output.contacts[0]").value("email@email.fr"))
         .andExpect(jsonPath("$.output.lieuDeSurvenue.numeroFiness").value("78000000"));
   }
 }

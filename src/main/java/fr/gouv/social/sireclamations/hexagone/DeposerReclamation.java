@@ -3,9 +3,7 @@ package fr.gouv.social.sireclamations.hexagone;
 import fr.gouv.social.sireclamations.hexagone.domain.*;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.*;
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
-import fr.gouv.social.sireclamations.hexagone.exceptions.ContactNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
-import fr.gouv.social.sireclamations.server_side.EmailService;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,41 +17,32 @@ public class DeposerReclamation {
   private final DematSocial dematSocial;
   private final ReferentielDesAutoritesCompetentesParCategoriesDEtablissements
       referentielDesAutoritesCompetentesParCategoriesDEtablissements;
-  private final ReferentielDesContacts referentielDesContacts;
   private final ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause;
   private final ReferentielDesAutoritesCompetentesParTypeDeMisEnCause
       referentielDesAutoritesCompetentesParTypeDeMisEnCause;
-  private final EmailService emailService;
   private static final Logger logger = LoggerFactory.getLogger(DeposerReclamation.class);
 
   public DeposerReclamation(
       DematSocial dematSocial,
       ReferentielDesAutoritesCompetentesParCategoriesDEtablissements
           referentielDesAutoritesCompetentesParCategoriesDEtablissements,
-      ReferentielDesContacts referentielDesContacts,
       ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause,
       ReferentielDesAutoritesCompetentesParTypeDeMisEnCause
-          referentielDesAutoritesCompetentesParTypeDeMisEnCause,
-      EmailService emailService) {
+          referentielDesAutoritesCompetentesParTypeDeMisEnCause) {
     this.dematSocial = dematSocial;
     this.referentielDesAutoritesCompetentesParCategoriesDEtablissements =
         referentielDesAutoritesCompetentesParCategoriesDEtablissements;
-    this.referentielDesContacts = referentielDesContacts;
     this.referentielDesTypeDeMisEnCause = referentielDesTypeDeMisEnCause;
     this.referentielDesAutoritesCompetentesParTypeDeMisEnCause =
         referentielDesAutoritesCompetentesParTypeDeMisEnCause;
-    this.emailService = emailService;
   }
 
   public Reclamation executer(int numeroDossier)
-      throws AutoriteCompetenteNotFoundException, ContactNotFoundException, DematSocialException {
+      throws AutoriteCompetenteNotFoundException, DematSocialException {
     DossierDeReclamation dossier = recupererDossier(numeroDossier);
     Set<AutoriteCompetente> autorites = determinerAutoritesCompetentes(dossier);
-    List<String> contacts =
-        recupererContacts(autorites, dossier.getLieuDeSurvenu().getCodePostal());
-    envoyerEmail(contacts);
 
-    return new Reclamation(dossier, autorites, contacts, dossier.getLieuDeSurvenu());
+    return new Reclamation(dossier, autorites, dossier.getLieuDeSurvenu());
   }
 
   private DossierDeReclamation recupererDossier(int numeroDossier) throws DematSocialException {
@@ -98,14 +87,5 @@ public class DeposerReclamation {
             code -> Arrays.stream(AutoriteCompetente.values()).anyMatch(a -> a.name().equals(code)))
         .map(AutoriteCompetente::valueOf)
         .collect(Collectors.toSet());
-  }
-
-  private List<String> recupererContacts(Set<AutoriteCompetente> autorites, Integer codePostal) {
-    return referentielDesContacts.recupererContacts(codePostal, autorites);
-  }
-
-  private void envoyerEmail(List<String> contacts) {
-    emailService.envoyer(contacts, "vous êtes les autorités responsables.");
-    logger.info("email envoyé");
   }
 }

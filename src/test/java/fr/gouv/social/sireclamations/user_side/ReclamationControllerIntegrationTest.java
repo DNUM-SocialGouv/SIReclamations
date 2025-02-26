@@ -40,8 +40,7 @@ class ReclamationControllerIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.numeroDossier", is(numeroDossier)))
         .andExpect(jsonPath("$.autoritesCompetentes", hasSize(2)))
-        .andExpect(jsonPath("$.autoritesCompetentes", containsInAnyOrder("CD", "ARS")))
-        .andExpect(jsonPath("$.contacts", hasSize(4)));
+        .andExpect(jsonPath("$.autoritesCompetentes", containsInAnyOrder("CD", "ARS")));
   }
 
   @Test
