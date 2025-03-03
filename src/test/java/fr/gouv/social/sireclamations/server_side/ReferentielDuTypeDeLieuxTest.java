@@ -27,6 +27,6 @@ class ReferentielDuTypeDeLieuxTest {
     var codeTypeLieux =
         referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleDuLieu);
     // Then
-    assertEquals(CodeTypeDeLieu.ETAB_M, codeTypeLieux);
+    assertEquals(CodeTypeDeLieu.ETAB, codeTypeLieux);
   }
 }

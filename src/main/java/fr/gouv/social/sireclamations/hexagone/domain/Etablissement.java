@@ -6,11 +6,15 @@ public class Etablissement implements LieuDeSurvenue {
   private int codePostal;
   private String nom;
 
-  public Etablissement(String numeroFiness, int codeSousCategorie, int codePostal, String nom) {
+  private String typeDeLieu;
+
+  public Etablissement(
+      String numeroFiness, int codeSousCategorie, int codePostal, String nom, String typeDeLieu) {
     this.numeroFiness = numeroFiness;
     this.codeSousCategorie = codeSousCategorie;
     this.codePostal = codePostal;
     this.nom = nom;
+    this.typeDeLieu = typeDeLieu;
   }
 
   public String getNumeroFiness() {
@@ -32,6 +36,11 @@ public class Etablissement implements LieuDeSurvenue {
 
   @Override
   public CodeTypeDeLieu getCodeTypeDeLieu() {
-    return CodeTypeDeLieu.ETAB_M;
+    return CodeTypeDeLieu.ETAB;
+  }
+
+  @Override
+  public String libelleTypeDeLieu() {
+    return typeDeLieu;
   }
 }

@@ -31,9 +31,11 @@ class ReferentielDesChampsDuFormulaireTest {
             Map.entry(ChampsArbreDeDecision.LIEU_ETAB, "Q2hhbXAtMTk1MDg="),
             Map.entry(ChampsArbreDeDecision.LIEU_DOM, "Q2hhbXAtMTk1MDY="),
             Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB, "Q2hhbXAtMTk1MTY="),
-            Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_DOM, "Q2hhbXAtMTk1MTU="));
+            Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_DOM, "Q2hhbXAtMTk1MTU="),
+            Map.entry(ChampsArbreDeDecision.MALTRAITANCE, "Q2hhbXAtMjcxNTU="),
+            Map.entry(ChampsArbreDeDecision.MOTIF, "Q2hhbXAtMTk1MjY="));
 
-    assertThat(mapDesChampsDeLarbreDeDecisionObtenu).hasSize(5);
+    assertThat(mapDesChampsDeLarbreDeDecisionObtenu).hasSize(7);
     assertThat(mapDesChampsDeLarbreDeDecisionObtenu)
         .usingRecursiveComparison()
         .isEqualTo(expectedChampsArbreDeDecision);

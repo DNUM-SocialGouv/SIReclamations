@@ -13,6 +13,7 @@ import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
+import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -127,11 +128,13 @@ class ReclamationControllerTest {
     String etat = "en_construction";
     String dateDepot = "2025-03-07 19:39:42 +0100";
 
-    var etablissement = new Etablissement("78000000", 500, 78210, "nom etablissement");
+    var etablissement =
+        new Etablissement("78000000", 500, 78210, "nom etablissement", "typeDeLieu");
     String libelleDuMisEnCause =
         "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)";
+    var motifs = List.of("Problème lié aux locaux ou la restauration");
     var dossierDeReclamation =
-        new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCause);
+        new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCause, true, motifs);
     given(deposerReclamation.executer(numeroDossier))
         .willReturn(
             new Reclamation(dossierDeReclamation, Set.of(AutoriteCompetente.ARS), etablissement));

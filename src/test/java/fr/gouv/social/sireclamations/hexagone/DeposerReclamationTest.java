@@ -8,7 +8,7 @@ import fr.gouv.social.sireclamations.hexagone.domain.ports.*;
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
 import java.io.IOException;
-import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,11 +32,27 @@ class DeposerReclamationTest {
   private ReferentielDesAutoritesCompetentesParTypeDeMisEnCause
       referentielDesAutoritesCompetentesParTypeDeMisEnCause;
 
+  @Mock
+  private ReferentielDesAutoritesCompetentesParMisEnCauseADomicile
+      referentielDesAutoritesCompetentesParMisEnCauseADomicile;
+
+  @Mock
+  private ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissement
+      referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement;
+
+  @Mock
+  private ReferentielDesAutoritesCompetentesParLieuDeSurvenue
+      referentielDesAutoritesCompetentesParLieuDeSurvenue;
+
+  @Mock
+  private ReferentielDesAutoritesCompetentesParMotifs referentielDesAutoritesCompetentesParMotifs;
+
   @Nested
   class ExceptionDeposerReclamation {
+
     @Test
     void
-        lorsqueLonDeposeUneReclamationConcernantUneCategorieEtablissementInconnu_alorsAutoriteCompetenteNotFoundException()
+        lorsqueLonSouhaiteDeposerUneReclamationMaisQuAucuneAutoriteCompetenteNestIdentifiee_alorsthrowsAutoriteCompetenteNotFoundException()
             throws IOException {
       // Given
       var numeroDossier = 12345;
@@ -46,22 +62,17 @@ class DeposerReclamationTest {
       var nom = "EHPAD LE VERGER DE VINCENNES";
       String libelleDuMisEnCauseProvenantDuFormulaire =
           "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)";
+      String typeDeLieu =
+          "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)";
       var etablissement =
-          new Etablissement(finess, codeSousCategorieEtablissementIntrouvable, codePostal, nom);
+          new Etablissement(
+              finess, codeSousCategorieEtablissementIntrouvable, codePostal, nom, typeDeLieu);
+      var motifs =
+          List.of("Problème comportemental, relationnel ou de communication avec une personne");
       var dossierReclamation =
           new DossierDeReclamation(
-              numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire);
+              numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire, true, motifs);
       when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
-      when(referentielDesAutoritesCompetentesParCategoriesDEtablissements
-              .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                  codeSousCategorieEtablissementIntrouvable))
-          .thenReturn(Collections.emptyList());
-      when(referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(
-              libelleDuMisEnCauseProvenantDuFormulaire))
-          .thenReturn(CodeTypeDuMisEnCause.PS);
-      when(referentielDesAutoritesCompetentesParTypeDeMisEnCause
-              .recupererAutoriteCompetentePourUnTypeDeMisEnCause(CodeTypeDuMisEnCause.PS))
-          .thenReturn(null);
       // When Then
       assertThatThrownBy(() -> deposerReclamation.executer(numeroDossier))
           .isInstanceOf(AutoriteCompetenteNotFoundException.class)

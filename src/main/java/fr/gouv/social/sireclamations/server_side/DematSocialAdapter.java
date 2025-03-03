@@ -6,7 +6,10 @@ import fr.gouv.social.sireclamations.hexagone.domain.*;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.DematSocial;
 import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -99,6 +102,10 @@ public class DematSocialAdapter implements DematSocial {
     var mapDesChampsDuDossier = extraireChampsDuDossier(champsDuDossierJson);
     var champsPourArbreDeDecision = referentielDesChampsDuFormulaire.getChampsPourArbreDeDecision();
 
+    var maltraitance =
+        recupererMaltraitance(
+            mapDesChampsDuDossier,
+            champsPourArbreDeDecision.get(ChampsArbreDeDecision.MALTRAITANCE));
     var codeTypeDeLieu =
         recupererCodeTypeDeLieu(
             mapDesChampsDuDossier,
@@ -107,14 +114,46 @@ public class DematSocialAdapter implements DematSocial {
         recupererLieuDeSurvenue(codeTypeDeLieu, mapDesChampsDuDossier, champsPourArbreDeDecision);
     var libelleMisEnCause =
         recupererLibelleMisEnCause(mapDesChampsDuDossier, champsPourArbreDeDecision);
+    var motifs =
+        recupererMotifs(
+            mapDesChampsDuDossier, champsPourArbreDeDecision.get(ChampsArbreDeDecision.MOTIF));
 
-    return new DossierDeReclamation(dossierId, lieuDeSurvenue, libelleMisEnCause);
+    return new DossierDeReclamation(
+        dossierId, lieuDeSurvenue, libelleMisEnCause, maltraitance, motifs);
+  }
+
+  private List<String> recupererMotifs(
+      Map<String, JsonNode> mapDesChampsDuDossier, String idChampMotifs) {
+    if (mapDesChampsDuDossier.containsKey(idChampMotifs)) {
+      JsonNode valuesNode = mapDesChampsDuDossier.get(idChampMotifs).path("values");
+
+      if (valuesNode.isArray()) {
+        List<String> valeursMotifs = new ArrayList<>();
+        for (JsonNode node : valuesNode) {
+          valeursMotifs.add(node.asText());
+        }
+        return valeursMotifs;
+      }
+    }
+    return Collections.emptyList();
   }
 
   private Map<String, JsonNode> extraireChampsDuDossier(JsonNode champsNode) {
     Map<String, JsonNode> map = new HashMap<>();
     champsNode.forEach(champ -> map.put(champ.path("id").asText(), champ));
     return map;
+  }
+
+  private boolean recupererMaltraitance(Map<String, JsonNode> champsMap, String idChampTypeDeLieu) {
+    if (champsMap.containsKey(idChampTypeDeLieu)) {
+      String maltraitanceValue = champsMap.get(idChampTypeDeLieu).path(STRING_VALUE).asText();
+      if (maltraitanceValue.equals("Oui")) {
+        return true;
+      } else if (maltraitanceValue.equals("Non")) {
+        return false;
+      }
+    }
+    return false;
   }
 
   private CodeTypeDeLieu recupererCodeTypeDeLieu(
@@ -146,26 +185,29 @@ public class DematSocialAdapter implements DematSocial {
       Map<String, JsonNode> mapDesChampsDuDossier,
       Map<ChampsArbreDeDecision, String> champsPourArbre)
       throws IOException {
+    String idChampTypeDeLieu = champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_LIEU);
+    String libelleTypeDeLieu =
+        mapDesChampsDuDossier.get(idChampTypeDeLieu).path(STRING_VALUE).asText();
     String idChampLieuEtablissement = champsPourArbre.get(ChampsArbreDeDecision.LIEU_ETAB);
     String idChampLieuDomicile = champsPourArbre.get(ChampsArbreDeDecision.LIEU_DOM);
 
-    if (CodeTypeDeLieu.ETAB_M.equals(codeTypeDeLieu)
+    if (CodeTypeDeLieu.ETAB.equals(codeTypeDeLieu)
         && mapDesChampsDuDossier.containsKey(idChampLieuEtablissement)) {
-      String stringValue =
+      String nomEtablissementVilleCodePostalEtFiness =
           mapDesChampsDuDossier.get(idChampLieuEtablissement).path(STRING_VALUE).asText();
-      return recupererEtablissement(stringValue);
+      return recupererEtablissement(nomEtablissementVilleCodePostalEtFiness, libelleTypeDeLieu);
     }
 
     if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieu)
         && mapDesChampsDuDossier.containsKey(idChampLieuDomicile)) {
       JsonNode domicileChamp = mapDesChampsDuDossier.get(idChampLieuDomicile);
-      return recupererDomicile(domicileChamp);
+      return recupererDomicile(domicileChamp, libelleTypeDeLieu);
     }
 
     return null;
   }
 
-  private LieuDeSurvenue recupererDomicile(JsonNode champ) {
+  private LieuDeSurvenue recupererDomicile(JsonNode champ, String libelleTypeDeLieu) {
     String adresse = null;
     String codePostal = null;
 
@@ -184,9 +226,9 @@ public class DematSocialAdapter implements DematSocial {
       codePostal = extraireCodePostalDepuisTexte(adresse);
     }
     if (codePostal != null) {
-      return new Domicile(Integer.parseInt(codePostal), adresse);
+      return new Domicile(Integer.parseInt(codePostal), adresse, libelleTypeDeLieu);
     }
-    return new Domicile(null, adresse);
+    return new Domicile(null, adresse, libelleTypeDeLieu);
   }
 
   private String extraireCodePostalDepuisTexte(String adresse) {
@@ -202,7 +244,8 @@ public class DematSocialAdapter implements DematSocial {
         "Le code postal n'est pas présent dans l'adresse du lieu de survenue.");
   }
 
-  private Etablissement recupererEtablissement(String stringValue) throws IOException {
+  private Etablissement recupererEtablissement(
+      String nomEtablissementVilleCodePostalEtFiness, String libelleTypeDeLieu) throws IOException {
     String nom = "";
     String codePostal = "";
     String numeroFiness = "";
@@ -211,7 +254,7 @@ public class DematSocialAdapter implements DematSocial {
     // Expression régulière pour extraire le nom (avant la première virgule)
     Pattern nomPattern =
         Pattern.compile("^([A-Za-zÀ-ÿ\\s'.,-]+),"); // Capture tout avant la virgule
-    Matcher nomMatcher = nomPattern.matcher(stringValue);
+    Matcher nomMatcher = nomPattern.matcher(nomEtablissementVilleCodePostalEtFiness);
 
     if (nomMatcher.find()) {
       nom = nomMatcher.group(1);
@@ -220,7 +263,7 @@ public class DematSocialAdapter implements DematSocial {
     // Expression régulière pour extraire le code postal (5 chiffres avant les parenthèses)
     Pattern codePostalPattern =
         Pattern.compile("(\\d{5})(?=\\s*\\()"); // 5 chiffres suivis de parenthèses
-    Matcher codePostalMatcher = codePostalPattern.matcher(stringValue);
+    Matcher codePostalMatcher = codePostalPattern.matcher(nomEtablissementVilleCodePostalEtFiness);
 
     if (codePostalMatcher.find()) {
       codePostal = codePostalMatcher.group(1);
@@ -234,7 +277,7 @@ public class DematSocialAdapter implements DematSocial {
     //        (?:\\s*-\\s*(\\d{3}))? : Partie optionnelle après le tiret, contenant 3 chiffres pour
     // le code sous catégorie.
     Pattern pattern = Pattern.compile("\\((\\d[AB|\\d]\\d{7})(?:\\s*-\\s*(\\d{3}))?\\)");
-    Matcher matcher = pattern.matcher(stringValue);
+    Matcher matcher = pattern.matcher(nomEtablissementVilleCodePostalEtFiness);
 
     if (matcher.find()) {
       numeroFiness = matcher.group(1);
@@ -245,7 +288,11 @@ public class DematSocialAdapter implements DematSocial {
       }
     }
     return new Etablissement(
-        numeroFiness, Integer.parseInt(codeSousCategorie), Integer.parseInt(codePostal), nom);
+        numeroFiness,
+        Integer.parseInt(codeSousCategorie),
+        Integer.parseInt(codePostal),
+        nom,
+        libelleTypeDeLieu);
   }
 
   private String recupererCodeSousCategorieDepuisLApiOpenDataSoft(String numeroFiness)

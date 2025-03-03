@@ -20,6 +20,18 @@ public class DeposerReclamation {
   private final ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause;
   private final ReferentielDesAutoritesCompetentesParTypeDeMisEnCause
       referentielDesAutoritesCompetentesParTypeDeMisEnCause;
+
+  private final ReferentielDesAutoritesCompetentesParMisEnCauseADomicile
+      referentielDesAutoritesCompetentesParMisEnCauseADomicile;
+
+  private final ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissement
+      referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement;
+
+  private final ReferentielDesAutoritesCompetentesParLieuDeSurvenue
+      referentielDesAutoritesCompetentesParLieuDeSurvenue;
+
+  private final ReferentielDesAutoritesCompetentesParMotifs
+      referentielDesAutoritesCompetentesParMotifs;
   private static final Logger logger = LoggerFactory.getLogger(DeposerReclamation.class);
 
   public DeposerReclamation(
@@ -28,13 +40,27 @@ public class DeposerReclamation {
           referentielDesAutoritesCompetentesParCategoriesDEtablissements,
       ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause,
       ReferentielDesAutoritesCompetentesParTypeDeMisEnCause
-          referentielDesAutoritesCompetentesParTypeDeMisEnCause) {
+          referentielDesAutoritesCompetentesParTypeDeMisEnCause,
+      ReferentielDesAutoritesCompetentesParMisEnCauseADomicile
+          referentielDesAutoritesCompetentesParMisEnCauseADomicile,
+      ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissement
+          referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement,
+      ReferentielDesAutoritesCompetentesParLieuDeSurvenue
+          referentielDesAutoritesCompetentesParLieuDeSurvenue,
+      ReferentielDesAutoritesCompetentesParMotifs referentielDesAutoritesCompetentesParMotifs) {
     this.dematSocial = dematSocial;
     this.referentielDesAutoritesCompetentesParCategoriesDEtablissements =
         referentielDesAutoritesCompetentesParCategoriesDEtablissements;
     this.referentielDesTypeDeMisEnCause = referentielDesTypeDeMisEnCause;
     this.referentielDesAutoritesCompetentesParTypeDeMisEnCause =
         referentielDesAutoritesCompetentesParTypeDeMisEnCause;
+    this.referentielDesAutoritesCompetentesParMisEnCauseADomicile =
+        referentielDesAutoritesCompetentesParMisEnCauseADomicile;
+    this.referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement =
+        referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement;
+    this.referentielDesAutoritesCompetentesParLieuDeSurvenue =
+        referentielDesAutoritesCompetentesParLieuDeSurvenue;
+    this.referentielDesAutoritesCompetentesParMotifs = referentielDesAutoritesCompetentesParMotifs;
   }
 
   public Reclamation executer(int numeroDossier)
@@ -56,28 +82,51 @@ public class DeposerReclamation {
   }
 
   private Set<AutoriteCompetente> determinerAutoritesCompetentes(DossierDeReclamation dossier) {
-    Set<AutoriteCompetente> autorites = new HashSet<>();
-    var typeMisEnCause =
-        referentielDesTypeDeMisEnCause.recupererTypeDuMisEnCause(dossier.getLibelleDuMisEnCause());
-    var autoriteParType =
-        referentielDesAutoritesCompetentesParTypeDeMisEnCause
-            .recupererAutoriteCompetentePourUnTypeDeMisEnCause(typeMisEnCause);
-
-    if (autoriteParType != null) {
-      autorites.add(AutoriteCompetente.valueOf(autoriteParType));
+    if (!(dossier.getLieuDeSurvenu() instanceof Etablissement etablissement)) {
+      return dossier.getLieuDeSurvenu() instanceof Domicile ? Collections.emptySet() : Set.of();
     }
 
-    if (dossier.getLieuDeSurvenu() instanceof Etablissement etablissement) {
-      autorites.addAll(
-          convertirCodesAutorites(
-              referentielDesAutoritesCompetentesParCategoriesDEtablissements
-                  .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                      etablissement.getCodeSousCategorie())));
-    } else if (dossier.getLieuDeSurvenu() instanceof Domicile) {
-      autorites.add(AutoriteCompetente.CD);
+    // Récupération des données des référentiels existant
+    String autoriteCompetentePourLeMisEnCause =
+        dossier.getMaltraitance()
+            ? referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement
+                .recupererAutoriteCompetente(dossier.getLibelleDuMisEnCause())
+            : null;
+
+    String autoriteCompetenteParLieuDeSurvenue =
+        referentielDesAutoritesCompetentesParLieuDeSurvenue.recupererAutoriteCompetente(
+            dossier.getLieuDeSurvenu().libelleTypeDeLieu());
+
+    List<String> autoritesCompetentesParMotifs =
+        dossier.getMotifs().stream()
+            .map(referentielDesAutoritesCompetentesParMotifs::recupererAutoriteCompetente)
+            .filter(Objects::nonNull)
+            .toList();
+
+    List<String> autoritesCompetenteParCategorieEtablissement =
+        referentielDesAutoritesCompetentesParCategoriesDEtablissements
+            .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
+                etablissement.getCodeSousCategorie());
+
+    // Application des règles métier
+    Set<AutoriteCompetente> autoritesCompetentes = new HashSet<>();
+    Optional.ofNullable(autoriteCompetentePourLeMisEnCause)
+        .map(AutoriteCompetente::valueOf)
+        .ifPresent(autoritesCompetentes::add);
+    Optional.ofNullable(autoriteCompetenteParLieuDeSurvenue)
+        .map(AutoriteCompetente::valueOf)
+        .ifPresent(autoritesCompetentes::add);
+
+    if (autoriteCompetenteParLieuDeSurvenue == null) {
+      if (!autoritesCompetentesParMotifs.isEmpty()) {
+        autoritesCompetentes.addAll(convertirCodesAutorites(autoritesCompetentesParMotifs));
+      } else {
+        autoritesCompetentes.addAll(
+            convertirCodesAutorites(autoritesCompetenteParCategorieEtablissement));
+      }
     }
 
-    return autorites;
+    return autoritesCompetentes;
   }
 
   private Set<AutoriteCompetente> convertirCodesAutorites(List<String> codesAutorites) {

@@ -10,6 +10,7 @@ import fr.gouv.social.sireclamations.hexagone.domain.Domicile;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
@@ -47,8 +48,10 @@ class DematSocialAdapterTest {
             Map.entry(ChampsArbreDeDecision.TYPE_DE_LIEU, "Q2hhbXAtMTk1MDU="),
             Map.entry(ChampsArbreDeDecision.LIEU_ETAB, "Q2hhbXAtMTk1MDg="),
             Map.entry(ChampsArbreDeDecision.LIEU_DOM, "Q2hhbXAtMTk1MDY="),
-            Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB, "Q2hhbXAtMTk1MTY="),
-            Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_DOM, "Q2hhbXAtMTk1MTU="));
+            Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_DOM, "Q2hhbXAtMTk1MTY="),
+            Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB, "Q2hhbXAtMTk1MTU="),
+            Map.entry(ChampsArbreDeDecision.MALTRAITANCE, "Q2hhbXAtMjcxNTU="),
+            Map.entry(ChampsArbreDeDecision.MOTIF, "Q2hhbXAtMTk1MjY="));
     when(referentielDesChampsDuFormulaire.getChampsPourArbreDeDecision())
         .thenReturn(champsArbreDeDecision);
   }
@@ -60,41 +63,69 @@ class DematSocialAdapterTest {
     // Given
     mockAppelDematSocialApi(
         """
-                {
-                    "data": {
-                        "dossier": {
-                            "number": 178291,
-                            "champs": [
-                                {
-                                    "id": "Q2hhbXAtMTk1MDU=",
-                                    "__typename": "TextChamp",
-                                    "label": "Où a eu lieu le problème ?",
-                                    "stringValue": "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)"
-                                },
-                                {
-                                    "id": "Q2hhbXAtMTk1MDg=",
-                                    "stringValue": "PHARMACIE DE L'ABBAYE, ST CYR L ECOLE 78210 (780012951 - 500)"
-                                }
-                            ]
-                        }
+            {
+                "data": {
+                    "dossier": {
+                        "number": 178291,
+                        "champs": [
+                            {
+                                "id": "Q2hhbXAtMjcxNTU=",
+                                "__typename": "TextChamp",
+                                "label": "Des actes de maltraitance ont-ils eu lieu ?",
+                                "stringValue": "Oui"
+                            },
+                            {
+                                "id": "Q2hhbXAtMTk1MjY=",
+                                "__typename": "MultipleDropDownListChamp",
+                                "label": "Le ou les types de fait(s)",
+                                "stringValue": "Problème comportemental, relationnel ou de communication avec une personne, Problème lié aux locaux ou la restauration",
+                                "values": [
+                                    "Problème comportemental, relationnel ou de communication avec une personne",
+                                    "Problème lié aux locaux ou la restauration"
+                                ]
+                            },
+                            {
+                                "id": "Q2hhbXAtMTk1MDU=",
+                                "__typename": "TextChamp",
+                                "label": "Où a eu lieu le problème ?",
+                                "stringValue": "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)"
+                            },
+                            {
+                                "id": "Q2hhbXAtMTk1MDg=",
+                                "stringValue": "PHARMACIE DE L'ABBAYE, ST CYR L ECOLE 78210 (780012951 - 500)"
+                            }
+                        ]
                     }
                 }
-                """);
+            }
+            """);
 
     var libelleTypeLieu = "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)";
     when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
-        .thenReturn(CodeTypeDeLieu.ETAB_M);
+        .thenReturn(CodeTypeDeLieu.ETAB);
     // When
     var dossier = dematSocialAdapter.recupererDossier(178291);
 
     // Then
-    var lieuDeSurvenuAttendu = new Etablissement("780012951", 500, 78210, "PHARMACIE DE L'ABBAYE");
+    var lieuDeSurvenuAttendu =
+        new Etablissement(
+            "780012951",
+            500,
+            78210,
+            "PHARMACIE DE L'ABBAYE",
+            "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)");
+    var motifsAttendu =
+        List.of(
+            "Problème comportemental, relationnel ou de communication avec une personne",
+            "Problème lié aux locaux ou la restauration");
     assertNotNull(dossier);
     assertEquals(178291, dossier.getNumeroDossier());
     assertEquals(78210, dossier.getCodePostal());
     assertThat(dossier.getLieuDeSurvenu())
         .usingRecursiveComparison()
         .isEqualTo(lieuDeSurvenuAttendu);
+    assertTrue(dossier.getMaltraitance());
+    assertEquals(motifsAttendu, dossier.getMotifs());
   }
 
   @Test
@@ -104,48 +135,54 @@ class DematSocialAdapterTest {
     // Given
     mockAppelDematSocialApi(
         """
-                {
-                    "data": {
-                        "dossier": {
-                            "number": 178291,
-                            "champs": [
-                                {
-                                    "id": "Q2hhbXAtMTk1MDU=",
-                                    "__typename": "TextChamp",
-                                    "label": "Où a eu lieu le problème ?",
-                                    "stringValue": "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)"
-                                },
-                                {
-                                    "id": "Q2hhbXAtMTk1MDg=",
-                                    "stringValue": "PHARMACIE DE L'ABBAYE, ST CYR L ECOLE 78210 (780012951)"
-                                }
-                            ]
-                        }
+            {
+                "data": {
+                    "dossier": {
+                        "number": 178291,
+                        "champs": [
+                            {
+                                "id": "Q2hhbXAtMTk1MDU=",
+                                "__typename": "TextChamp",
+                                "label": "Où a eu lieu le problème ?",
+                                "stringValue": "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)"
+                            },
+                            {
+                                "id": "Q2hhbXAtMTk1MDg=",
+                                "stringValue": "PHARMACIE DE L'ABBAYE, ST CYR L ECOLE 78210 (780012951)"
+                            }
+                        ]
                     }
                 }
-                """);
+            }
+            """);
 
     // JSON simulé pour OpenDataSoft
     mockAppelOpenDataSoftApi(
         """
-                {
-                   "total_count": 1,
-                   "results": [
-                      {
-                         "categ_code": "500"
-                      }
-                   ]
-                }
-                """);
+            {
+               "total_count": 1,
+               "results": [
+                  {
+                     "categ_code": "500"
+                  }
+               ]
+            }
+            """);
 
     var libelleTypeLieu = "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)";
     when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
-        .thenReturn(CodeTypeDeLieu.ETAB_M);
+        .thenReturn(CodeTypeDeLieu.ETAB);
     // When
     var dossier = dematSocialAdapter.recupererDossier(178291);
 
     // Then
-    var lieuDeSurvenuAttendu = new Etablissement("780012951", 500, 78210, "PHARMACIE DE L'ABBAYE");
+    var lieuDeSurvenuAttendu =
+        new Etablissement(
+            "780012951",
+            500,
+            78210,
+            "PHARMACIE DE L'ABBAYE",
+            "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)");
 
     assertNotNull(dossier);
     assertEquals(178291, dossier.getNumeroDossier());
@@ -162,42 +199,42 @@ class DematSocialAdapterTest {
     // Given
     mockAppelDematSocialApi(
         """
-                {
-                    "data": {
-                        "dossier": {
-                            "number": 178291,
-                            "champs": [
-                                {
-                                     "id": "Q2hhbXAtMTk1MDU=",
-                                     "__typename": "TextChamp",
-                                     "label": "Où a eu lieu le problème ?",
-                                     "stringValue": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)"
-                                 },
-                                 {
-                                     "id": "Q2hhbXAtMTk1MDY=",
-                                     "__typename": "AddressChamp",
-                                     "label": "Renseignez l'adresse où a eu lieu le problème :",
-                                     "stringValue": "81 Avenue Pierre Curie 78210 Saint-Cyr-l'École",
-                                     "address": {
-                                         "label": "81 Avenue Pierre Curie 78210 Saint-Cyr-l'École",
-                                         "type": "housenumber",
-                                         "streetAddress": "81 Avenue Pierre Curie",
-                                         "streetNumber": "81",
-                                         "streetName": "Avenue Pierre Curie",
-                                         "postalCode": "78210",
-                                         "cityName": "Saint-Cyr-l'École",
-                                         "cityCode": "78545",
-                                         "departmentName": "Yvelines",
-                                         "departmentCode": "78",
-                                         "regionName": "Île-de-France",
-                                         "regionCode": "11"
-                                     }
+            {
+                "data": {
+                    "dossier": {
+                        "number": 178291,
+                        "champs": [
+                            {
+                                 "id": "Q2hhbXAtMTk1MDU=",
+                                 "__typename": "TextChamp",
+                                 "label": "Où a eu lieu le problème ?",
+                                 "stringValue": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)"
+                             },
+                             {
+                                 "id": "Q2hhbXAtMTk1MDY=",
+                                 "__typename": "AddressChamp",
+                                 "label": "Renseignez l'adresse où a eu lieu le problème :",
+                                 "stringValue": "81 Avenue Pierre Curie 78210 Saint-Cyr-l'École",
+                                 "address": {
+                                     "label": "81 Avenue Pierre Curie 78210 Saint-Cyr-l'École",
+                                     "type": "housenumber",
+                                     "streetAddress": "81 Avenue Pierre Curie",
+                                     "streetNumber": "81",
+                                     "streetName": "Avenue Pierre Curie",
+                                     "postalCode": "78210",
+                                     "cityName": "Saint-Cyr-l'École",
+                                     "cityCode": "78545",
+                                     "departmentName": "Yvelines",
+                                     "departmentCode": "78",
+                                     "regionName": "Île-de-France",
+                                     "regionCode": "11"
                                  }
-                            ]
-                        }
+                             }
+                        ]
                     }
                 }
-                """);
+            }
+            """);
     var libelleTypeLieu =
         "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)";
     when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
@@ -205,7 +242,11 @@ class DematSocialAdapterTest {
     // When
     var dossier = dematSocialAdapter.recupererDossier(178291);
     // Then
-    var lieuDeSurvenuAttendu = new Domicile(78210, "81 Avenue Pierre Curie");
+    var lieuDeSurvenuAttendu =
+        new Domicile(
+            78210,
+            "81 Avenue Pierre Curie",
+            "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)");
     assertNotNull(dossier);
     assertEquals(178291, dossier.getNumeroDossier());
     assertEquals(78210, dossier.getCodePostal());
@@ -221,28 +262,28 @@ class DematSocialAdapterTest {
     // Given
     mockAppelDematSocialApi(
         """
-                {
-                    "data": {
-                        "dossier": {
-                            "number": 178291,
-                            "champs": [
-                                {
-                                     "id": "Q2hhbXAtMTk1MDU=",
-                                     "__typename": "TextChamp",
-                                     "label": "Où a eu lieu le problème ?",
-                                     "stringValue": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)"
-                                 },
-                                 {
-                                     "id": "Q2hhbXAtMTk1MDY=",
-                                     "__typename": "AddressChamp",
-                                     "label": "Renseignez l'adresse où a eu lieu le problème :",
-                                     "stringValue": "81 Avenue Pierre Curie 78210"
-                                 }
-                            ]
-                        }
+            {
+                "data": {
+                    "dossier": {
+                        "number": 178291,
+                        "champs": [
+                            {
+                                 "id": "Q2hhbXAtMTk1MDU=",
+                                 "__typename": "TextChamp",
+                                 "label": "Où a eu lieu le problème ?",
+                                 "stringValue": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)"
+                             },
+                             {
+                                 "id": "Q2hhbXAtMTk1MDY=",
+                                 "__typename": "AddressChamp",
+                                 "label": "Renseignez l'adresse où a eu lieu le problème :",
+                                 "stringValue": "81 Avenue Pierre Curie 78210"
+                             }
+                        ]
                     }
                 }
-                """);
+            }
+            """);
     var libelleTypeLieu =
         "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)";
     when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
@@ -250,7 +291,11 @@ class DematSocialAdapterTest {
     // When
     var dossier = dematSocialAdapter.recupererDossier(178291);
     // Then
-    var lieuDeSurvenuAttendu = new Domicile(78210, "81 Avenue Pierre Curie 78210");
+    var lieuDeSurvenuAttendu =
+        new Domicile(
+            78210,
+            "81 Avenue Pierre Curie 78210",
+            "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)");
     assertNotNull(dossier);
     assertEquals(178291, dossier.getNumeroDossier());
     assertEquals(78210, dossier.getCodePostal());
@@ -266,28 +311,28 @@ class DematSocialAdapterTest {
     // Given
     mockAppelDematSocialApi(
         """
-                {
-                    "data": {
-                        "dossier": {
-                            "number": 178291,
-                            "champs": [
-                                {
-                                     "id": "Q2hhbXAtMTk1MDU=",
-                                     "__typename": "TextChamp",
-                                     "label": "Où a eu lieu le problème ?",
-                                     "stringValue": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)"
-                                 },
-                                 {
-                                     "id": "Q2hhbXAtMTk1MDY=",
-                                     "__typename": "AddressChamp",
-                                     "label": "Renseignez l'adresse où a eu lieu le problème :",
-                                     "stringValue": "81 Avenue Pierre Curie"
-                                 }
-                            ]
-                        }
+            {
+                "data": {
+                    "dossier": {
+                        "number": 178291,
+                        "champs": [
+                            {
+                                 "id": "Q2hhbXAtMTk1MDU=",
+                                 "__typename": "TextChamp",
+                                 "label": "Où a eu lieu le problème ?",
+                                 "stringValue": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)"
+                             },
+                             {
+                                 "id": "Q2hhbXAtMTk1MDY=",
+                                 "__typename": "AddressChamp",
+                                 "label": "Renseignez l'adresse où a eu lieu le problème :",
+                                 "stringValue": "81 Avenue Pierre Curie"
+                             }
+                        ]
                     }
                 }
-                """);
+            }
+            """);
     var libelleTypeLieu =
         "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)";
     when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
@@ -335,29 +380,29 @@ class DematSocialAdapterTest {
     // Given
     mockAppelDematSocialApi(
         """
-                {
-                    "data": {
-                        "dossier": {
-                            "number": 178291,
-                            "champs": [
-                                {
-                                    "id": "Q2hhbXAtMTk1MDU=",
-                                    "__typename": "TextChamp",
-                                    "label": "Où a eu lieu le problème ?",
-                                    "stringValue": "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)"
-                                },
-                                {
-                                    "id": "Q2hhbXAtMTk1MDg=",
-                                    "stringValue": "PHARMACIE DE L'ABBAYE, ST CYR L ECOLE 78210 (780012951)"
-                                }
-                            ]
-                        }
+            {
+                "data": {
+                    "dossier": {
+                        "number": 178291,
+                        "champs": [
+                            {
+                                "id": "Q2hhbXAtMTk1MDU=",
+                                "__typename": "TextChamp",
+                                "label": "Où a eu lieu le problème ?",
+                                "stringValue": "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)"
+                            },
+                            {
+                                "id": "Q2hhbXAtMTk1MDg=",
+                                "stringValue": "PHARMACIE DE L'ABBAYE, ST CYR L ECOLE 78210 (780012951)"
+                            }
+                        ]
                     }
                 }
-                """);
+            }
+            """);
     var libelleTypeLieu = "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)";
     when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
-        .thenReturn(CodeTypeDeLieu.ETAB_M);
+        .thenReturn(CodeTypeDeLieu.ETAB);
 
     String invalidJsonResponse = "Ceci n'est pas un JSON valide";
     ResponseBody responseBody =

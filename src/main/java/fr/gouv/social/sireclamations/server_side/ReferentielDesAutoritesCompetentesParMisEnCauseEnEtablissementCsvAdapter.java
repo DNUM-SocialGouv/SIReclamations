@@ -1,6 +1,6 @@
 package fr.gouv.social.sireclamations.server_side;
 
-import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesAutoritesCompetentesParMisEnCausePourMaltraitance;
+import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissement;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -13,16 +13,16 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class ReferentielDesAutoritesCompetentesParMisEnCausePourMaltraitanceCsvAdapter
-    implements ReferentielDesAutoritesCompetentesParMisEnCausePourMaltraitance {
+public class ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapter
+    implements ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissement {
 
   private static final Logger logger =
       LoggerFactory.getLogger(
-          ReferentielDesAutoritesCompetentesParMisEnCausePourMaltraitanceCsvAdapter.class);
+          ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapter.class);
   private final Map<String, String> misEnCauseToAutorite = new HashMap<>();
 
-  public ReferentielDesAutoritesCompetentesParMisEnCausePourMaltraitanceCsvAdapter(
-      @Value("${referentiel.maltraitance.misEnCause}") Resource csvResource) {
+  public ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapter(
+      @Value("${referentiel.etablissement.misEnCause}") Resource csvResource) {
     try (BufferedReader reader =
         new BufferedReader(
             new InputStreamReader(csvResource.getInputStream(), StandardCharsets.UTF_8))) {
@@ -51,13 +51,12 @@ public class ReferentielDesAutoritesCompetentesParMisEnCausePourMaltraitanceCsvA
   }
 
   @Override
-  public String recupererAutoriteCompetente(String libelleDuMisEnCausePourMaltraitance) {
-    if (libelleDuMisEnCausePourMaltraitance == null
-        || libelleDuMisEnCausePourMaltraitance.isEmpty()) {
+  public String recupererAutoriteCompetente(String libelleDuMisEnCause) {
+    if (libelleDuMisEnCause == null || libelleDuMisEnCause.isEmpty()) {
       logger.warn("Le libellé du mis en cause pour maltraitance est null ou vide.");
       return null;
     }
 
-    return misEnCauseToAutorite.getOrDefault(libelleDuMisEnCausePourMaltraitance, null);
+    return misEnCauseToAutorite.getOrDefault(libelleDuMisEnCause, null);
   }
 }
