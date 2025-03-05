@@ -190,6 +190,7 @@ public class DematSocialAdapter implements DematSocial {
         mapDesChampsDuDossier.get(idChampTypeDeLieu).path(STRING_VALUE).asText();
     String idChampLieuEtablissement = champsPourArbre.get(ChampsArbreDeDecision.LIEU_ETAB);
     String idChampLieuDomicile = champsPourArbre.get(ChampsArbreDeDecision.LIEU_DOM);
+    String idChampServiceADomicile = champsPourArbre.get(ChampsArbreDeDecision.SERVICE);
 
     if (CodeTypeDeLieu.ETAB.equals(codeTypeDeLieu)
         && mapDesChampsDuDossier.containsKey(idChampLieuEtablissement)) {
@@ -201,13 +202,16 @@ public class DematSocialAdapter implements DematSocial {
     if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieu)
         && mapDesChampsDuDossier.containsKey(idChampLieuDomicile)) {
       JsonNode domicileChamp = mapDesChampsDuDossier.get(idChampLieuDomicile);
-      return recupererDomicile(domicileChamp, libelleTypeDeLieu);
+      String libelleService =
+          mapDesChampsDuDossier.get(idChampServiceADomicile).path(STRING_VALUE).asText();
+      return recupererDomicile(domicileChamp, libelleTypeDeLieu, libelleService);
     }
 
     return null;
   }
 
-  private LieuDeSurvenue recupererDomicile(JsonNode champ, String libelleTypeDeLieu) {
+  private LieuDeSurvenue recupererDomicile(
+      JsonNode champ, String libelleTypeDeLieu, String libelleService) {
     String adresse = null;
     String codePostal = null;
 
@@ -226,9 +230,9 @@ public class DematSocialAdapter implements DematSocial {
       codePostal = extraireCodePostalDepuisTexte(adresse);
     }
     if (codePostal != null) {
-      return new Domicile(Integer.parseInt(codePostal), adresse, libelleTypeDeLieu);
+      return new Domicile(Integer.parseInt(codePostal), adresse, libelleTypeDeLieu, libelleService);
     }
-    return new Domicile(null, adresse, libelleTypeDeLieu);
+    return new Domicile(null, adresse, libelleTypeDeLieu, libelleService);
   }
 
   private String extraireCodePostalDepuisTexte(String adresse) {

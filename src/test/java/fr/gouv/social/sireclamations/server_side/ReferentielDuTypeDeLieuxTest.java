@@ -21,7 +21,8 @@ class ReferentielDuTypeDeLieuxTest {
   @Test
   void lorsqueLonVeutRecupererLeCodeTypeDeLieuPourUnEtablissementDeSante_alorsRetourneETAB_M() {
     // Given
-    var libelleDuLieu = "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)";
+    var libelleDuLieu =
+        "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)";
 
     // When
     var codeTypeLieux =

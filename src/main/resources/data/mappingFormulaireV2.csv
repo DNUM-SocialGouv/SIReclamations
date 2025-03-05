@@ -6,3 +6,4 @@ index;id;__typename;label;proprieteArbreDecision
 5;Q2hhbXAtMTk1MTU=;TextChamp;Avec qui a eu lieu le problème ?;TYPE_DE_MEC_ETAB
 6;Q2hhbXAtMjcxNTU=;TextChamp;Des actes de maltraitance ont-ils eu lieu ?;MALTRAITANCE
 7;Q2hhbXAtMTk1MjY=;MultipleDropDownListChamp;Le ou les types de fait(s);MOTIF
+8;Q2hhbXAtMjcxNjg=;TextChamp;Avec quel type de service à domicile a eu lieu le(s) fait(s) ?;SERVICE

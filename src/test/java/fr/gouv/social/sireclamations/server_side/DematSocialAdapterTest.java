@@ -51,7 +51,8 @@ class DematSocialAdapterTest {
             Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_DOM, "Q2hhbXAtMTk1MTY="),
             Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB, "Q2hhbXAtMTk1MTU="),
             Map.entry(ChampsArbreDeDecision.MALTRAITANCE, "Q2hhbXAtMjcxNTU="),
-            Map.entry(ChampsArbreDeDecision.MOTIF, "Q2hhbXAtMTk1MjY="));
+            Map.entry(ChampsArbreDeDecision.MOTIF, "Q2hhbXAtMTk1MjY="),
+            Map.entry(ChampsArbreDeDecision.SERVICE, "Q2hhbXAtMjcxNjg="));
     when(referentielDesChampsDuFormulaire.getChampsPourArbreDeDecision())
         .thenReturn(champsArbreDeDecision);
   }
@@ -88,7 +89,7 @@ class DematSocialAdapterTest {
                                 "id": "Q2hhbXAtMTk1MDU=",
                                 "__typename": "TextChamp",
                                 "label": "Où a eu lieu le problème ?",
-                                "stringValue": "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)"
+                                "stringValue": "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)"
                             },
                             {
                                 "id": "Q2hhbXAtMTk1MDg=",
@@ -100,7 +101,8 @@ class DematSocialAdapterTest {
             }
             """);
 
-    var libelleTypeLieu = "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)";
+    var libelleTypeLieu =
+        "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)";
     when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
         .thenReturn(CodeTypeDeLieu.ETAB);
     // When
@@ -113,7 +115,7 @@ class DematSocialAdapterTest {
             500,
             78210,
             "PHARMACIE DE L'ABBAYE",
-            "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)");
+            "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)");
     var motifsAttendu =
         List.of(
             "Problème comportemental, relationnel ou de communication avec une personne",
@@ -144,7 +146,7 @@ class DematSocialAdapterTest {
                                 "id": "Q2hhbXAtMTk1MDU=",
                                 "__typename": "TextChamp",
                                 "label": "Où a eu lieu le problème ?",
-                                "stringValue": "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)"
+                                "stringValue": "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)"
                             },
                             {
                                 "id": "Q2hhbXAtMTk1MDg=",
@@ -169,7 +171,8 @@ class DematSocialAdapterTest {
             }
             """);
 
-    var libelleTypeLieu = "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)";
+    var libelleTypeLieu =
+        "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)";
     when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
         .thenReturn(CodeTypeDeLieu.ETAB);
     // When
@@ -182,7 +185,7 @@ class DematSocialAdapterTest {
             500,
             78210,
             "PHARMACIE DE L'ABBAYE",
-            "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)");
+            "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)");
 
     assertNotNull(dossier);
     assertEquals(178291, dossier.getNumeroDossier());
@@ -211,6 +214,12 @@ class DematSocialAdapterTest {
                                  "stringValue": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)"
                              },
                              {
+                                 "id": "Q2hhbXAtMjcxNjg=",
+                                 "__typename": "TextChamp",
+                                 "label": "Avec quel type de service à domicile a eu lieu le(s) fait(s) ?",
+                                 "stringValue": "Service infirmier à Domicile (SIAD)"
+                             },
+                             {
                                  "id": "Q2hhbXAtMTk1MDY=",
                                  "__typename": "AddressChamp",
                                  "label": "Renseignez l'adresse où a eu lieu le problème :",
@@ -237,6 +246,7 @@ class DematSocialAdapterTest {
             """);
     var libelleTypeLieu =
         "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)";
+
     when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
         .thenReturn(CodeTypeDeLieu.DOM);
     // When
@@ -246,7 +256,8 @@ class DematSocialAdapterTest {
         new Domicile(
             78210,
             "81 Avenue Pierre Curie",
-            "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)");
+            "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)",
+            "Service infirmier à Domicile (SIAD)");
     assertNotNull(dossier);
     assertEquals(178291, dossier.getNumeroDossier());
     assertEquals(78210, dossier.getCodePostal());
@@ -278,6 +289,12 @@ class DematSocialAdapterTest {
                                  "__typename": "AddressChamp",
                                  "label": "Renseignez l'adresse où a eu lieu le problème :",
                                  "stringValue": "81 Avenue Pierre Curie 78210"
+                             },
+                             {
+                                 "id": "Q2hhbXAtMjcxNjg=",
+                                 "__typename": "TextChamp",
+                                 "label": "Avec quel type de service à domicile a eu lieu le(s) fait(s) ?",
+                                 "stringValue": "Service infirmier à Domicile (SIAD)"
                              }
                         ]
                     }
@@ -295,7 +312,8 @@ class DematSocialAdapterTest {
         new Domicile(
             78210,
             "81 Avenue Pierre Curie 78210",
-            "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)");
+            "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant)",
+            "Service infirmier à Domicile (SIAD)");
     assertNotNull(dossier);
     assertEquals(178291, dossier.getNumeroDossier());
     assertEquals(78210, dossier.getCodePostal());
@@ -327,6 +345,12 @@ class DematSocialAdapterTest {
                                  "__typename": "AddressChamp",
                                  "label": "Renseignez l'adresse où a eu lieu le problème :",
                                  "stringValue": "81 Avenue Pierre Curie"
+                             },
+                             {
+                                 "id": "Q2hhbXAtMjcxNjg=",
+                                 "__typename": "TextChamp",
+                                 "label": "Avec quel type de service à domicile a eu lieu le(s) fait(s) ?",
+                                 "stringValue": "Service infirmier à Domicile (SIAD)"
                              }
                         ]
                     }
@@ -389,7 +413,7 @@ class DematSocialAdapterTest {
                                 "id": "Q2hhbXAtMTk1MDU=",
                                 "__typename": "TextChamp",
                                 "label": "Où a eu lieu le problème ?",
-                                "stringValue": "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)"
+                                "stringValue": "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)"
                             },
                             {
                                 "id": "Q2hhbXAtMTk1MDg=",
@@ -400,7 +424,8 @@ class DematSocialAdapterTest {
                 }
             }
             """);
-    var libelleTypeLieu = "Dans un établissement de santé (hôpital, clinique, pharmacie, ...)";
+    var libelleTypeLieu =
+        "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)";
     when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
         .thenReturn(CodeTypeDeLieu.ETAB);
 

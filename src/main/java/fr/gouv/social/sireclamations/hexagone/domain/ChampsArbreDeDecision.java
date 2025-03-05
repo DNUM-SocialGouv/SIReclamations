@@ -8,4 +8,5 @@ public enum ChampsArbreDeDecision {
   TYPE_DE_MEC_DOM,
   MALTRAITANCE,
   MOTIF,
+  SERVICE
 }
