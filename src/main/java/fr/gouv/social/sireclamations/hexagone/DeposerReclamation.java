@@ -17,9 +17,6 @@ public class DeposerReclamation {
   private final DematSocial dematSocial;
   private final ReferentielDesAutoritesCompetentesParCategoriesDEtablissements
       referentielDesAutoritesCompetentesParCategoriesDEtablissements;
-  private final ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause;
-  private final ReferentielDesAutoritesCompetentesParTypeDeMisEnCause
-      referentielDesAutoritesCompetentesParTypeDeMisEnCause;
 
   private final ReferentielDesAutoritesCompetentesParMisEnCauseADomicile
       referentielDesAutoritesCompetentesParMisEnCauseADomicile;
@@ -41,9 +38,6 @@ public class DeposerReclamation {
       DematSocial dematSocial,
       ReferentielDesAutoritesCompetentesParCategoriesDEtablissements
           referentielDesAutoritesCompetentesParCategoriesDEtablissements,
-      ReferentielDesTypeDeMisEnCause referentielDesTypeDeMisEnCause,
-      ReferentielDesAutoritesCompetentesParTypeDeMisEnCause
-          referentielDesAutoritesCompetentesParTypeDeMisEnCause,
       ReferentielDesAutoritesCompetentesParMisEnCauseADomicile
           referentielDesAutoritesCompetentesParMisEnCauseADomicile,
       ReferentielDesAutoritesCompetentesParServicesADomicile
@@ -56,9 +50,6 @@ public class DeposerReclamation {
     this.dematSocial = dematSocial;
     this.referentielDesAutoritesCompetentesParCategoriesDEtablissements =
         referentielDesAutoritesCompetentesParCategoriesDEtablissements;
-    this.referentielDesTypeDeMisEnCause = referentielDesTypeDeMisEnCause;
-    this.referentielDesAutoritesCompetentesParTypeDeMisEnCause =
-        referentielDesAutoritesCompetentesParTypeDeMisEnCause;
     this.referentielDesAutoritesCompetentesParMisEnCauseADomicile =
         referentielDesAutoritesCompetentesParMisEnCauseADomicile;
     this.referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement =

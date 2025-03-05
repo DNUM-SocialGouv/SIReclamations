@@ -30,12 +30,13 @@ class ReferentielDesChampsDuFormulaireTest {
             Map.entry(ChampsArbreDeDecision.TYPE_DE_LIEU, "Q2hhbXAtMTk1MDU="),
             Map.entry(ChampsArbreDeDecision.LIEU_ETAB, "Q2hhbXAtMTk1MDg="),
             Map.entry(ChampsArbreDeDecision.LIEU_DOM, "Q2hhbXAtMTk1MDY="),
-            Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB, "Q2hhbXAtMTk1MTY="),
-            Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_DOM, "Q2hhbXAtMTk1MTU="),
+            Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB, "Q2hhbXAtMTk1MTU="),
+            Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_DOM, "Q2hhbXAtMTk1MTY="),
             Map.entry(ChampsArbreDeDecision.MALTRAITANCE, "Q2hhbXAtMjcxNTU="),
-            Map.entry(ChampsArbreDeDecision.MOTIF, "Q2hhbXAtMTk1MjY="));
+            Map.entry(ChampsArbreDeDecision.MOTIF, "Q2hhbXAtMTk1MjY="),
+            Map.entry(ChampsArbreDeDecision.SERVICE, "Q2hhbXAtMjcxNjg="));
 
-    assertThat(mapDesChampsDeLarbreDeDecisionObtenu).hasSize(7);
+    assertThat(mapDesChampsDeLarbreDeDecisionObtenu).hasSize(8);
     assertThat(mapDesChampsDeLarbreDeDecisionObtenu)
         .usingRecursiveComparison()
         .isEqualTo(expectedChampsArbreDeDecision);
