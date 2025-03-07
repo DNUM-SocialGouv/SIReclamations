@@ -20,7 +20,7 @@ public class ReclamationController {
 
   @PostMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
   public ResponseEntity<String> handleNonBrowserSubmissions(
-          @RequestParam MultiValueMap<String, String> paramMap) {
+      @RequestParam MultiValueMap<String, String> paramMap) {
 
     logger.info("MultiValueMap : {}", paramMap.toString());
 
