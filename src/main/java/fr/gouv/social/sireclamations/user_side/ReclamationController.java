@@ -1,14 +1,16 @@
 package fr.gouv.social.sireclamations.user_side;
 
 import fr.gouv.social.sireclamations.hexagone.DeposerReclamation;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -22,7 +24,7 @@ public class ReclamationController {
     this.deposerReclamation = deposerReclamation;
   }
 
-  @PostMapping
+ /* @PostMapping
   @Operation(
       summary = "Déposer une réclamation",
       description = "Permet de déposer une réclamation en envoyant un numéro de dossier",
@@ -41,5 +43,17 @@ public class ReclamationController {
         "La réclamation pour le dossier numéro de dossier : {}",
         deposerReclamationRequest.getNumeroDossier() + "à été créée.");
     return ReclamationApiMapper.toReclamationApiResponse(reclamation);
+  }
+
+  */
+
+
+  @PostMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+  public ResponseEntity<String> handleNonBrowserSubmissions(
+          @RequestParam MultiValueMap<String, String> paramMap) {
+
+    logger.info("MultiValueMap : {}", paramMap.toString());
+
+    return new ResponseEntity<String>(paramMap.toString(), HttpStatus.OK);
   }
 }
