@@ -24,7 +24,7 @@ public class ReclamationController {
     this.deposerReclamation = deposerReclamation;
   }
 
- /* @PostMapping
+  /* @PostMapping
   @Operation(
       summary = "Déposer une réclamation",
       description = "Permet de déposer une réclamation en envoyant un numéro de dossier",
@@ -46,7 +46,6 @@ public class ReclamationController {
   }
 
   */
-
 
   @PostMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
   public ResponseEntity<String> handleNonBrowserSubmissions(
