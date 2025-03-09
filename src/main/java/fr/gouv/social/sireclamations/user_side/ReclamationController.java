@@ -68,7 +68,8 @@ public class ReclamationController {
       final DeposerReclamationRequest deposerReclamationRequest =
           new DeposerReclamationRequest(numeroProcedure, numeroDossier, etat, dateDepot);
 
-      if (deposerReclamationRequest.getEtat() == DeposerReclamationRequest.Etat.EN_CONSTRUCTION) {
+      if (deposerReclamationRequest.getEtat()
+          == DeposerReclamationRequest.Etat.EN_CONSTRUCTION) { // todo: devrait être en_instruction
         final Reclamation reclamation =
             deposerReclamation.executer(deposerReclamationRequest.getNumeroDossier());
         message = ReclamationApiMapper.toReclamationApiResponse(reclamation).toString();
