@@ -37,17 +37,19 @@ public class ReclamationController {
     this.deposerReclamation = deposerReclamation;
   }
 
-  //hack: une nouvelle version du webhook doit prochainement être intégrée. Cette version enverra une payload de type application/json. Cette méthode est créée dans l'attente.
+  // hack: une nouvelle version du webhook doit prochainement être intégrée. Cette version enverra
+  // une payload de type application/json. Cette méthode est créée dans l'attente.
   @PostMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
   @Operation(
-          summary = "Récupère une réclamation issue de demat.social",
-          description = "Permet de récupérer une réclamation issue de demat.social grâce un numéro de dossier transmis. Cette API est un webhook destiné à être configuré dans demat.social",
-          responses = {
-                  @ApiResponse(responseCode = "200", description = "Réclamation affectée avec succès"),
-                  @ApiResponse(responseCode = "400", description = "Données invalides dans la requête"),
-                  @ApiResponse(responseCode = "404", description = "Ressources nécessaires introuvables"),
-                  @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
-          })
+      summary = "Récupère une réclamation issue de demat.social",
+      description =
+          "Permet de récupérer une réclamation issue de demat.social grâce un numéro de dossier transmis. Cette API est un webhook destiné à être configuré dans demat.social",
+      responses = {
+        @ApiResponse(responseCode = "200", description = "Réclamation affectée avec succès"),
+        @ApiResponse(responseCode = "400", description = "Données invalides dans la requête"),
+        @ApiResponse(responseCode = "404", description = "Ressources nécessaires introuvables"),
+        @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+      })
   public ResponseEntity<Map<String, String>> handleNonBrowserSubmissions(
       @RequestParam Map<String, String> dsWebhookMap) {
 
@@ -55,27 +57,37 @@ public class ReclamationController {
 
     String message = "";
 
-    if(isValidPayload(dsWebhookMap)) {
-      final DeposerReclamationRequest.Etat etat = DeposerReclamationRequest.Etat.valueOf(dsWebhookMap.get(ETAT_KEY).toUpperCase());
+    if (isValidPayload(dsWebhookMap)) {
+      final DeposerReclamationRequest.Etat etat =
+          DeposerReclamationRequest.Etat.valueOf(dsWebhookMap.get(ETAT_KEY).toUpperCase());
       final int numeroProcedure = Integer.parseInt(dsWebhookMap.get(NUMERO_DEMARCHE_KEY));
       final int numeroDossier = Integer.parseInt(dsWebhookMap.get(NUMERO_DOSSIER_KEY));
-      final LocalDateTime dateDepot = LocalDateTime.parse(dsWebhookMap.get(DATE_DEPOT_KEY), DateTimeFormatter.ofPattern(DATETIME_PATTERN_KEY));
-      final DeposerReclamationRequest deposerReclamationRequest = new DeposerReclamationRequest(numeroProcedure, numeroDossier, etat, dateDepot);
+      final LocalDateTime dateDepot =
+          LocalDateTime.parse(
+              dsWebhookMap.get(DATE_DEPOT_KEY), DateTimeFormatter.ofPattern(DATETIME_PATTERN_KEY));
+      final DeposerReclamationRequest deposerReclamationRequest =
+          new DeposerReclamationRequest(numeroProcedure, numeroDossier, etat, dateDepot);
 
-      if(deposerReclamationRequest.getEtat() == DeposerReclamationRequest.Etat.EN_CONSTRUCTION) {
-        final Reclamation reclamation = deposerReclamation.executer(deposerReclamationRequest.getNumeroDossier());
+      if (deposerReclamationRequest.getEtat() == DeposerReclamationRequest.Etat.EN_CONSTRUCTION) {
+        final Reclamation reclamation =
+            deposerReclamation.executer(deposerReclamationRequest.getNumeroDossier());
         message = ReclamationApiMapper.toReclamationApiResponse(reclamation).toString();
         logger.info("La réclamation : {} à été affectée.", message);
         return GlobalControllerAdvice.getGlobalControllerAdviceResponse(HttpStatus.OK, message);
       } else {
-        message = String.format("Le Dossier %s présenté n'est pas à l'état de Construction.", deposerReclamationRequest.getNumeroDossier());
+        message =
+            String.format(
+                "Le Dossier %s présenté n'est pas à l'état de Construction.",
+                deposerReclamationRequest.getNumeroDossier());
         logger.error(message);
-        return GlobalControllerAdvice.getGlobalControllerAdviceResponse(HttpStatus.BAD_REQUEST, message);
+        return GlobalControllerAdvice.getGlobalControllerAdviceResponse(
+            HttpStatus.BAD_REQUEST, message);
       }
     } else {
       message = "Paramètres envoyés invalides.";
       logger.error(message);
-      return GlobalControllerAdvice.getGlobalControllerAdviceResponse(HttpStatus.BAD_REQUEST, message);
+      return GlobalControllerAdvice.getGlobalControllerAdviceResponse(
+          HttpStatus.BAD_REQUEST, message);
     }
   }
 
@@ -102,9 +114,10 @@ public class ReclamationController {
   }
 
   private static boolean isValidPayload(Map<String, String> params) {
-    return params.size() == 4 && validateInteger(params, NUMERO_DEMARCHE_KEY)
-            && validateInteger(params, NUMERO_DOSSIER_KEY)
-            && validateState(params, ETAT_KEY)
-            && validateDate(params, DATE_DEPOT_KEY);
+    return params.size() == 4
+        && validateInteger(params, NUMERO_DEMARCHE_KEY)
+        && validateInteger(params, NUMERO_DOSSIER_KEY)
+        && validateState(params, ETAT_KEY)
+        && validateDate(params, DATE_DEPOT_KEY);
   }
 }

@@ -63,10 +63,14 @@ public class GlobalControllerAdvice {
     return getGlobalControllerAdviceBodyResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
   }
 
-  public static Map<String,String> getGlobalControllerAdviceBodyResponse(HttpStatus httpStatus, String message) {
+  public static Map<String, String> getGlobalControllerAdviceBodyResponse(
+      HttpStatus httpStatus, String message) {
     return Map.of(STATUS, String.valueOf(httpStatus.value()), MESSAGE, message);
   }
-  public static ResponseEntity<Map<String, String>> getGlobalControllerAdviceResponse(HttpStatus httpStatus, String message) {
-    return ResponseEntity.status(httpStatus).body(getGlobalControllerAdviceBodyResponse(httpStatus, message));
+
+  public static ResponseEntity<Map<String, String>> getGlobalControllerAdviceResponse(
+      HttpStatus httpStatus, String message) {
+    return ResponseEntity.status(httpStatus)
+        .body(getGlobalControllerAdviceBodyResponse(httpStatus, message));
   }
 }

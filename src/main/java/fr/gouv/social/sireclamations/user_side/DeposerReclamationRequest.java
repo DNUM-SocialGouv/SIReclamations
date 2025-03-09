@@ -18,7 +18,8 @@ public class DeposerReclamationRequest {
   private final Etat etat;
   private final LocalDateTime dateDepot;
 
-  public DeposerReclamationRequest(int numeroProcedure, int numeroDossier, Etat etat, LocalDateTime dateDepot) {
+  public DeposerReclamationRequest(
+      int numeroProcedure, int numeroDossier, Etat etat, LocalDateTime dateDepot) {
     this.numeroProcedure = numeroProcedure;
     this.numeroDossier = numeroDossier;
     this.etat = etat;
@@ -37,9 +38,13 @@ public class DeposerReclamationRequest {
     this.numeroDossier = numeroDossier;
   }
 
-  public Etat getEtat() { return etat; }
+  public Etat getEtat() {
+    return etat;
+  }
 
-  public LocalDateTime getDateDepot() { return dateDepot; }
+  public LocalDateTime getDateDepot() {
+    return dateDepot;
+  }
 
   public enum Etat {
     BROUILLON("brouillon"),
@@ -59,8 +64,7 @@ public class DeposerReclamationRequest {
     }
 
     public static boolean isValid(String input) {
-      return Stream.of(Etat.values())
-              .anyMatch(state -> state.value.equals(input));
+      return Stream.of(Etat.values()).anyMatch(state -> state.value.equals(input));
     }
   }
 }
