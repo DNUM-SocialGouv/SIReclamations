@@ -24,7 +24,7 @@ public class GlobalControllerAdvice {
   @ExceptionHandler(AutoriteCompetenteNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
-  public Map<String, String> handleAutoriteCompetenteNotFoundException(
+  public Map<String, Object> handleAutoriteCompetenteNotFoundException(
       AutoriteCompetenteNotFoundException ex) {
     logger.error(ex.getMessage());
     return getGlobalControllerAdviceBodyResponse(HttpStatus.NOT_FOUND, ex.getMessage());
@@ -33,7 +33,7 @@ public class GlobalControllerAdvice {
   @ExceptionHandler(ContactNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
-  public Map<String, String> handleContactNotFoundException(ContactNotFoundException ex) {
+  public Map<String, Object> handleContactNotFoundException(ContactNotFoundException ex) {
     logger.error(ex.getMessage());
     return getGlobalControllerAdviceBodyResponse(HttpStatus.NOT_FOUND, ex.getMessage());
   }
@@ -41,7 +41,7 @@ public class GlobalControllerAdvice {
   @ExceptionHandler(DematSocialException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
-  public Map<String, String> handleDematSocialException(DematSocialException ex) {
+  public Map<String, Object> handleDematSocialException(DematSocialException ex) {
     logger.error(ex.getMessage());
     return getGlobalControllerAdviceBodyResponse(HttpStatus.NOT_FOUND, ex.getMessage());
   }
@@ -49,7 +49,7 @@ public class GlobalControllerAdvice {
   @ExceptionHandler(CodePostalAbsentException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
-  public Map<String, String> handleCodePostalAbsentException(CodePostalAbsentException ex) {
+  public Map<String, Object> handleCodePostalAbsentException(CodePostalAbsentException ex) {
     logger.error(ex.getMessage());
     return getGlobalControllerAdviceBodyResponse(HttpStatus.NOT_FOUND, ex.getMessage());
   }
@@ -57,17 +57,17 @@ public class GlobalControllerAdvice {
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ResponseBody
-  public Map<String, String> handleGenericException(Exception ex) {
+  public Map<String, Object> handleGenericException(Exception ex) {
     logger.error(ex.getMessage());
     return getGlobalControllerAdviceBodyResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
   }
 
-  public static Map<String, String> getGlobalControllerAdviceBodyResponse(
+  public static Map<String, Object> getGlobalControllerAdviceBodyResponse(
       HttpStatus httpStatus, String message) {
     return Map.of(STATUS, String.valueOf(httpStatus.value()), MESSAGE, message);
   }
 
-  public static ResponseEntity<Map<String, String>> getGlobalControllerAdviceResponse(
+  public static ResponseEntity<Map<String, Object>> getGlobalControllerAdviceResponse(
       HttpStatus httpStatus, String message) {
     return ResponseEntity.status(httpStatus)
         .body(getGlobalControllerAdviceBodyResponse(httpStatus, message));

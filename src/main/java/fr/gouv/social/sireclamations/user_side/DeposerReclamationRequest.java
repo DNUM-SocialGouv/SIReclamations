@@ -45,6 +45,13 @@ public class DeposerReclamationRequest {
     return dateDepot;
   }
 
+  @Override
+  public String toString() {
+    return String.format(
+        "numeroProcedure=%s;numeroDossier=%s;etat=%s;dateDepot=%s",
+        numeroProcedure, numeroDossier, etat, dateDepot);
+  }
+
   public enum Etat {
     BROUILLON("brouillon"),
     EN_CONSTRUCTION("en_construction"),

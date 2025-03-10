@@ -52,95 +52,95 @@ class ReclamationControllerTest {
   void lorsqueDeposerReclamationRenvoiAutoriteCompetenteNotFoundException_alorsRenvoiUne404()
       throws Exception {
     // Given
-    var numeroDossier = 12345;
-    var dossierRequest =
-        """
-                {
-                    "numeroDossier": "%s"
-                }
-                """
-            .formatted(numeroDossier);
+    int numeroDemarche = 1;
+    int numeroDossier = 12345;
+    String etat = "en_construction";
+    String dateDepot = "2025-03-07 19:39:42 +0100";
+
     given(deposerReclamation.executer(numeroDossier))
         .willThrow(new AutoriteCompetenteNotFoundException("autorite competente not found"));
     // When Then
     mockMvc
         .perform(
             post("/api/v1/reclamations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(dossierRequest))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .param("procedure_id", String.valueOf(numeroDemarche))
+                .param("dossier_id", String.valueOf(numeroDossier))
+                .param("state", etat)
+                .param("updated_at", dateDepot))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.error").value("autorite competente not found"));
+        .andExpect(jsonPath("$.message").value("autorite competente not found"));
   }
 
   @Test
   void lorsqueDeposerReclamationRenvoiContactNotFoundException_alorsRenvoiUne404()
       throws Exception {
     // Given
-    var numeroDossier = 12345;
-    var dossierRequest =
-        """
-                {
-                    "numeroDossier": "%s"
-                }
-                """
-            .formatted(numeroDossier);
+    int numeroDemarche = 1;
+    int numeroDossier = 12345;
+    String etat = "en_construction";
+    String dateDepot = "2025-03-07 19:39:42 +0100";
+
     given(deposerReclamation.executer(numeroDossier))
         .willThrow(new ContactNotFoundException("contact not found"));
     // When Then
     mockMvc
         .perform(
             post("/api/v1/reclamations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(dossierRequest))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .param("procedure_id", String.valueOf(numeroDemarche))
+                .param("dossier_id", String.valueOf(numeroDossier))
+                .param("state", etat)
+                .param("updated_at", dateDepot))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.error").value("contact not found"));
+        .andExpect(jsonPath("$.message").value("contact not found"));
   }
 
   @Test
   void lorsqueDeposerReclamationRenvoiDematSocialException_alorsRenvoiUne404() throws Exception {
     // Given
-    var numeroDossier = 12345;
-    var dossierRequest =
-        """
-                {
-                    "numeroDossier": "%s"
-                }
-                """
-            .formatted(numeroDossier);
+    int numeroDemarche = 1;
+    int numeroDossier = 12345;
+    String etat = "en_construction";
+    String dateDepot = "2025-03-07 19:39:42 +0100";
+
     given(deposerReclamation.executer(numeroDossier))
         .willThrow(new DematSocialException("dossier not found"));
     // When Then
     mockMvc
         .perform(
             post("/api/v1/reclamations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(dossierRequest))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .param("procedure_id", String.valueOf(numeroDemarche))
+                .param("dossier_id", String.valueOf(numeroDossier))
+                .param("state", etat)
+                .param("updated_at", dateDepot))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.error").value("dossier not found"));
+        .andExpect(jsonPath("$.message").value("dossier not found"));
   }
 
   @Test
   void lorsqueDeposerReclamationRenvoiCodePostalAbsentException_alorsRenvoiUne404()
       throws Exception {
     // Given
-    var numeroDossier = 12345;
-    var dossierRequest =
-        """
-                {
-                    "numeroDossier": "%s"
-                }
-                """
-            .formatted(numeroDossier);
+    int numeroDemarche = 1;
+    int numeroDossier = 12345;
+    String etat = "en_construction";
+    String dateDepot = "2025-03-07 19:39:42 +0100";
+
     given(deposerReclamation.executer(numeroDossier))
         .willThrow(new CodePostalAbsentException("code postal absent"));
     // When Then
     mockMvc
         .perform(
             post("/api/v1/reclamations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(dossierRequest))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .param("procedure_id", String.valueOf(numeroDemarche))
+                .param("dossier_id", String.valueOf(numeroDossier))
+                .param("state", etat)
+                .param("updated_at", dateDepot))
         .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.error").value("code postal absent"));
+        .andExpect(jsonPath("$.message").value("code postal absent"));
   }
 
   @Test
@@ -148,14 +148,11 @@ class ReclamationControllerTest {
       lorsqueDeposerReclamationRenvoiBienLaReclamation_alorsRenvoiUne200AvecLesDonneesDeLaReclamationEnBody()
           throws Exception {
     // Given
-    var numeroDossier = 12345;
-    var dossierRequest =
-        """
-                {
-                    "numeroDossier": "%s"
-                }
-                """
-            .formatted(numeroDossier);
+    int numeroDemarche = 1;
+    int numeroDossier = 12345;
+    String etat = "en_construction";
+    String dateDepot = "2025-03-07 19:39:42 +0100";
+
     var etablissement = new Etablissement("78000000", 500, 78210, "nom etablissement");
     String libelleDuMisEnCause =
         "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)";
@@ -172,12 +169,15 @@ class ReclamationControllerTest {
     mockMvc
         .perform(
             post("/api/v1/reclamations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(dossierRequest))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .param("procedure_id", String.valueOf(numeroDemarche))
+                .param("dossier_id", String.valueOf(numeroDossier))
+                .param("state", etat)
+                .param("updated_at", dateDepot))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.numeroDossier").value(12345))
-        .andExpect(jsonPath("$.autoritesCompetentes[0]").value("ARS"))
-        .andExpect(jsonPath("$.contacts[0]").value("email@email.fr"))
-        .andExpect(jsonPath("$.lieuDeSurvenue.numeroFiness").value("78000000"));
+        .andExpect(jsonPath("$.output.numeroDossier").value(12345))
+        .andExpect(jsonPath("$.output.autoritesCompetentes[0]").value("ARS"))
+        .andExpect(jsonPath("$.output.contacts[0]").value("email@email.fr"))
+        .andExpect(jsonPath("$.output.lieuDeSurvenue.numeroFiness").value("78000000"));
   }
 }

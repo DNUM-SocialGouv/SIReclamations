@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ public class ReclamationController {
   private static final String ETAT_KEY = "state";
   private static final String DATE_DEPOT_KEY = "updated_at";
   private static final String DATETIME_PATTERN_KEY = "yyyy-MM-dd HH:mm:ss Z";
+  private static final String OUTPUT = "output";
 
   private final DeposerReclamation deposerReclamation;
 
@@ -49,12 +51,10 @@ public class ReclamationController {
         @ApiResponse(responseCode = "404", description = "Ressources nécessaires introuvables"),
         @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
       })
-  public ResponseEntity<Map<String, String>> handleNonBrowserSubmissions(
+  public ResponseEntity<Map<String, Object>> handleNonBrowserSubmissions(
       @RequestParam Map<String, String> dsWebhookMap) {
 
-    logger.info("Appel Webhook reçu avec les paramètres : {}", dsWebhookMap);
-
-    String message = "";
+    String message;
 
     if (isValidPayload(dsWebhookMap)) {
       final DeposerReclamationRequest.Etat etat =
@@ -67,13 +67,27 @@ public class ReclamationController {
       final DeposerReclamationRequest deposerReclamationRequest =
           new DeposerReclamationRequest(numeroProcedure, numeroDossier, etat, dateDepot);
 
+      logger.info("Appel Webhook reçu avec les paramètres : {}", deposerReclamationRequest);
+
       if (deposerReclamationRequest.getEtat()
           == DeposerReclamationRequest.Etat.EN_CONSTRUCTION) { // todo: devrait être en_instruction
         final Reclamation reclamation =
             deposerReclamation.executer(deposerReclamationRequest.getNumeroDossier());
-        message = ReclamationApiMapper.toReclamationApiResponse(reclamation).toString();
-        logger.info("La réclamation : {} à été affectée.", message);
-        return GlobalControllerAdvice.getGlobalControllerAdviceResponse(HttpStatus.OK, message);
+        message =
+            String.format(
+                "Le Dossier %s présenté à été affecté.",
+                deposerReclamationRequest.getNumeroDossier());
+        logger.info(message);
+        final Map<String, Object> response =
+            new HashMap<>(
+                GlobalControllerAdvice.getGlobalControllerAdviceBodyResponse(
+                    HttpStatus.OK, message));
+        response.put(
+            OUTPUT,
+            ReclamationApiMapper.toReclamationApiResponse(
+                reclamation)); // NB : Output utile pour les démos, et en attendant le branchement
+        // vers le système de traitement.
+        return new ResponseEntity<>(response, HttpStatus.OK);
       } else {
         message =
             String.format(

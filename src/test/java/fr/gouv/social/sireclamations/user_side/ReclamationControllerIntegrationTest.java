@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDateTime;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,24 +20,24 @@ class ReclamationControllerIntegrationTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @Autowired private ObjectMapper objectMapper;
-
   @Test
   @Tag("localOnly")
   void lorsqueLonDeposeUneReclamationPourUnDossierExistant_alorsRetourne200EtLaReclamationEnBody()
       throws Exception {
     // Given
-    int numeroDossier = 186287; // Correspond a un dossier existant avec un Ehpad pour établissement
-    DeposerReclamationRequest request =
-        new DeposerReclamationRequest(
-            1, numeroDossier, DeposerReclamationRequest.Etat.EN_CONSTRUCTION, LocalDateTime.now());
-
+    int numeroDemarche = 1;
+    int numeroDossier = 209940; // Correspond a un dossier existant avec un Ehpad pour établissement
+    String etat = "en_construction";
+    String dateDepot = "2025-03-07 19:39:42 +0100";
     // When Then
     mockMvc
         .perform(
             post("/api/v1/reclamations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .param("procedure_id", String.valueOf(numeroDemarche))
+                .param("dossier_id", String.valueOf(numeroDossier))
+                .param("state", etat)
+                .param("updated_at", dateDepot))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.numeroDossier", is(numeroDossier)))
         .andExpect(jsonPath("$.autoritesCompetentes", hasSize(2)))
@@ -49,22 +48,25 @@ class ReclamationControllerIntegrationTest {
   @Test
   void lorsqueLonDeposeUneReclamationPourUnDossierInexistant_alorsRetourne404() throws Exception {
     // Given
+    int numeroDemarche = 1;
     int numeroDossier = 1111111111;
-    DeposerReclamationRequest request =
-        new DeposerReclamationRequest(
-            1, numeroDossier, DeposerReclamationRequest.Etat.EN_CONSTRUCTION, LocalDateTime.now());
-    request.setNumeroDossier(numeroDossier);
+    String etat = "en_construction";
+    String dateDepot = "2025-03-07 19:39:42 +0100";
 
     // When Then
     mockMvc
         .perform(
             post("/api/v1/reclamations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .param("procedure_id", String.valueOf(numeroDemarche))
+                .param("dossier_id", String.valueOf(numeroDossier))
+                .param("state", etat)
+                .param("updated_at", dateDepot))
         .andExpect(status().isNotFound())
         .andExpect(
-            jsonPath("$.error")
+            jsonPath("$.message")
                 .value(
-                    "Erreur API DematSocial pour le dossier numéro 1111111111 : Dossier not found"));
+                    "Erreur API DematSocial pour le dossier numéro 1111111111 : Dossier not found"))
+        .andExpect(jsonPath("$.status").value("404"));
   }
 }
