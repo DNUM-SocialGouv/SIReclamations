@@ -27,7 +27,7 @@ public class RetrofitConfiguration {
 
   private OkHttpClient createClient(String token) {
     HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-    loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+    loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC); //NB : Des données personnelles et de santé sont envoyées. Ces données ne doivent pas figurer dans les LOGS
 
     Interceptor authInterceptor =
         chain -> {
@@ -77,7 +77,7 @@ public class RetrofitConfiguration {
     OkHttpClient client =
         new OkHttpClient.Builder()
             .addInterceptor(
-                new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
             .build();
 
     return new Retrofit.Builder()
