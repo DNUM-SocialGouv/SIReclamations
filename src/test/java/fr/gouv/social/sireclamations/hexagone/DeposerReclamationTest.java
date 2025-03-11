@@ -97,12 +97,12 @@ class DeposerReclamationTest {
     var finess = "380022723";
     String nom = "SERVICE DES MAJEURS PROTEGES";
     String typeDeLieu =
-        "Dans un établissement ou service social (Centre de jour, service d'aide, service Mandataire Judiciaire à la Protection des Majeurs...";
+        "Dans un établissement ou service social (Centre de jour, service d'aide, service Mandataire Judiciaire à la Protection des Majeurs...)";
     var motifs =
         List.of("Problème comportemental, relationnel ou de communication avec une personne");
     var etablissement =
         new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom, typeDeLieu);
-    String libelleDuMisEnCauseProvenantDuFormulaire = "Un membre de la famille";
+    String libelleDuMisEnCauseProvenantDuFormulaire = "Membre de la famille";
     var dossierReclamation =
         new DossierDeReclamation(
             numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire, true, motifs);
@@ -141,7 +141,7 @@ class DeposerReclamationTest {
     var finess = "380022723";
     String nom = "SERVICE DES MAJEURS PROTEGES";
     String typeDeLieu =
-        "Dans un établissement ou service social (Centre de jour, service d'aide, service Mandataire Judiciaire à la Protection des Majeurs...";
+        "Dans un établissement ou service social (Centre de jour, service d'aide, service Mandataire Judiciaire à la Protection des Majeurs...)";
     var motifs =
         List.of(
             "Problème de qualité des soins médicaux ou paramédicaux (ex: soins et/ou interventions inadaptés, absents ou abusifs...)");
@@ -184,7 +184,7 @@ class DeposerReclamationTest {
         List.of("Problème comportemental, relationnel ou de communication avec une personne");
     var etablissement =
         new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom, typeDeLieu);
-    String libelleDuMisEnCauseProvenantDuFormulaire = "Un membre de la famille";
+    String libelleDuMisEnCauseProvenantDuFormulaire = "Membre de la famille";
     var dossierReclamation =
         new DossierDeReclamation(
             numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire, true, motifs);
@@ -219,7 +219,7 @@ class DeposerReclamationTest {
     // Given
     var numeroDossier = 12345;
     var codePostal = 38120;
-    String libelleDuMisEnCauseProvenantDuFormulaire = "Un membre de la famille";
+    String libelleDuMisEnCauseProvenantDuFormulaire = "Membre de la famille";
     var motifs =
         List.of("Problème comportemental, relationnel ou de communication avec une personne");
     var typeDeLieu =

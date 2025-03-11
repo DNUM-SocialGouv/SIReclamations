@@ -29,16 +29,18 @@ class ReferentielDesChampsDuFormulaireTest {
         Map.ofEntries(
             Map.entry(ChampsArbreDeDecision.TYPE_DE_LIEU, "Q2hhbXAtMTk1MDU="),
             Map.entry(ChampsArbreDeDecision.LIEU_ETAB, "Q2hhbXAtMTk1MDg="),
-            Map.entry(ChampsArbreDeDecision.LIEU_DOM, "Q2hhbXAtMTk1MDY="),
+            Map.entry(ChampsArbreDeDecision.LIEU_DOM, "Q2hhbXAtMjcxNjE="),
             Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB, "Q2hhbXAtMTk1MTU="),
-            Map.entry(ChampsArbreDeDecision.TYPE_DE_MEC_DOM, "Q2hhbXAtMTk1MTY="),
             Map.entry(ChampsArbreDeDecision.MALTRAITANCE, "Q2hhbXAtMjcxNTU="),
             Map.entry(ChampsArbreDeDecision.MOTIF, "Q2hhbXAtMTk1MjY="),
-            Map.entry(ChampsArbreDeDecision.SERVICE, "Q2hhbXAtMjcxNjg="));
+            Map.entry(ChampsArbreDeDecision.SERVICE, "Q2hhbXAtMjcxNjg="),
+            Map.entry(ChampsArbreDeDecision.PERS_RESP_ETAB, "Q2hhbXAtMjgzNjg="),
+            Map.entry(ChampsArbreDeDecision.PERS_RESP_DOM, "Q2hhbXAtMjg3ODE="),
+            Map.entry(ChampsArbreDeDecision.CODE_POSTAL, "Q2hhbXAtMjgzNjc="),
+            Map.entry(ChampsArbreDeDecision.VILLE, "Q2hhbXAtMjgzNjk="));
 
-    assertThat(mapDesChampsDeLarbreDeDecisionObtenu).hasSize(8);
+    assertThat(mapDesChampsDeLarbreDeDecisionObtenu).hasSize(expectedChampsArbreDeDecision.size());
     assertThat(mapDesChampsDeLarbreDeDecisionObtenu)
-        .usingRecursiveComparison()
-        .isEqualTo(expectedChampsArbreDeDecision);
+        .containsExactlyInAnyOrderEntriesOf(expectedChampsArbreDeDecision);
   }
 }

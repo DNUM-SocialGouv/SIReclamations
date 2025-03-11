@@ -14,7 +14,7 @@ class ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapterTe
 
   @BeforeEach
   void setup() {
-    Resource csvResource = new ClassPathResource("data/misEnCauseMaltraitance-test.csv");
+    Resource csvResource = new ClassPathResource("data/misEnCauseEtablissement-test.csv");
     referentielDesAutoritesCompetentesParMisEnCausePourMaltraitance =
         new ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapter(csvResource);
   }
@@ -23,7 +23,7 @@ class ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapterTe
   void
       lorsqueLonSouhaiteRecupererUneAutoriteCompetentePourUnMisEnCauseADomicileExistant_alorsRetourneLautoriteCompetente() {
     // Given
-    var libelle = "Un membre de la famille";
+    var libelle = "Membre de la famille";
     // When
     var autoriteCompetenteObtenue =
         referentielDesAutoritesCompetentesParMisEnCausePourMaltraitance.recupererAutoriteCompetente(

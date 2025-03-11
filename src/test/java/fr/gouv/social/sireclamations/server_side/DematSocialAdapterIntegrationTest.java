@@ -18,7 +18,7 @@ class DematSocialAdapterIntegrationTest {
   void lorsqueJappelleDematSocialAvecUnNumeroDeDossierExistant_alorsRetourneLeDossier()
       throws IOException {
     // Given
-    var numeroDossier = 185631; // Correspond a un dossier existant avec un Ehpad pour établissement
+    var numeroDossier = 208803; // Correspond a un dossier existant avec un Ehpad pour établissement
     // When
     var dossier = dematSocialAdapter.recupererDossier(numeroDossier);
     // Then

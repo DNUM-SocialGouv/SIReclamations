@@ -39,8 +39,8 @@ class ReclamationControllerIntegrationTest {
                 .param("updated_at", dateDepot))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.numeroDossier", is(numeroDossier)))
-        .andExpect(jsonPath("$.autoritesCompetentes", hasSize(2)))
-        .andExpect(jsonPath("$.autoritesCompetentes", containsInAnyOrder("CD", "ARS")));
+        .andExpect(jsonPath("$.autoritesCompetentes", hasSize(1)))
+        .andExpect(jsonPath("$.autoritesCompetentes", containsInAnyOrder("ARS")));
   }
 
   @Test

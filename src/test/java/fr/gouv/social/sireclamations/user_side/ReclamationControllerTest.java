@@ -11,7 +11,6 @@ import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
-import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
 import java.util.List;
 import java.util.Set;
@@ -92,30 +91,6 @@ class ReclamationControllerTest {
                 .param("updated_at", dateDepot))
         .andExpect(status().isNotFound())
         .andExpect(jsonPath("$.message").value("dossier not found"));
-  }
-
-  @Test
-  void lorsqueDeposerReclamationRenvoiCodePostalAbsentException_alorsRenvoiUne404()
-      throws Exception {
-    // Given
-    int numeroDemarche = 1;
-    int numeroDossier = 12345;
-    String etat = "en_construction";
-    String dateDepot = "2025-03-07 19:39:42 +0100";
-
-    given(deposerReclamation.executer(numeroDossier))
-        .willThrow(new CodePostalAbsentException("code postal absent"));
-    // When Then
-    mockMvc
-        .perform(
-            post("/api/v1/reclamations")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                .param("procedure_id", String.valueOf(numeroDemarche))
-                .param("dossier_id", String.valueOf(numeroDossier))
-                .param("state", etat)
-                .param("updated_at", dateDepot))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.message").value("code postal absent"));
   }
 
   @Test

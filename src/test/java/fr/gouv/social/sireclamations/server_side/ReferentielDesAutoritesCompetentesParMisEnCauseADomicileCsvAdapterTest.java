@@ -24,7 +24,7 @@ class ReferentielDesAutoritesCompetentesParMisEnCauseADomicileCsvAdapterTest {
   void
       lorsqueLonSouhaiteRecupererUneAutoriteCompetentePourUnMisEnCauseADomicileExistant_alorsRetourneLautoriteCompetente() {
     // Given
-    var motif = "Un membre de la famille";
+    var motif = "Membre de la famille";
     // When
     var autoriteCompetenteObtenue =
         referentielDesAutoritesCompetentesParMisEnCauseADomicile.recupererAutoriteCompetente(motif);

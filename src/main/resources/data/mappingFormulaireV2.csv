@@ -1,9 +1,12 @@
 index;id;__typename;label;proprieteArbreDecision
-1;Q2hhbXAtMTk1MDU=;TextChamp;Où a eu lieu le problème ?;TYPE_DE_LIEU
-2;Q2hhbXAtMTk1MDg=;TextChamp;Dans quel établissement a eu lieu le problème ?;LIEU_ETAB
-3;Q2hhbXAtMTk1MDY=;TextChamp;Renseignez l'adresse où a eu lieu le problème :;LIEU_DOM
-4;Q2hhbXAtMTk1MTY=;TextChamp;Avec qui a eu lieu le problème ?;TYPE_DE_MEC_DOM
-5;Q2hhbXAtMTk1MTU=;TextChamp;Avec qui a eu lieu le problème ?;TYPE_DE_MEC_ETAB
-6;Q2hhbXAtMjcxNTU=;TextChamp;Des actes de maltraitance ont-ils eu lieu ?;MALTRAITANCE
-7;Q2hhbXAtMTk1MjY=;MultipleDropDownListChamp;Le ou les types de fait(s);MOTIF
-8;Q2hhbXAtMjcxNjg=;TextChamp;Avec quel type de service à domicile a eu lieu le(s) fait(s) ?;SERVICE
+1;Q2hhbXAtMjcxNTU=;TextChamp;Des actes de maltraitance ont-ils eu lieu ?;MALTRAITANCE
+2;Q2hhbXAtMTk1MDU=;TextChamp;Lieu principal de survenue;TYPE_DE_LIEU
+3;Q2hhbXAtMjgzNjg=;TextChamp;Personne responsable des faits;PERS_RESP_ETAB
+4;Q2hhbXAtMjg3ODE=;TextChamp;Personne responsable des faits;PERS_RESP_DOM
+5;Q2hhbXAtMjcxNjg=;TextChamp;Précisez le type de service ou intervention concerné par les faits;SERVICE
+6;Q2hhbXAtMTk1MTU=;TextChamp;Avec qui les faits ont-ils eu lieu ?;TYPE_DE_MEC_ETAB
+7;Q2hhbXAtMTk1MDg=;TextChamp;Sélectionnez l'établissement concerné;LIEU_ETAB
+8;Q2hhbXAtMjcxNjE=;AddressChamp;Adresse concernée;LIEU_DOM
+9;Q2hhbXAtMjgzNjc=;IntegerNumberChamp;CodePostal;CODE_POSTAL
+10;Q2hhbXAtMjgzNjk=;TextChamp;Ville;VILLE
+11;Q2hhbXAtMTk1MjY=;MultipleDropDownListChamp;Le ou les types de fait(s);MOTIF

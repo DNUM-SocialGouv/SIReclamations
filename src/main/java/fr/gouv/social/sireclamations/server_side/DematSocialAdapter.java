@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.gouv.social.sireclamations.hexagone.domain.*;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.DematSocial;
-import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import okhttp3.ResponseBody;
@@ -167,14 +167,28 @@ public class DematSocialAdapter implements DematSocial {
 
   private String recupererLibelleMisEnCause(
       Map<String, JsonNode> champsMap, Map<ChampsArbreDeDecision, String> champsPourArbre) {
-    String idChampMisEnCauseEtablissement =
-        champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB);
-    String idChampMisEnCauseDomicile = champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_MEC_DOM);
+    String idChampLibellePersonneResponsableEnEtablissement =
+        champsPourArbre.get(ChampsArbreDeDecision.PERS_RESP_ETAB);
+    String idChampLibellePersonneResponsableADomicile =
+        champsPourArbre.get(ChampsArbreDeDecision.PERS_RESP_DOM);
 
-    if (champsMap.containsKey(idChampMisEnCauseEtablissement)) {
-      return champsMap.get(idChampMisEnCauseEtablissement).path(STRING_VALUE).asText();
-    } else if (champsMap.containsKey(idChampMisEnCauseDomicile)) {
-      return champsMap.get(idChampMisEnCauseDomicile).path(STRING_VALUE).asText();
+    String idChampLibellePersonneResponsable =
+        champsMap.containsKey(idChampLibellePersonneResponsableEnEtablissement)
+            ? idChampLibellePersonneResponsableEnEtablissement
+            : idChampLibellePersonneResponsableADomicile;
+
+    if (champsMap.containsKey(idChampLibellePersonneResponsable)) {
+      var persResp = champsMap.get(idChampLibellePersonneResponsable).path(STRING_VALUE).asText();
+      if (persResp.contains("Professionnel")) {
+        String idChampServiceADomicile = champsPourArbre.get(ChampsArbreDeDecision.SERVICE);
+        String idChampMisEnCauseEtablissement =
+            champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB);
+        if (champsMap.get(idChampServiceADomicile) != null)
+          return champsMap.get(idChampServiceADomicile).path(STRING_VALUE).asText();
+        if (champsMap.get(idChampMisEnCauseEtablissement) != null)
+          return champsMap.get(idChampMisEnCauseEtablissement).path(STRING_VALUE).asText();
+      }
+      return persResp;
     }
 
     return "";
@@ -188,51 +202,93 @@ public class DematSocialAdapter implements DematSocial {
     String idChampTypeDeLieu = champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_LIEU);
     String libelleTypeDeLieu =
         mapDesChampsDuDossier.get(idChampTypeDeLieu).path(STRING_VALUE).asText();
-    String idChampLieuEtablissement = champsPourArbre.get(ChampsArbreDeDecision.LIEU_ETAB);
-    String idChampLieuDomicile = champsPourArbre.get(ChampsArbreDeDecision.LIEU_DOM);
-    String idChampServiceADomicile = champsPourArbre.get(ChampsArbreDeDecision.SERVICE);
+    String idChampCodePostal = champsPourArbre.get(ChampsArbreDeDecision.CODE_POSTAL);
+    String libelleCodePostal =
+        mapDesChampsDuDossier.get(idChampCodePostal).path(STRING_VALUE).asText();
 
-    if (CodeTypeDeLieu.ETAB.equals(codeTypeDeLieu)
-        && mapDesChampsDuDossier.containsKey(idChampLieuEtablissement)) {
+    if (CodeTypeDeLieu.ETAB.equals(codeTypeDeLieu)) {
+      String idChampLieuEtablissement = champsPourArbre.get(ChampsArbreDeDecision.LIEU_ETAB);
       String nomEtablissementVilleCodePostalEtFiness =
           mapDesChampsDuDossier.get(idChampLieuEtablissement).path(STRING_VALUE).asText();
       return recupererEtablissement(nomEtablissementVilleCodePostalEtFiness, libelleTypeDeLieu);
     }
 
-    if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieu)
-        && mapDesChampsDuDossier.containsKey(idChampLieuDomicile)) {
+    if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieu)) {
+      String idChampLieuDomicile =
+          champsPourArbre.get(
+              ChampsArbreDeDecision
+                  .LIEU_DOM); // Adresse complète avec auto completion adresse cp et ville
+      String idChampServiceADomicile = champsPourArbre.get(ChampsArbreDeDecision.SERVICE);
       JsonNode domicileChamp = mapDesChampsDuDossier.get(idChampLieuDomicile);
       String libelleService =
-          mapDesChampsDuDossier.get(idChampServiceADomicile).path(STRING_VALUE).asText();
-      return recupererDomicile(domicileChamp, libelleTypeDeLieu, libelleService);
+          Optional.ofNullable(mapDesChampsDuDossier.get(idChampServiceADomicile))
+              .map(node -> node.path(STRING_VALUE).asText())
+              .orElse(null);
+      return recupererDomicile(domicileChamp, libelleTypeDeLieu, libelleService, libelleCodePostal);
     }
 
     return null;
   }
 
   private LieuDeSurvenue recupererDomicile(
-      JsonNode champ, String libelleTypeDeLieu, String libelleService) {
+      JsonNode champCompletDuDomicile,
+      String libelleTypeDeLieu,
+      String libelleService,
+      String libelleCodePostal) {
+
     String adresse = null;
     String codePostal = null;
 
-    // Vérification si "address" est présent et non null
-    JsonNode addressNode = champ.path("address");
+    // Récupération de l'objet "address" si présent
+    JsonNode addressNode = champCompletDuDomicile.path("address");
     if (!addressNode.isMissingNode() && !addressNode.isNull()) {
       adresse = addressNode.path("streetAddress").asText(null);
       codePostal = addressNode.path("postalCode").asText(null);
+
+      // Si l'adresse est composée de plusieurs parties, on essaie de les reconstruire
+      if (adresse == null || adresse.isEmpty()) {
+        String streetNumber = addressNode.path("streetNumber").asText(null);
+        String streetName = addressNode.path("streetName").asText(null);
+        String cityName = addressNode.path("cityName").asText(null);
+        String postalCode = addressNode.path("postalCode").asText(null);
+
+        if (streetNumber != null && streetName != null && cityName != null && postalCode != null) {
+          adresse = String.format("%s %s %s %s", streetNumber, streetName, postalCode, cityName);
+          codePostal = postalCode;
+        }
+      }
     }
-    // Si "address" est absent ou incomplet, on utilise "stringValue"
-    if (adresse == null) {
-      adresse = champ.path(STRING_VALUE).asText(null); // Fallback vers stringValue
+
+    // Utiliser "stringValue" si l'adresse est absente ou vide
+    if (adresse == null && champCompletDuDomicile.has("stringValue")) {
+      String stringValue = champCompletDuDomicile.path("stringValue").asText(null);
+      if (stringValue != null && !stringValue.isEmpty()) {
+        adresse = stringValue;
+      }
     }
-    // Extraction du code postal depuis stringValue si absent
+
+    // Extraire le code postal depuis "libelleCodePostal" s'il est fourni
+    if (codePostal == null && libelleCodePostal != null) {
+      codePostal = libelleCodePostal.replaceAll(".*\\((\\d{5})\\).*", "$1");
+    }
+
+    // Extraction du code postal depuis l'adresse s'il n'a pas encore été trouvé
     if (codePostal == null && adresse != null) {
       codePostal = extraireCodePostalDepuisTexte(adresse);
     }
-    if (codePostal != null) {
-      return new Domicile(Integer.parseInt(codePostal), adresse, libelleTypeDeLieu, libelleService);
+
+    // Conversion du code postal en entier si possible
+    Integer codePostalInt = null;
+    try {
+      if (codePostal != null) {
+        codePostalInt = Integer.parseInt(codePostal);
+      }
+    } catch (NumberFormatException e) {
+      // Si le code postal est mal formé, on le laisse null
     }
-    return new Domicile(null, adresse, libelleTypeDeLieu, libelleService);
+
+    // Création de l'objet Domicile
+    return new Domicile(codePostalInt, adresse, libelleTypeDeLieu, libelleService);
   }
 
   private String extraireCodePostalDepuisTexte(String adresse) {
@@ -243,9 +299,7 @@ public class DematSocialAdapter implements DematSocial {
     if (matcher.find()) {
       return matcher.group();
     }
-
-    throw new CodePostalAbsentException(
-        "Le code postal n'est pas présent dans l'adresse du lieu de survenue.");
+    return null;
   }
 
   private Etablissement recupererEtablissement(
