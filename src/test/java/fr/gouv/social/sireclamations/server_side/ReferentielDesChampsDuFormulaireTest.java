@@ -36,8 +36,7 @@ class ReferentielDesChampsDuFormulaireTest {
             Map.entry(ChampsArbreDeDecision.SERVICE, "Q2hhbXAtMjcxNjg="),
             Map.entry(ChampsArbreDeDecision.PERS_RESP_ETAB, "Q2hhbXAtMjgzNjg="),
             Map.entry(ChampsArbreDeDecision.PERS_RESP_DOM, "Q2hhbXAtMjg3ODE="),
-            Map.entry(ChampsArbreDeDecision.CODE_POSTAL, "Q2hhbXAtMjgzNjc="),
-            Map.entry(ChampsArbreDeDecision.VILLE, "Q2hhbXAtMjgzNjk="));
+            Map.entry(ChampsArbreDeDecision.CODE_POSTAL, "Q2hhbXAtMjgzNjc="));
 
     assertThat(mapDesChampsDeLarbreDeDecisionObtenu).hasSize(expectedChampsArbreDeDecision.size());
     assertThat(mapDesChampsDeLarbreDeDecisionObtenu)

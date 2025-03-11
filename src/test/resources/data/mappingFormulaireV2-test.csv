@@ -8,5 +8,4 @@ index;id;__typename;label;proprieteArbreDecision
 7;Q2hhbXAtMTk1MDg=;TextChamp;Sélectionnez l'établissement concerné;LIEU_ETAB
 8;Q2hhbXAtMjcxNjE=;AddressChamp;Adresse concernée;LIEU_DOM
 9;Q2hhbXAtMjgzNjc=;IntegerNumberChamp;CodePostal;CODE_POSTAL
-10;Q2hhbXAtMjgzNjk=;TextChamp;Ville;VILLE
-11;Q2hhbXAtMTk1MjY=;MultipleDropDownListChamp;Le ou les types de fait(s);MOTIF
+10;Q2hhbXAtMTk1MjY=;MultipleDropDownListChamp;Le ou les types de fait(s);MOTIF

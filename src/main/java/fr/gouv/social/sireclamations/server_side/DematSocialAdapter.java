@@ -269,7 +269,11 @@ public class DematSocialAdapter implements DematSocial {
 
     // Extraire le code postal depuis "libelleCodePostal" s'il est fourni
     if (codePostal == null && libelleCodePostal != null) {
-      codePostal = libelleCodePostal.replaceAll(".*\\((\\d{5})\\).*", "$1");
+      Pattern pattern = Pattern.compile(".*\\((\\d{5})\\).*");
+      Matcher matcher = pattern.matcher(libelleCodePostal);
+      if (matcher.matches()) {
+        codePostal = matcher.group(1);
+      }
     }
 
     // Extraction du code postal depuis l'adresse s'il n'a pas encore été trouvé

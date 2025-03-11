@@ -1,5 +1,5 @@
 libelleService;autoriteCompetente
-Intervention d'un professionnel libéral ou service (SAMU, médecin)
+Intervention d'un professionnel libéral ou service (SAMU, médecin);ARS
 Hospitalisation à domicile;ARS
 Service de Soins Infirmier à Domicile (SSIAD);ARS
 Service d'Aide et d'Accompagnement à Domicile (SAAD);CD
@@ -9,4 +9,4 @@ Service de repas;CD
 Traitements spécialisés;CD
 Service d'Aide et d'Accompagnement à Domicile aux familles (SAADF);CD
 Mandataire Judiciaire à la Protection des Majeurs (curatelle, tutelle);DDETS
-Autre;CD
+Autre service ou intervention par un professionnel;CD

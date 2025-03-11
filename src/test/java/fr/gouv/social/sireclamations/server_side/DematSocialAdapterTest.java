@@ -54,8 +54,7 @@ class DematSocialAdapterTest {
             Map.entry(ChampsArbreDeDecision.SERVICE, "Q2hhbXAtMjcxNjg="),
             Map.entry(ChampsArbreDeDecision.PERS_RESP_ETAB, "Q2hhbXAtMjgzNjg="),
             Map.entry(ChampsArbreDeDecision.PERS_RESP_DOM, "Q2hhbXAtMjg3ODE="),
-            Map.entry(ChampsArbreDeDecision.CODE_POSTAL, "Q2hhbXAtMjgzNjc="),
-            Map.entry(ChampsArbreDeDecision.VILLE, "Q2hhbXAtMjgzNjk="));
+            Map.entry(ChampsArbreDeDecision.CODE_POSTAL, "Q2hhbXAtMjgzNjc="));
     when(referentielDesChampsDuFormulaire.getChampsPourArbreDeDecision())
         .thenReturn(champsArbreDeDecision);
   }
@@ -132,13 +131,6 @@ class DematSocialAdapterTest {
                                 "stringValue": "78210",
                                 "updatedAt": "2025-03-06T10:25:55+01:00",
                                 "integerNumber": "78210"
-                            },
-                            {
-                                "id": "Q2hhbXAtMjgzNjk=",
-                                "__typename": "TextChamp",
-                                "label": "Ville",
-                                "stringValue": "Saint-Cyr-Lecole",
-                                "updatedAt": "2025-03-06T10:25:54+01:00"
                             },
                             {
                                 "id": "Q2hhbXAtMjg3ODE=",
@@ -232,18 +224,19 @@ class DematSocialAdapterTest {
                             },
                             {
                                 "id": "Q2hhbXAtMjgzNjc=",
-                                "__typename": "IntegerNumberChamp",
+                                "__typename": "CommuneChamp",
                                 "label": "Code postal",
-                                "stringValue": "78210",
-                                "updatedAt": "2025-03-06T10:25:55+01:00",
-                                "integerNumber": "78210"
-                            },
-                            {
-                                "id": "Q2hhbXAtMjgzNjk=",
-                                "__typename": "TextChamp",
-                                "label": "Ville",
-                                "stringValue": "Saint-Cyr-Lecole",
-                                "updatedAt": "2025-03-06T10:25:54+01:00"
+                                "stringValue": "Saint-Cyr-l’École (78210)",
+                                "updatedAt": "2025-03-10T17:42:49+01:00",
+                                "commune": {
+                                    "name": "Saint-Cyr-l’École",
+                                    "code": "78545",
+                                    "postalCode": "78210"
+                                },
+                                "departement": {
+                                    "name": "Yvelines",
+                                    "code": "78"
+                                }
                             },
                             {
                                 "id": "Q2hhbXAtMjg3ODE=",
@@ -335,13 +328,6 @@ class DematSocialAdapterTest {
                                 "stringValue": "78210",
                                 "updatedAt": "2025-03-06T10:25:55+01:00",
                                 "integerNumber": "78210"
-                            },
-                            {
-                                "id": "Q2hhbXAtMjgzNjk=",
-                                "__typename": "TextChamp",
-                                "label": "Ville",
-                                "stringValue": "Saint-Cyr-Lecole",
-                                "updatedAt": "2025-03-06T10:25:54+01:00"
                             },
                             {
                                 "id": "Q2hhbXAtMjgzNjg=",

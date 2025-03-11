@@ -10,6 +10,5 @@ public enum ChampsArbreDeDecision {
   SERVICE,
   PERS_RESP_ETAB,
   PERS_RESP_DOM,
-  CODE_POSTAL,
-  VILLE
+  CODE_POSTAL
 }

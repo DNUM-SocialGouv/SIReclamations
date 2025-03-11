@@ -101,6 +101,9 @@ public class DeposerReclamation {
             .map(AutoriteCompetente::valueOf)
             .ifPresent(autoritesCompetentes::add);
       }
+      if (autoritesCompetentes.isEmpty()) {
+        autoritesCompetentes.add(AutoriteCompetente.CD);
+      }
     } else if (dossier.getLieuDeSurvenu() instanceof Etablissement etablissement) {
       // Récupération des données des référentiels existants pour l'établissement
       String autoriteCompetentePourLeMisEnCause =
