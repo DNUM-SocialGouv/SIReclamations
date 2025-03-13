@@ -25,7 +25,7 @@ jobs:
           -Ddependency-check.failBuildOnCVSS=7.0
 
     - name: Upload Dependency-Check HTML report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4.6.1
       with:
         name: dependency-check-html-report
         path: ${{ github.workspace }}/target/dependency-check-report/dependency-check-report.html
