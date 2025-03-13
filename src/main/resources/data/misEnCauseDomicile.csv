@@ -1,5 +1,4 @@
 libelleMisEnCauseDomicile;autoriteCompetente
-Un membre de la famille;CD
-Un proche;CD
-Tuteur;CD
+Membre de la famille;CD
+Proche (ami, voisin...);CD
 Autre;CD

@@ -1,8 +1,6 @@
 package fr.gouv.social.sireclamations.user_side;
 
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
-import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
-import fr.gouv.social.sireclamations.hexagone.exceptions.ContactNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -30,26 +28,10 @@ public class GlobalControllerAdvice {
     return getGlobalControllerAdviceBodyResponse(HttpStatus.NOT_FOUND, ex.getMessage());
   }
 
-  @ExceptionHandler(ContactNotFoundException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public Map<String, Object> handleContactNotFoundException(ContactNotFoundException ex) {
-    logger.error(ex.getMessage());
-    return getGlobalControllerAdviceBodyResponse(HttpStatus.NOT_FOUND, ex.getMessage());
-  }
-
   @ExceptionHandler(DematSocialException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ResponseBody
   public Map<String, Object> handleDematSocialException(DematSocialException ex) {
-    logger.error(ex.getMessage());
-    return getGlobalControllerAdviceBodyResponse(HttpStatus.NOT_FOUND, ex.getMessage());
-  }
-
-  @ExceptionHandler(CodePostalAbsentException.class)
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ResponseBody
-  public Map<String, Object> handleCodePostalAbsentException(CodePostalAbsentException ex) {
     logger.error(ex.getMessage());
     return getGlobalControllerAdviceBodyResponse(HttpStatus.NOT_FOUND, ex.getMessage());
   }

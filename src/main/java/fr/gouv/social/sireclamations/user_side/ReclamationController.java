@@ -1,6 +1,6 @@
 package fr.gouv.social.sireclamations.user_side;
 
-import fr.gouv.social.sireclamations.hexagone.DeposerReclamation;
+import fr.gouv.social.sireclamations.hexagone.AffecterReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -32,10 +32,10 @@ public class ReclamationController {
   private static final String DATETIME_PATTERN_KEY = "yyyy-MM-dd HH:mm:ss Z";
   private static final String OUTPUT = "output";
 
-  private final DeposerReclamation deposerReclamation;
+  private final AffecterReclamation affecterReclamation;
 
-  public ReclamationController(DeposerReclamation deposerReclamation) {
-    this.deposerReclamation = deposerReclamation;
+  public ReclamationController(AffecterReclamation affecterReclamation) {
+    this.affecterReclamation = affecterReclamation;
   }
 
   // hack: une nouvelle version du webhook doit prochainement être intégrée. Cette version enverra
@@ -57,26 +57,26 @@ public class ReclamationController {
     String message;
 
     if (isValidPayload(dsWebhookMap)) {
-      final DeposerReclamationRequest.Etat etat =
-          DeposerReclamationRequest.Etat.valueOf(dsWebhookMap.get(ETAT_KEY).toUpperCase());
+      final AffecterReclamationRequest.Etat etat =
+          AffecterReclamationRequest.Etat.valueOf(dsWebhookMap.get(ETAT_KEY).toUpperCase());
       final int numeroProcedure = Integer.parseInt(dsWebhookMap.get(NUMERO_DEMARCHE_KEY));
       final int numeroDossier = Integer.parseInt(dsWebhookMap.get(NUMERO_DOSSIER_KEY));
       final LocalDateTime dateDepot =
           LocalDateTime.parse(
               dsWebhookMap.get(DATE_DEPOT_KEY), DateTimeFormatter.ofPattern(DATETIME_PATTERN_KEY));
-      final DeposerReclamationRequest deposerReclamationRequest =
-          new DeposerReclamationRequest(numeroProcedure, numeroDossier, etat, dateDepot);
+      final AffecterReclamationRequest affecterReclamationRequest =
+          new AffecterReclamationRequest(numeroProcedure, numeroDossier, etat, dateDepot);
 
-      logger.info("Appel Webhook reçu avec les paramètres : {}", deposerReclamationRequest);
+      logger.info("Appel Webhook reçu avec les paramètres : {}", affecterReclamationRequest);
 
-      if (deposerReclamationRequest.getEtat()
-          == DeposerReclamationRequest.Etat.EN_CONSTRUCTION) { // todo: devrait être en_instruction
+      if (affecterReclamationRequest.getEtat()
+          == AffecterReclamationRequest.Etat.EN_CONSTRUCTION) { // todo: devrait être en_instruction
         final Reclamation reclamation =
-            deposerReclamation.executer(deposerReclamationRequest.getNumeroDossier());
+            affecterReclamation.executer(affecterReclamationRequest.getNumeroDossier());
         message =
             String.format(
                 "Le Dossier %s présenté à été affecté.",
-                deposerReclamationRequest.getNumeroDossier());
+                affecterReclamationRequest.getNumeroDossier());
         logger.info(message);
         final Map<String, Object> response =
             new HashMap<>(
@@ -92,7 +92,7 @@ public class ReclamationController {
         message =
             String.format(
                 "Le Dossier %s présenté n'est pas à l'état de Construction.",
-                deposerReclamationRequest.getNumeroDossier());
+                affecterReclamationRequest.getNumeroDossier());
         logger.error(message);
         return GlobalControllerAdvice.getGlobalControllerAdviceResponse(
             HttpStatus.BAD_REQUEST, message);
@@ -115,7 +115,7 @@ public class ReclamationController {
   }
 
   private static boolean validateState(Map<String, String> params, String key) {
-    return DeposerReclamationRequest.Etat.isValid(params.get(key));
+    return AffecterReclamationRequest.Etat.isValid(params.get(key));
   }
 
   private static boolean validateDate(Map<String, String> params, String key) {

@@ -7,23 +7,23 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-class ReferentielDesAutoritesCompetentesParMisEnCausePourMaltraitanceCsvAdapterTest {
+class ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapterTest {
 
-  private ReferentielDesAutoritesCompetentesParMisEnCausePourMaltraitanceCsvAdapter
+  private ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapter
       referentielDesAutoritesCompetentesParMisEnCausePourMaltraitance;
 
   @BeforeEach
   void setup() {
-    Resource csvResource = new ClassPathResource("data/misEnCauseMaltraitance-test.csv");
+    Resource csvResource = new ClassPathResource("data/misEnCauseEtablissement-test.csv");
     referentielDesAutoritesCompetentesParMisEnCausePourMaltraitance =
-        new ReferentielDesAutoritesCompetentesParMisEnCausePourMaltraitanceCsvAdapter(csvResource);
+        new ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapter(csvResource);
   }
 
   @Test
   void
       lorsqueLonSouhaiteRecupererUneAutoriteCompetentePourUnMisEnCauseADomicileExistant_alorsRetourneLautoriteCompetente() {
     // Given
-    var libelle = "Un membre de la famille";
+    var libelle = "Membre de la famille";
     // When
     var autoriteCompetenteObtenue =
         referentielDesAutoritesCompetentesParMisEnCausePourMaltraitance.recupererAutoriteCompetente(

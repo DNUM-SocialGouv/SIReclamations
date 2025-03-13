@@ -5,5 +5,10 @@ public enum ChampsArbreDeDecision {
   LIEU_ETAB,
   LIEU_DOM,
   TYPE_DE_MEC_ETAB,
-  TYPE_DE_MEC_DOM
+  MALTRAITANCE,
+  MOTIF,
+  SERVICE,
+  PERS_RESP_ETAB,
+  PERS_RESP_DOM,
+  CODE_POSTAL
 }

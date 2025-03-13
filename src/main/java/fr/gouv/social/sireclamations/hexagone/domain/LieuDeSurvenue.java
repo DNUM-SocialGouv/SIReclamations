@@ -4,4 +4,6 @@ public interface LieuDeSurvenue {
   Integer getCodePostal();
 
   CodeTypeDeLieu getCodeTypeDeLieu();
+
+  String libelleTypeDeLieu();
 }

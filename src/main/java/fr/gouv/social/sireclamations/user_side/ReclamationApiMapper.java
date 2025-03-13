@@ -33,7 +33,6 @@ public class ReclamationApiMapper {
     return new ReclamationApiResponse(
         reclamation.getNumeroDossier(),
         reclamation.getAutoritesCompetentes(),
-        reclamation.getContacts(),
         lieuDeSurvenueResponse);
   }
 }

@@ -5,14 +5,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import fr.gouv.social.sireclamations.hexagone.DeposerReclamation;
+import fr.gouv.social.sireclamations.hexagone.AffecterReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.AutoriteCompetente;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
-import fr.gouv.social.sireclamations.hexagone.exceptions.CodePostalAbsentException;
-import fr.gouv.social.sireclamations.hexagone.exceptions.ContactNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
 import java.util.List;
 import java.util.Set;
@@ -33,19 +31,19 @@ class ReclamationControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @Autowired private DeposerReclamation deposerReclamation;
+  @Autowired private AffecterReclamation affecterReclamation;
 
   @TestConfiguration
   static class TestConfig {
     @Bean
-    public DeposerReclamation deposerReclamation() {
-      return Mockito.mock(DeposerReclamation.class);
+    public AffecterReclamation affecterReclamation() {
+      return Mockito.mock(AffecterReclamation.class);
     }
   }
 
   @BeforeEach
   void resetMocks() {
-    Mockito.reset(deposerReclamation);
+    Mockito.reset(affecterReclamation);
   }
 
   @Test
@@ -57,7 +55,7 @@ class ReclamationControllerTest {
     String etat = "en_construction";
     String dateDepot = "2025-03-07 19:39:42 +0100";
 
-    given(deposerReclamation.executer(numeroDossier))
+    given(affecterReclamation.executer(numeroDossier))
         .willThrow(new AutoriteCompetenteNotFoundException("autorite competente not found"));
     // When Then
     mockMvc
@@ -73,30 +71,6 @@ class ReclamationControllerTest {
   }
 
   @Test
-  void lorsqueDeposerReclamationRenvoiContactNotFoundException_alorsRenvoiUne404()
-      throws Exception {
-    // Given
-    int numeroDemarche = 1;
-    int numeroDossier = 12345;
-    String etat = "en_construction";
-    String dateDepot = "2025-03-07 19:39:42 +0100";
-
-    given(deposerReclamation.executer(numeroDossier))
-        .willThrow(new ContactNotFoundException("contact not found"));
-    // When Then
-    mockMvc
-        .perform(
-            post("/api/v1/reclamations")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                .param("procedure_id", String.valueOf(numeroDemarche))
-                .param("dossier_id", String.valueOf(numeroDossier))
-                .param("state", etat)
-                .param("updated_at", dateDepot))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.message").value("contact not found"));
-  }
-
-  @Test
   void lorsqueDeposerReclamationRenvoiDematSocialException_alorsRenvoiUne404() throws Exception {
     // Given
     int numeroDemarche = 1;
@@ -104,7 +78,7 @@ class ReclamationControllerTest {
     String etat = "en_construction";
     String dateDepot = "2025-03-07 19:39:42 +0100";
 
-    given(deposerReclamation.executer(numeroDossier))
+    given(affecterReclamation.executer(numeroDossier))
         .willThrow(new DematSocialException("dossier not found"));
     // When Then
     mockMvc
@@ -120,30 +94,6 @@ class ReclamationControllerTest {
   }
 
   @Test
-  void lorsqueDeposerReclamationRenvoiCodePostalAbsentException_alorsRenvoiUne404()
-      throws Exception {
-    // Given
-    int numeroDemarche = 1;
-    int numeroDossier = 12345;
-    String etat = "en_construction";
-    String dateDepot = "2025-03-07 19:39:42 +0100";
-
-    given(deposerReclamation.executer(numeroDossier))
-        .willThrow(new CodePostalAbsentException("code postal absent"));
-    // When Then
-    mockMvc
-        .perform(
-            post("/api/v1/reclamations")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-                .param("procedure_id", String.valueOf(numeroDemarche))
-                .param("dossier_id", String.valueOf(numeroDossier))
-                .param("state", etat)
-                .param("updated_at", dateDepot))
-        .andExpect(status().isNotFound())
-        .andExpect(jsonPath("$.message").value("code postal absent"));
-  }
-
-  @Test
   void
       lorsqueDeposerReclamationRenvoiBienLaReclamation_alorsRenvoiUne200AvecLesDonneesDeLaReclamationEnBody()
           throws Exception {
@@ -153,18 +103,16 @@ class ReclamationControllerTest {
     String etat = "en_construction";
     String dateDepot = "2025-03-07 19:39:42 +0100";
 
-    var etablissement = new Etablissement("78000000", 500, 78210, "nom etablissement");
+    var etablissement =
+        new Etablissement("78000000", 500, 78210, "nom etablissement", "typeDeLieu");
     String libelleDuMisEnCause =
         "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)";
+    var motifs = List.of("Problème lié aux locaux ou la restauration");
     var dossierDeReclamation =
-        new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCause);
-    given(deposerReclamation.executer(numeroDossier))
+        new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCause, true, motifs);
+    given(affecterReclamation.executer(numeroDossier))
         .willReturn(
-            new Reclamation(
-                dossierDeReclamation,
-                Set.of(AutoriteCompetente.ARS),
-                List.of("email@email.fr"),
-                etablissement));
+            new Reclamation(dossierDeReclamation, Set.of(AutoriteCompetente.ARS), etablissement));
     // When Then
     mockMvc
         .perform(
@@ -177,7 +125,6 @@ class ReclamationControllerTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.output.numeroDossier").value(12345))
         .andExpect(jsonPath("$.output.autoritesCompetentes[0]").value("ARS"))
-        .andExpect(jsonPath("$.output.contacts[0]").value("email@email.fr"))
         .andExpect(jsonPath("$.output.lieuDeSurvenue.numeroFiness").value("78000000"));
   }
 }
