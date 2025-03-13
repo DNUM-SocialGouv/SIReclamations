@@ -21,6 +21,18 @@ import retrofit2.Retrofit;
 
 @Component
 public class DematSocialAdapter implements DematSocial {
+
+  public static final String OUI = "Oui";
+  public static final String NON = "Non";
+  public static final String PROFESSIONNEL_RESPONSABLE = "Professionnel";
+  public static final String ADRESSE = "address";
+  public static final String ADRESSE_RUE = "streetAddress";
+  public static final String CODE_POSTAL = "postalCode";
+  public static final String NUMERO_RUE = "streetNumber";
+  public static final String NOM_RUE = "streetName";
+  public static final String VILLE = "cityName";
+  public static final String STRING_VALUE = "stringValue";
+  public static final String COMMUNE = "commune";
   private final DematSocialApi dematSocialApi;
 
   private final OpenDataSoftApi openDataSoftApi;
@@ -29,7 +41,6 @@ public class DematSocialAdapter implements DematSocial {
 
   private static final String STRING_ERRORS = "errors";
 
-  private static final String STRING_VALUE = "stringValue";
   private final ReferentielDesChampsDuFormulaire referentielDesChampsDuFormulaire;
 
   public DematSocialAdapter(
@@ -144,12 +155,13 @@ public class DematSocialAdapter implements DematSocial {
     return map;
   }
 
-  private boolean recupererMaltraitance(Map<String, JsonNode> champsMap, String idChampTypeDeLieu) {
-    if (champsMap.containsKey(idChampTypeDeLieu)) {
-      String maltraitanceValue = champsMap.get(idChampTypeDeLieu).path(STRING_VALUE).asText();
-      if (maltraitanceValue.equals("Oui")) {
+  private boolean recupererMaltraitance(
+      Map<String, JsonNode> champsMap, String idChampMaltraitance) {
+    if (champsMap.containsKey(idChampMaltraitance)) {
+      String maltraitanceValue = champsMap.get(idChampMaltraitance).path(STRING_VALUE).asText();
+      if (maltraitanceValue.equals(OUI)) {
         return true;
-      } else if (maltraitanceValue.equals("Non")) {
+      } else if (maltraitanceValue.equals(NON)) {
         return false;
       }
     }
@@ -179,14 +191,16 @@ public class DematSocialAdapter implements DematSocial {
 
     if (champsMap.containsKey(idChampLibellePersonneResponsable)) {
       var persResp = champsMap.get(idChampLibellePersonneResponsable).path(STRING_VALUE).asText();
-      if (persResp.contains("Professionnel")) {
+      if (persResp.contains(PROFESSIONNEL_RESPONSABLE)) {
         String idChampServiceADomicile = champsPourArbre.get(ChampsArbreDeDecision.SERVICE);
         String idChampMisEnCauseEtablissement =
             champsPourArbre.get(ChampsArbreDeDecision.TYPE_DE_MEC_ETAB);
-        if (champsMap.get(idChampServiceADomicile) != null)
+        if (champsMap.get(idChampServiceADomicile) != null) {
           return champsMap.get(idChampServiceADomicile).path(STRING_VALUE).asText();
-        if (champsMap.get(idChampMisEnCauseEtablissement) != null)
+        }
+        if (champsMap.get(idChampMisEnCauseEtablissement) != null) {
           return champsMap.get(idChampMisEnCauseEtablissement).path(STRING_VALUE).asText();
+        }
       }
       return persResp;
     }
@@ -204,7 +218,7 @@ public class DematSocialAdapter implements DematSocial {
         mapDesChampsDuDossier.get(idChampTypeDeLieu).path(STRING_VALUE).asText();
     String idChampCodePostal = champsPourArbre.get(ChampsArbreDeDecision.CODE_POSTAL);
     String libelleCodePostal =
-        mapDesChampsDuDossier.get(idChampCodePostal).path(STRING_VALUE).asText();
+        mapDesChampsDuDossier.get(idChampCodePostal).path(COMMUNE).path(CODE_POSTAL).asText();
 
     if (CodeTypeDeLieu.ETAB.equals(codeTypeDeLieu)) {
       String idChampLieuEtablissement = champsPourArbre.get(ChampsArbreDeDecision.LIEU_ETAB);
@@ -239,18 +253,22 @@ public class DematSocialAdapter implements DematSocial {
     String adresse = null;
     String codePostal = null;
 
+    if (libelleCodePostal != null) {
+      codePostal = libelleCodePostal;
+    }
+
     // Récupération de l'objet "address" si présent
-    JsonNode addressNode = champCompletDuDomicile.path("address");
+    JsonNode addressNode = champCompletDuDomicile.path(ADRESSE);
     if (!addressNode.isMissingNode() && !addressNode.isNull()) {
-      adresse = addressNode.path("streetAddress").asText(null);
-      codePostal = addressNode.path("postalCode").asText(null);
+      adresse = addressNode.path(ADRESSE_RUE).asText(null);
+      //      codePostal = addressNode.path(CODE_POSTAL).asText(null);
 
       // Si l'adresse est composée de plusieurs parties, on essaie de les reconstruire
       if (adresse == null || adresse.isEmpty()) {
-        String streetNumber = addressNode.path("streetNumber").asText(null);
-        String streetName = addressNode.path("streetName").asText(null);
-        String cityName = addressNode.path("cityName").asText(null);
-        String postalCode = addressNode.path("postalCode").asText(null);
+        String streetNumber = addressNode.path(NUMERO_RUE).asText(null);
+        String streetName = addressNode.path(NOM_RUE).asText(null);
+        String cityName = addressNode.path(VILLE).asText(null);
+        String postalCode = addressNode.path(CODE_POSTAL).asText(null);
 
         if (streetNumber != null && streetName != null && cityName != null && postalCode != null) {
           adresse = String.format("%s %s %s %s", streetNumber, streetName, postalCode, cityName);
@@ -260,27 +278,12 @@ public class DematSocialAdapter implements DematSocial {
     }
 
     // Utiliser "stringValue" si l'adresse est absente ou vide
-    if (adresse == null && champCompletDuDomicile.has("stringValue")) {
-      String stringValue = champCompletDuDomicile.path("stringValue").asText(null);
+    if (adresse == null && champCompletDuDomicile.has(STRING_VALUE)) {
+      String stringValue = champCompletDuDomicile.path(STRING_VALUE).asText(null);
       if (stringValue != null && !stringValue.isEmpty()) {
         adresse = stringValue;
       }
     }
-
-    // Extraire le code postal depuis "libelleCodePostal" s'il est fourni
-    if (codePostal == null && libelleCodePostal != null) {
-      Pattern pattern = Pattern.compile(".*\\((\\d{5})\\).*");
-      Matcher matcher = pattern.matcher(libelleCodePostal);
-      if (matcher.matches()) {
-        codePostal = matcher.group(1);
-      }
-    }
-
-    // Extraction du code postal depuis l'adresse s'il n'a pas encore été trouvé
-    if (codePostal == null && adresse != null) {
-      codePostal = extraireCodePostalDepuisTexte(adresse);
-    }
-
     // Conversion du code postal en entier si possible
     Integer codePostalInt = null;
     try {
@@ -293,17 +296,6 @@ public class DematSocialAdapter implements DematSocial {
 
     // Création de l'objet Domicile
     return new Domicile(codePostalInt, adresse, libelleTypeDeLieu, libelleService);
-  }
-
-  private String extraireCodePostalDepuisTexte(String adresse) {
-    // Regex pour capturer les codes postaux français (5 chiffres)
-    Pattern pattern = Pattern.compile("\\b\\d{5}\\b");
-    Matcher matcher = pattern.matcher(adresse);
-
-    if (matcher.find()) {
-      return matcher.group();
-    }
-    return null;
   }
 
   private Etablissement recupererEtablissement(

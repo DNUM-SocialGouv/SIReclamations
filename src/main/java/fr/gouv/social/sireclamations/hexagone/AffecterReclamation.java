@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DeposerReclamation {
+public class AffecterReclamation {
 
   private final DematSocial dematSocial;
   private final ReferentielDesAutoritesCompetentesParCategoriesDEtablissements
@@ -32,9 +32,9 @@ public class DeposerReclamation {
 
   private final ReferentielDesAutoritesCompetentesParMotifs
       referentielDesAutoritesCompetentesParMotifs;
-  private static final Logger logger = LoggerFactory.getLogger(DeposerReclamation.class);
+  private static final Logger logger = LoggerFactory.getLogger(AffecterReclamation.class);
 
-  public DeposerReclamation(
+  public AffecterReclamation(
       DematSocial dematSocial,
       ReferentielDesAutoritesCompetentesParCategoriesDEtablissements
           referentielDesAutoritesCompetentesParCategoriesDEtablissements,
@@ -101,7 +101,8 @@ public class DeposerReclamation {
             .map(AutoriteCompetente::valueOf)
             .ifPresent(autoritesCompetentes::add);
       }
-      if (autoritesCompetentes.isEmpty()) {
+      if (autoritesCompetentes
+          .isEmpty()) { // ajoute CD par défaut si aucune autorité compétente n'est trouvée
         autoritesCompetentes.add(AutoriteCompetente.CD);
       }
     } else if (dossier.getLieuDeSurvenu() instanceof Etablissement etablissement) {
@@ -146,76 +147,6 @@ public class DeposerReclamation {
     }
 
     return autoritesCompetentes;
-  }
-
-  private Set<AutoriteCompetente> determinerAutoritesCompetentesavant(
-      DossierDeReclamation dossier) {
-
-    Set<AutoriteCompetente> autorites = new HashSet<>();
-    if (dossier.getLieuDeSurvenu() instanceof Etablissement etablissement) {
-      if (dossier.getMaltraitance()) {
-        var autoriteCompetentePourLeMisEnCause =
-            referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement
-                .recupererAutoriteCompetente(dossier.getLibelleDuMisEnCause());
-        if (autoriteCompetentePourLeMisEnCause != null) {
-          var autoriteMisEnCause = AutoriteCompetente.valueOf(autoriteCompetentePourLeMisEnCause);
-          autorites.add(autoriteMisEnCause);
-        }
-      }
-
-      var autoriteCompetentePourLeLieuDeSurvenue =
-          referentielDesAutoritesCompetentesParLieuDeSurvenue.recupererAutoriteCompetente(
-              dossier.getLieuDeSurvenu().libelleTypeDeLieu());
-      if (autoriteCompetentePourLeLieuDeSurvenue != null) {
-        var autoriteLieuDeSurvenue =
-            AutoriteCompetente.valueOf(autoriteCompetentePourLeLieuDeSurvenue);
-        autorites.add(autoriteLieuDeSurvenue);
-      } else {
-        if (!dossier.getMotifs().isEmpty()) {
-          List<String> autoritesMotif = new ArrayList<>();
-          for (String motif : dossier.getMotifs()) {
-            String autorite =
-                referentielDesAutoritesCompetentesParMotifs.recupererAutoriteCompetente(motif);
-            if (autorite != null) {
-              autoritesMotif.add(autorite);
-            }
-          }
-          if (!autoritesMotif.isEmpty()) {
-            autorites.addAll(convertirCodesAutorites(autoritesMotif));
-          } else {
-            autorites.addAll(
-                convertirCodesAutorites(
-                    referentielDesAutoritesCompetentesParCategoriesDEtablissements
-                        .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                            etablissement.getCodeSousCategorie())));
-          }
-        } else {
-          autorites.addAll(
-              convertirCodesAutorites(
-                  referentielDesAutoritesCompetentesParCategoriesDEtablissements
-                      .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                          etablissement.getCodeSousCategorie())));
-        }
-      }
-    } else if (dossier.getLieuDeSurvenu() instanceof Domicile domicile) {
-      var autoriteCompetentePourLeMisEnCauseADomicile =
-          referentielDesAutoritesCompetentesParMisEnCauseADomicile.recupererAutoriteCompetente(
-              dossier.getLibelleDuMisEnCause());
-      if (autoriteCompetentePourLeMisEnCauseADomicile != null) {
-        var autoriteMisEnCause =
-            AutoriteCompetente.valueOf(autoriteCompetentePourLeMisEnCauseADomicile);
-        autorites.add(autoriteMisEnCause);
-      } else {
-        var autoriteCompetentePourServiceADomicile =
-            referentielDesAutoritesCompetentesParServicesADomicile.recupererAutoriteCompetente(
-                domicile.getService());
-        var autoriteCompetenteService =
-            AutoriteCompetente.valueOf(autoriteCompetentePourServiceADomicile);
-        autorites.add(autoriteCompetenteService);
-      }
-      return Collections.emptySet();
-    }
-    return autorites;
   }
 
   private Set<AutoriteCompetente> convertirCodesAutorites(List<String> codesAutorites) {

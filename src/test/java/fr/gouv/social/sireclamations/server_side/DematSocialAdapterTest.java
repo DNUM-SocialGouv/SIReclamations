@@ -126,11 +126,19 @@ class DematSocialAdapterTest {
                             },
                             {
                                 "id": "Q2hhbXAtMjgzNjc=",
-                                "__typename": "IntegerNumberChamp",
+                                "__typename": "CommuneChamp",
                                 "label": "Code postal",
-                                "stringValue": "78210",
-                                "updatedAt": "2025-03-06T10:25:55+01:00",
-                                "integerNumber": "78210"
+                                "stringValue": "Hardricourt (78250)",
+                                "updatedAt": "2025-03-11T14:49:28+01:00",
+                                "commune": {
+                                    "name": "Hardricourt",
+                                    "code": "78299",
+                                    "postalCode": "78250"
+                                },
+                                "departement": {
+                                    "name": "Yvelines",
+                                    "code": "78"
+                                }
                             },
                             {
                                 "id": "Q2hhbXAtMjg3ODE=",
@@ -162,7 +170,7 @@ class DematSocialAdapterTest {
     // Then
     var domicile =
         new Domicile(
-            78210,
+            78250,
             "81 Avenue Pierre Curie",
             libelleTypeLieu,
             "Service de Soins Infirmier à Domicile (SSIAD)");
@@ -281,6 +289,112 @@ class DematSocialAdapterTest {
 
   @Test
   void
+      lorsquunDossierExisteEtConcerneUneReclamationADomicileDontLadresseEstPartiellementSaisieEtDontLeMisEnCauseEstUnServiceADomicile_alorsRecupereTousLesChampsNecessaireALaffectation()
+          throws IOException {
+    // Given
+    mockAppelDematSocialApi(
+        """
+            {
+                "data": {
+                    "dossier": {
+                        "number": 178291,
+                        "champs": [
+                            {
+                                "id": "Q2hhbXAtMjcxNTU=",
+                                "__typename": "TextChamp",
+                                "label": "Des actes de maltraitance ont-ils eu lieu ?",
+                                "stringValue": "Oui"
+                            },
+                            {
+                                "id": "Q2hhbXAtMTk1MjY=",
+                                "__typename": "MultipleDropDownListChamp",
+                                "label": "Le ou les types de fait(s)",
+                                "stringValue": "Problème comportemental, relationnel ou de communication avec une personne",
+                                "updatedAt": "2025-03-06T10:25:25+01:00",
+                                "values": [
+                                    "Problème comportemental, relationnel ou de communication avec une personne"
+                                ]
+                            },
+                            {
+                                "id": "Q2hhbXAtMTk1MDU=",
+                                "__typename": "TextChamp",
+                                "label": "Lieu principal de survenue",
+                                "stringValue": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant...)",
+                                "updatedAt": "2025-03-06T10:25:37+01:00"
+                            },
+                            {
+                                "id": "Q2hhbXAtMjcxNjE=",
+                                "__typename": "AddressChamp",
+                                "label": "Adresse concernée",
+                                "stringValue": "81 Avenue Jean Macé",
+                                "updatedAt": "2025-03-12T16:33:52+01:00",
+                                "address": null,
+                                "commune": null,
+                                "departement": null
+                            },
+                            {
+                                "id": "Q2hhbXAtMjgzNjc=",
+                                "__typename": "CommuneChamp",
+                                "label": "Code postal",
+                                "stringValue": "Saint-Cyr-l’École (78210)",
+                                "updatedAt": "2025-03-10T17:42:49+01:00",
+                                "commune": {
+                                    "name": "Saint-Cyr-l’École",
+                                    "code": "78545",
+                                    "postalCode": "78210"
+                                },
+                                "departement": {
+                                    "name": "Yvelines",
+                                    "code": "78"
+                                }
+                            },
+                            {
+                                "id": "Q2hhbXAtMjg3ODE=",
+                                "__typename": "TextChamp",
+                                "label": "Personne responsable des faits",
+                                "stringValue": "Professionnel dans le cadre d'un service ou d'une intervention à domicile",
+                                "updatedAt": "2025-03-10T17:43:11+01:00"
+                            },
+                            {
+                                "id": "Q2hhbXAtMjcxNjg=",
+                                "__typename": "TextChamp",
+                                "label": "Professionnel dans le cadre d'un service ou d'une intervention à domicile",
+                                "stringValue": "Service de Soins Infirmier à Domicile (SSIAD)",
+                                "updatedAt": "2025-03-10T17:43:16+01:00"
+                            }
+                        ]
+                    }
+                }
+            }
+            """);
+
+    var libelleTypeLieu =
+        "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant...)";
+    when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
+        .thenReturn(CodeTypeDeLieu.DOM);
+    // When
+    var dossierObtenu = dematSocialAdapter.recupererDossier(178291);
+
+    // Then
+    var domicile =
+        new Domicile(
+            78210,
+            "81 Avenue Jean Macé",
+            libelleTypeLieu,
+            "Service de Soins Infirmier à Domicile (SSIAD)");
+    var dossierAttendu =
+        new DossierDeReclamation(
+            178291,
+            domicile,
+            "Service de Soins Infirmier à Domicile (SSIAD)",
+            true,
+            List.of("Problème comportemental, relationnel ou de communication avec une personne"));
+    assertNotNull(dossierObtenu);
+    assertThat(dossierObtenu).usingRecursiveComparison().isEqualTo(dossierAttendu);
+  }
+
+  @Test
+  void
       lorsquunDossierExisteEtConcerneUneReclamationEnEtablissementSanteContreUnProfessionnelDeSante_alorsRecupereTousLesChampsNecessaireALaffectation()
           throws IOException {
     // Given
@@ -323,11 +437,19 @@ class DematSocialAdapterTest {
                             },
                             {
                                 "id": "Q2hhbXAtMjgzNjc=",
-                                "__typename": "IntegerNumberChamp",
+                                "__typename": "CommuneChamp",
                                 "label": "Code postal",
-                                "stringValue": "78210",
-                                "updatedAt": "2025-03-06T10:25:55+01:00",
-                                "integerNumber": "78210"
+                                "stringValue": "Saint-Cyr-L'ecole (78210)",
+                                "updatedAt": "2025-03-11T14:49:28+01:00",
+                                "commune": {
+                                    "name": "Saint-Cyr-L'ecole",
+                                    "code": "78299",
+                                    "postalCode": "78210"
+                                },
+                                "departement": {
+                                    "name": "Yvelines",
+                                    "code": "78"
+                                }
                             },
                             {
                                 "id": "Q2hhbXAtMjgzNjg=",

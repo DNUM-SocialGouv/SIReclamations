@@ -18,9 +18,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class DeposerReclamationTest {
+class AffecterReclamationTest {
 
-  @InjectMocks DeposerReclamation deposerReclamation;
+  @InjectMocks AffecterReclamation affecterReclamation;
   @Mock DematSocial dematSocial;
 
   @Mock
@@ -79,7 +79,7 @@ class DeposerReclamationTest {
                 codeSousCategorieEtablissement))
         .thenReturn(List.of("ARS"));
     // When
-    var reclamationObtenue = deposerReclamation.executer(numeroDossier);
+    var reclamationObtenue = affecterReclamation.executer(numeroDossier);
     // Then
     var reclamationAttendue =
         new Reclamation(dossierReclamation, Set.of(AutoriteCompetente.ARS), etablissement);
@@ -120,7 +120,7 @@ class DeposerReclamationTest {
                 codeSousCategorieEtablissement))
         .thenReturn(List.of("DDETS"));
     // When
-    var reclamationObtenue = deposerReclamation.executer(numeroDossier);
+    var reclamationObtenue = affecterReclamation.executer(numeroDossier);
     // Then
     var reclamationAttendue =
         new Reclamation(
@@ -161,7 +161,7 @@ class DeposerReclamationTest {
     when(referentielDesAutoritesCompetentesParMotifs.recupererAutoriteCompetente(motifs.get(0)))
         .thenReturn("ARS");
     // When
-    var reclamationObtenue = deposerReclamation.executer(numeroDossier);
+    var reclamationObtenue = affecterReclamation.executer(numeroDossier);
     // Then
     var reclamationAttendue =
         new Reclamation(dossierReclamation, Set.of(AutoriteCompetente.ARS), etablissement);
@@ -202,7 +202,7 @@ class DeposerReclamationTest {
                 codeSousCategorieEtablissement))
         .thenReturn(List.of("ARS"));
     // When
-    var reclamationObtenue = deposerReclamation.executer(numeroDossier);
+    var reclamationObtenue = affecterReclamation.executer(numeroDossier);
     // Then
     var reclamationAttendue =
         new Reclamation(
@@ -238,7 +238,7 @@ class DeposerReclamationTest {
         .thenReturn("ARS");
 
     // When
-    var reclamationObtenue = deposerReclamation.executer(numeroDossier);
+    var reclamationObtenue = affecterReclamation.executer(numeroDossier);
     // Then
     var reclamationAttendue =
         new Reclamation(dossierReclamation, Set.of(AutoriteCompetente.CD), domicile);
@@ -271,7 +271,7 @@ class DeposerReclamationTest {
         .thenReturn("DDETS");
 
     // When
-    var reclamationObtenue = deposerReclamation.executer(numeroDossier);
+    var reclamationObtenue = affecterReclamation.executer(numeroDossier);
     // Then
     var reclamationAttendue =
         new Reclamation(dossierReclamation, Set.of(AutoriteCompetente.DDETS), domicile);
@@ -302,7 +302,7 @@ class DeposerReclamationTest {
             numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire, true, motifs);
     when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
     // When Then
-    assertThatThrownBy(() -> deposerReclamation.executer(numeroDossier))
+    assertThatThrownBy(() -> affecterReclamation.executer(numeroDossier))
         .isInstanceOf(AutoriteCompetenteNotFoundException.class)
         .hasMessage("Aucune autorité compétente n'a été trouvée pour le dossier : 12345");
   }
@@ -316,7 +316,7 @@ class DeposerReclamationTest {
     when(dematSocial.recupererDossier(numeroDossier))
         .thenThrow(new IOException("erreur sur le dossier numero :" + numeroDossier));
     // When Then
-    assertThatThrownBy(() -> deposerReclamation.executer(numeroDossier))
+    assertThatThrownBy(() -> affecterReclamation.executer(numeroDossier))
         .isInstanceOf(DematSocialException.class)
         .hasMessage("erreur sur le dossier numero :12345");
   }

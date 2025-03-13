@@ -5,7 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import fr.gouv.social.sireclamations.hexagone.DeposerReclamation;
+import fr.gouv.social.sireclamations.hexagone.AffecterReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.AutoriteCompetente;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
@@ -31,19 +31,19 @@ class ReclamationControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @Autowired private DeposerReclamation deposerReclamation;
+  @Autowired private AffecterReclamation affecterReclamation;
 
   @TestConfiguration
   static class TestConfig {
     @Bean
-    public DeposerReclamation deposerReclamation() {
-      return Mockito.mock(DeposerReclamation.class);
+    public AffecterReclamation affecterReclamation() {
+      return Mockito.mock(AffecterReclamation.class);
     }
   }
 
   @BeforeEach
   void resetMocks() {
-    Mockito.reset(deposerReclamation);
+    Mockito.reset(affecterReclamation);
   }
 
   @Test
@@ -55,7 +55,7 @@ class ReclamationControllerTest {
     String etat = "en_construction";
     String dateDepot = "2025-03-07 19:39:42 +0100";
 
-    given(deposerReclamation.executer(numeroDossier))
+    given(affecterReclamation.executer(numeroDossier))
         .willThrow(new AutoriteCompetenteNotFoundException("autorite competente not found"));
     // When Then
     mockMvc
@@ -78,7 +78,7 @@ class ReclamationControllerTest {
     String etat = "en_construction";
     String dateDepot = "2025-03-07 19:39:42 +0100";
 
-    given(deposerReclamation.executer(numeroDossier))
+    given(affecterReclamation.executer(numeroDossier))
         .willThrow(new DematSocialException("dossier not found"));
     // When Then
     mockMvc
@@ -110,7 +110,7 @@ class ReclamationControllerTest {
     var motifs = List.of("Problème lié aux locaux ou la restauration");
     var dossierDeReclamation =
         new DossierDeReclamation(numeroDossier, etablissement, libelleDuMisEnCause, true, motifs);
-    given(deposerReclamation.executer(numeroDossier))
+    given(affecterReclamation.executer(numeroDossier))
         .willReturn(
             new Reclamation(dossierDeReclamation, Set.of(AutoriteCompetente.ARS), etablissement));
     // When Then

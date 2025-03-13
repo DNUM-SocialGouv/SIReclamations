@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
-public class DeposerReclamationRequest {
+public class AffecterReclamationRequest {
   @NotNull(message = "Le numéro de procédure est obligatoire.")
   @Positive(message = "Le numéro de procédure doit être un entier positif.")
   private final int numeroProcedure;
@@ -17,7 +17,7 @@ public class DeposerReclamationRequest {
   private final Etat etat;
   private final LocalDateTime dateDepot;
 
-  public DeposerReclamationRequest(
+  public AffecterReclamationRequest(
       int numeroProcedure, int numeroDossier, Etat etat, LocalDateTime dateDepot) {
     this.numeroProcedure = numeroProcedure;
     this.numeroDossier = numeroDossier;
