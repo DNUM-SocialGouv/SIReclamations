@@ -66,6 +66,8 @@ public class AffecterReclamation {
     DossierDeReclamation dossier = recupererDossier(numeroDossier);
     Set<AutoriteCompetente> autorites = determinerAutoritesCompetentes(dossier);
 
+    logger.info("Résultat de l'affectation du dossier {} : autorités compétentes : {}", numeroDossier, autorites);
+
     return new Reclamation(dossier, autorites, dossier.getLieuDeSurvenu());
   }
 
@@ -73,8 +75,8 @@ public class AffecterReclamation {
     try {
       return dematSocial.recupererDossier(numeroDossier);
     } catch (IOException e) {
-      logger.error(
-          "Erreur lors de la récupération du dossier chez demat social : " + e.getMessage(), e);
+      logger.error("Erreur lors de la récupération du dossier demat.social : {}",
+          e.getMessage(), e);
       throw new DematSocialException(e.getMessage());
     }
   }
