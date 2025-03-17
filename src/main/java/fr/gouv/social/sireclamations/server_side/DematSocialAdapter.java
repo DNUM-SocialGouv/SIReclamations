@@ -242,66 +242,84 @@ public class DematSocialAdapter implements DematSocial {
   }
 
   private LieuDeSurvenue recupererDomicileOuAutreLieu(
-      JsonNode champCompletDuDomicile,
+      JsonNode champCompletDeLAdresse,
       String libelleTypeDeLieu,
       String libelleService,
       String libelleCodePostal,
       CodeTypeDeLieu codeTypeDeLieu) {
 
-    String adresse = null;
-    String codePostal = null;
+    String adresse =
+        extraireAdresseAPartirDuChampDeRechercheDAdresseComplete(champCompletDeLAdresse);
+    String codePostal = extraireCodePostal(libelleCodePostal, champCompletDeLAdresse);
 
+    Integer codePostalInt = convertirCodePostalEnEntier(codePostal);
+
+    return creerLieuDeSurvenue(
+        adresse, codePostalInt, libelleTypeDeLieu, libelleService, codeTypeDeLieu);
+  }
+
+  private String extraireAdresseAPartirDuChampDeRechercheDAdresseComplete(
+      JsonNode champCompletDuDomicile) {
+    if (champCompletDuDomicile == null) {
+      return null;
+    }
+
+    JsonNode addressNode = champCompletDuDomicile.path(ADRESSE);
+    if (addressNode == null || addressNode.isMissingNode() || addressNode.isNull()) {
+      String stringValue =
+          champCompletDuDomicile.has(STRING_VALUE)
+              ? champCompletDuDomicile.path(STRING_VALUE).asText(null)
+              : null;
+      return (stringValue != null && !stringValue.isEmpty()) ? stringValue : null;
+    }
+
+    String adresse = addressNode.path(ADRESSE_RUE).asText(null);
+    if (adresse == null || adresse.isEmpty()) {
+      String streetNumber = addressNode.path(NUMERO_RUE).asText(null);
+      String streetName = addressNode.path(NOM_RUE).asText(null);
+      String cityName = addressNode.path(VILLE).asText(null);
+      String postalCode = addressNode.path(CODE_POSTAL).asText(null);
+
+      if (streetNumber != null && streetName != null && cityName != null && postalCode != null) {
+        adresse = String.format("%s %s %s %s", streetNumber, streetName, postalCode, cityName);
+      } else {
+        return null; // Retourne null si aucune adresse valide n'a été trouvée
+      }
+    }
+    return adresse;
+  }
+
+  private String extraireCodePostal(String libelleCodePostal, JsonNode champCompletDuDomicile) {
     if (libelleCodePostal != null) {
-      codePostal = libelleCodePostal;
+      return libelleCodePostal;
     }
 
-    // Récupération de l'objet "address" si présent
-    JsonNode addressNode =
-        (champCompletDuDomicile != null) ? champCompletDuDomicile.path(ADRESSE) : null;
+    JsonNode addressNode = champCompletDuDomicile.path(ADRESSE);
     if (addressNode != null && !addressNode.isMissingNode() && !addressNode.isNull()) {
-
-      adresse = addressNode.path(ADRESSE_RUE).asText(null);
-      //      codePostal = addressNode.path(CODE_POSTAL).asText(null);
-
-      // Si l'adresse est composée de plusieurs parties, on essaie de les reconstruire
-      if (adresse == null || adresse.isEmpty()) {
-        String streetNumber = addressNode.path(NUMERO_RUE).asText(null);
-        String streetName = addressNode.path(NOM_RUE).asText(null);
-        String cityName = addressNode.path(VILLE).asText(null);
-        String postalCode = addressNode.path(CODE_POSTAL).asText(null);
-
-        if (streetNumber != null && streetName != null && cityName != null && postalCode != null) {
-          adresse = String.format("%s %s %s %s", streetNumber, streetName, postalCode, cityName);
-          codePostal = postalCode;
-        }
-      }
+      return addressNode.path(CODE_POSTAL).asText(null);
     }
+    return null;
+  }
 
-    // Utiliser "stringValue" si l'adresse est absente ou vide
-    if (adresse == null
-        && champCompletDuDomicile != null
-        && champCompletDuDomicile.has(STRING_VALUE)) {
-      String stringValue = champCompletDuDomicile.path(STRING_VALUE).asText(null);
-      if (stringValue != null && !stringValue.isEmpty()) {
-        adresse = stringValue;
-      }
-    }
-    // Conversion du code postal en entier si possible
-    Integer codePostalInt = null;
+  private Integer convertirCodePostalEnEntier(String codePostal) {
     try {
-      if (codePostal != null) {
-        codePostalInt = Integer.parseInt(codePostal);
-      }
+      return (codePostal != null) ? Integer.parseInt(codePostal) : null;
     } catch (NumberFormatException e) {
-      // Si le code postal est mal formé, on le laisse null
+      return null;
     }
+  }
 
-    // Création de l'objet du lieu de survenue
-    if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieu))
-      return new Domicile(codePostalInt, adresse, libelleTypeDeLieu, libelleService);
-    if (CodeTypeDeLieu.TRAJET.equals(codeTypeDeLieu))
-      return new Trajet(codePostalInt, libelleTypeDeLieu);
-    return new AutreEtablissement(codePostalInt, adresse, libelleTypeDeLieu);
+  private LieuDeSurvenue creerLieuDeSurvenue(
+      String adresse,
+      Integer codePostalInt,
+      String libelleTypeDeLieu,
+      String libelleService,
+      CodeTypeDeLieu codeTypeDeLieu) {
+    return switch (codeTypeDeLieu) {
+      case DOM -> new Domicile(codePostalInt, adresse, libelleTypeDeLieu, libelleService);
+      case TRAJET -> new Trajet(codePostalInt, libelleTypeDeLieu);
+      default -> new AutreEtablissement(codePostalInt, adresse, libelleTypeDeLieu);
+    };
   }
 
   private Etablissement recupererEtablissement(

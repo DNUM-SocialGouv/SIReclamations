@@ -5,7 +5,7 @@ public abstract class LieuDeSurvenue {
   private final Integer codePostal;
   private final String typeDeLieu;
 
-  public LieuDeSurvenue(Integer codePostal, String typeDeLieu) {
+  protected LieuDeSurvenue(Integer codePostal, String typeDeLieu) {
     this.codePostal = codePostal;
     this.typeDeLieu = typeDeLieu;
   }
