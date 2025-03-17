@@ -25,7 +25,7 @@ class ReclamationControllerIntegrationTest {
       throws Exception {
     // Given
     int numeroDemarche = 1;
-    int numeroDossier = 209940; // Correspond a un dossier existant avec un Ehpad pour établissement
+    int numeroDossier = 210310;
     String etat = "en_construction";
     String dateDepot = "2025-03-07 19:39:42 +0100";
     // When Then
@@ -38,9 +38,9 @@ class ReclamationControllerIntegrationTest {
                 .param("state", etat)
                 .param("updated_at", dateDepot))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.numeroDossier", is(numeroDossier)))
-        .andExpect(jsonPath("$.autoritesCompetentes", hasSize(1)))
-        .andExpect(jsonPath("$.autoritesCompetentes", containsInAnyOrder("ARS")));
+        .andExpect(jsonPath("$.output.numeroDossier", is(numeroDossier)))
+        .andExpect(jsonPath("$.output.autoritesCompetentes", hasSize(1)))
+        .andExpect(jsonPath("$.output.autoritesCompetentes", containsInAnyOrder("ARS")));
   }
 
   @Test

@@ -1,22 +1,16 @@
 package fr.gouv.social.sireclamations.hexagone.domain;
 
-public class Domicile extends LieuDeSurvenue {
+public class AutreEtablissement extends LieuDeSurvenue {
 
   private final String adresse;
-  private final String service;
 
-  public Domicile(Integer codePostal, String adresse, String typeDeLieu, String service) {
+  public AutreEtablissement(Integer codePostal, String adresse, String typeDeLieu) {
     super(codePostal, typeDeLieu);
     this.adresse = adresse;
-    this.service = service;
   }
 
   public String getAdresse() {
     return adresse;
-  }
-
-  public String getService() {
-    return service;
   }
 
   @Override

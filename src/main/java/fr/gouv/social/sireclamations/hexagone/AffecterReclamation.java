@@ -88,70 +88,86 @@ public class AffecterReclamation {
     Set<AutoriteCompetente> autoritesCompetentes = new HashSet<>();
 
     if (dossier.getLieuDeSurvenu() instanceof Domicile domicile) {
-      // Récupération des données des référentiels existants pour le domicile
-      String autoriteCompetentePourLeMisEnCauseADomicile =
-          referentielDesAutoritesCompetentesParMisEnCauseADomicile.recupererAutoriteCompetente(
-              dossier.getLibelleDuMisEnCause());
-
-      String autoriteCompetentePourServiceADomicile =
-          referentielDesAutoritesCompetentesParServicesADomicile.recupererAutoriteCompetente(
-              domicile.getService());
-
-      // Application des règles métiers
-      Optional.ofNullable(autoriteCompetentePourLeMisEnCauseADomicile)
-          .map(AutoriteCompetente::valueOf)
-          .ifPresent(autoritesCompetentes::add);
-      if (autoriteCompetentePourLeMisEnCauseADomicile == null) {
-        Optional.ofNullable(autoriteCompetentePourServiceADomicile)
-            .map(AutoriteCompetente::valueOf)
-            .ifPresent(autoritesCompetentes::add);
-      }
-      if (autoritesCompetentes
-          .isEmpty()) { // ajoute CD par défaut si aucune autorité compétente n'est trouvée
-        autoritesCompetentes.add(AutoriteCompetente.CD);
-      }
+      traiterDomicile(dossier, domicile, autoritesCompetentes);
     } else if (dossier.getLieuDeSurvenu() instanceof Etablissement etablissement) {
-      // Récupération des données des référentiels existants pour l'établissement
-      String autoriteCompetentePourLeMisEnCause =
-          dossier.getMaltraitance()
-              ? referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement
-                  .recupererAutoriteCompetente(dossier.getLibelleDuMisEnCause())
-              : null;
-
-      String autoriteCompetenteParLieuDeSurvenue =
-          referentielDesAutoritesCompetentesParLieuDeSurvenue.recupererAutoriteCompetente(
-              dossier.getLieuDeSurvenu().libelleTypeDeLieu());
-
-      List<String> autoritesCompetentesParMotifs =
-          dossier.getMotifs().stream()
-              .map(referentielDesAutoritesCompetentesParMotifs::recupererAutoriteCompetente)
-              .filter(Objects::nonNull)
-              .toList();
-
-      List<String> autoritesCompetenteParCategorieEtablissement =
-          referentielDesAutoritesCompetentesParCategoriesDEtablissements
-              .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                  etablissement.getCodeSousCategorie());
-
-      // Application des règles métier
-      Optional.ofNullable(autoriteCompetentePourLeMisEnCause)
-          .map(AutoriteCompetente::valueOf)
-          .ifPresent(autoritesCompetentes::add);
-      Optional.ofNullable(autoriteCompetenteParLieuDeSurvenue)
-          .map(AutoriteCompetente::valueOf)
-          .ifPresent(autoritesCompetentes::add);
-
-      if (autoriteCompetenteParLieuDeSurvenue == null) {
-        if (!autoritesCompetentesParMotifs.isEmpty()) {
-          autoritesCompetentes.addAll(convertirCodesAutorites(autoritesCompetentesParMotifs));
-        } else {
-          autoritesCompetentes.addAll(
-              convertirCodesAutorites(autoritesCompetenteParCategorieEtablissement));
-        }
-      }
+      traiterEtablissement(dossier, etablissement, autoritesCompetentes);
+    } else {
+      traiterLieuCommun(dossier, autoritesCompetentes);
     }
 
     return autoritesCompetentes;
+  }
+
+  private void traiterDomicile(
+      DossierDeReclamation dossier,
+      Domicile domicile,
+      Set<AutoriteCompetente> autoritesCompetentes) {
+    String autoriteCompetentePourLeMisEnCauseADomicile =
+        referentielDesAutoritesCompetentesParMisEnCauseADomicile.recupererAutoriteCompetente(
+            dossier.getLibelleDuMisEnCause());
+    String autoriteCompetentePourServiceADomicile =
+        referentielDesAutoritesCompetentesParServicesADomicile.recupererAutoriteCompetente(
+            domicile.getService());
+
+    Optional.ofNullable(autoriteCompetentePourLeMisEnCauseADomicile)
+        .map(AutoriteCompetente::valueOf)
+        .ifPresent(autoritesCompetentes::add);
+
+    if (autoriteCompetentePourLeMisEnCauseADomicile == null) {
+      Optional.ofNullable(autoriteCompetentePourServiceADomicile)
+          .map(AutoriteCompetente::valueOf)
+          .ifPresent(autoritesCompetentes::add);
+    }
+
+    if (autoritesCompetentes.isEmpty()) {
+      autoritesCompetentes.add(AutoriteCompetente.CD);
+    }
+  }
+
+  private void traiterEtablissement(
+      DossierDeReclamation dossier,
+      Etablissement etablissement,
+      Set<AutoriteCompetente> autoritesCompetentes) {
+    traiterLieuCommun(dossier, autoritesCompetentes);
+    List<String> autoritesCompetenteParCategorieEtablissement =
+        referentielDesAutoritesCompetentesParCategoriesDEtablissements
+            .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
+                etablissement.getCodeSousCategorie());
+
+    if (!autoritesCompetenteParCategorieEtablissement.isEmpty()) {
+      autoritesCompetentes.addAll(
+          convertirCodesAutorites(autoritesCompetenteParCategorieEtablissement));
+    }
+  }
+
+  private void traiterLieuCommun(
+      DossierDeReclamation dossier, Set<AutoriteCompetente> autoritesCompetentes) {
+    String autoriteCompetentePourLeMisEnCause =
+        dossier.getMaltraitance()
+            ? referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement
+                .recupererAutoriteCompetente(dossier.getLibelleDuMisEnCause())
+            : null;
+    String autoriteCompetenteParLieuDeSurvenue =
+        referentielDesAutoritesCompetentesParLieuDeSurvenue.recupererAutoriteCompetente(
+            dossier.getLieuDeSurvenu().libelleTypeDeLieu());
+
+    List<String> autoritesCompetentesParMotifs =
+        dossier.getMotifs().stream()
+            .map(referentielDesAutoritesCompetentesParMotifs::recupererAutoriteCompetente)
+            .filter(Objects::nonNull)
+            .toList();
+
+    Optional.ofNullable(autoriteCompetentePourLeMisEnCause)
+        .map(AutoriteCompetente::valueOf)
+        .ifPresent(autoritesCompetentes::add);
+
+    Optional.ofNullable(autoriteCompetenteParLieuDeSurvenue)
+        .map(AutoriteCompetente::valueOf)
+        .ifPresent(autoritesCompetentes::add);
+
+    if (autoriteCompetenteParLieuDeSurvenue == null && !autoritesCompetentesParMotifs.isEmpty()) {
+      autoritesCompetentes.addAll(convertirCodesAutorites(autoritesCompetentesParMotifs));
+    }
   }
 
   private Set<AutoriteCompetente> convertirCodesAutorites(List<String> codesAutorites) {
