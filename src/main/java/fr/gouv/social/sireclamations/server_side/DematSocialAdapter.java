@@ -227,28 +227,26 @@ public class DematSocialAdapter implements DematSocial {
       return recupererEtablissement(nomEtablissementVilleCodePostalEtFiness, libelleTypeDeLieu);
     }
 
-    if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieu)) {
-      String idChampLieuDomicile =
-          champsPourArbre.get(
-              ChampsArbreDeDecision
-                  .LIEU_DOM); // Adresse complète avec auto completion adresse cp et ville
-      String idChampServiceADomicile = champsPourArbre.get(ChampsArbreDeDecision.SERVICE);
-      JsonNode domicileChamp = mapDesChampsDuDossier.get(idChampLieuDomicile);
-      String libelleService =
-          Optional.ofNullable(mapDesChampsDuDossier.get(idChampServiceADomicile))
-              .map(node -> node.path(STRING_VALUE).asText())
-              .orElse(null);
-      return recupererDomicile(domicileChamp, libelleTypeDeLieu, libelleService, libelleCodePostal);
-    }
-
-    return null;
+    String idChampLieuDomicile =
+        champsPourArbre.get(
+            ChampsArbreDeDecision
+                .LIEU_DOM); // Adresse complète avec auto completion adresse cp et ville
+    String idChampServiceADomicile = champsPourArbre.get(ChampsArbreDeDecision.SERVICE);
+    JsonNode domicileChamp = mapDesChampsDuDossier.get(idChampLieuDomicile);
+    String libelleService =
+        Optional.ofNullable(mapDesChampsDuDossier.get(idChampServiceADomicile))
+            .map(node -> node.path(STRING_VALUE).asText())
+            .orElse(null);
+    return recupererDomicileOuAutreLieu(
+        domicileChamp, libelleTypeDeLieu, libelleService, libelleCodePostal, codeTypeDeLieu);
   }
 
-  private LieuDeSurvenue recupererDomicile(
+  private LieuDeSurvenue recupererDomicileOuAutreLieu(
       JsonNode champCompletDuDomicile,
       String libelleTypeDeLieu,
       String libelleService,
-      String libelleCodePostal) {
+      String libelleCodePostal,
+      CodeTypeDeLieu codeTypeDeLieu) {
 
     String adresse = null;
     String codePostal = null;
@@ -258,8 +256,10 @@ public class DematSocialAdapter implements DematSocial {
     }
 
     // Récupération de l'objet "address" si présent
-    JsonNode addressNode = champCompletDuDomicile.path(ADRESSE);
-    if (!addressNode.isMissingNode() && !addressNode.isNull()) {
+    JsonNode addressNode =
+        (champCompletDuDomicile != null) ? champCompletDuDomicile.path(ADRESSE) : null;
+    if (addressNode != null && !addressNode.isMissingNode() && !addressNode.isNull()) {
+
       adresse = addressNode.path(ADRESSE_RUE).asText(null);
       //      codePostal = addressNode.path(CODE_POSTAL).asText(null);
 
@@ -278,7 +278,9 @@ public class DematSocialAdapter implements DematSocial {
     }
 
     // Utiliser "stringValue" si l'adresse est absente ou vide
-    if (adresse == null && champCompletDuDomicile.has(STRING_VALUE)) {
+    if (adresse == null
+        && champCompletDuDomicile != null
+        && champCompletDuDomicile.has(STRING_VALUE)) {
       String stringValue = champCompletDuDomicile.path(STRING_VALUE).asText(null);
       if (stringValue != null && !stringValue.isEmpty()) {
         adresse = stringValue;
@@ -294,8 +296,12 @@ public class DematSocialAdapter implements DematSocial {
       // Si le code postal est mal formé, on le laisse null
     }
 
-    // Création de l'objet Domicile
-    return new Domicile(codePostalInt, adresse, libelleTypeDeLieu, libelleService);
+    // Création de l'objet du lieu de survenue
+    if (CodeTypeDeLieu.DOM.equals(codeTypeDeLieu))
+      return new Domicile(codePostalInt, adresse, libelleTypeDeLieu, libelleService);
+    if (CodeTypeDeLieu.TRAJET.equals(codeTypeDeLieu))
+      return new Trajet(codePostalInt, libelleTypeDeLieu);
+    return new AutreEtablissement(codePostalInt, adresse, libelleTypeDeLieu);
   }
 
   private Etablissement recupererEtablissement(

@@ -2,7 +2,7 @@
 Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant...);Domicile;DOM
 Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...);Etablissement;ETAB
 Dans un établissement d'hébergement (EHPAD, foyer d'accueil et d'hébergement ...);Etablissement;ETAB
-Dans un établissement ou service social (Centre de jour, service d'aide, service Mandataire Judiciaire à la Protection des Majeurs..;Etablissement;ETAB
-Dans un cabinet médical (dentiste, orthopédique, pédiatrie, médecin généraliste...);Cabinet médical;ETAB
-Durant le trajet (transport sanitaire, SAMU, Pompier);Trajet;ETAB
-Autre (institut d'esthétique, salon de tatouage, prison);Autre;ETAB
+Dans un établissement ou service social (Centre de jour, service d'aide, service Mandataire Judiciaire à la Protection des Majeurs..);Etablissement;ETAB
+Dans un cabinet médical (dentiste, orthopédique, pédiatrie, médecin généraliste...);Cabinet médical;CABINET
+Durant le trajet (transport sanitaire, SAMU, Pompier);Trajet;TRAJET
+Autre (institut d'esthétique, salon de tatouage, prison);Autre;AUTRE

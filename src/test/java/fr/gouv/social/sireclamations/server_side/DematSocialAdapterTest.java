@@ -4,11 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import fr.gouv.social.sireclamations.hexagone.domain.AutreEtablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.ChampsArbreDeDecision;
 import fr.gouv.social.sireclamations.hexagone.domain.CodeTypeDeLieu;
 import fr.gouv.social.sireclamations.hexagone.domain.Domicile;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
+import fr.gouv.social.sireclamations.hexagone.domain.Trajet;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -387,6 +389,230 @@ class DematSocialAdapterTest {
             178291,
             domicile,
             "Service de Soins Infirmier à Domicile (SSIAD)",
+            true,
+            List.of("Problème comportemental, relationnel ou de communication avec une personne"));
+    assertNotNull(dossierObtenu);
+    assertThat(dossierObtenu).usingRecursiveComparison().isEqualTo(dossierAttendu);
+  }
+
+  @Test
+  void
+      lorsquunDossierExisteEtConcerneUneReclamationDansUnAutreEtablissementDontLadresseEstSaisieEtDontLeMisEnCauseEstUnProfessionnelDeSante_alorsRecupereTousLesChampsNecessaireALaffectation()
+          throws IOException {
+    // Given
+    mockAppelDematSocialApi(
+        """
+            {
+                "data": {
+                    "dossier": {
+                        "number": 178291,
+                        "champs": [
+                            {
+                                "id": "Q2hhbXAtMjcxNTU=",
+                                "__typename": "TextChamp",
+                                "label": "Des actes de maltraitance ont-ils eu lieu ?",
+                                "stringValue": "Oui"
+                            },
+                            {
+                                "id": "Q2hhbXAtMTk1MjY=",
+                                "__typename": "MultipleDropDownListChamp",
+                                "label": "Le ou les types de fait(s)",
+                                "stringValue": "Problème comportemental, relationnel ou de communication avec une personne",
+                                "updatedAt": "2025-03-06T10:25:25+01:00",
+                                "values": [
+                                    "Problème comportemental, relationnel ou de communication avec une personne"
+                                ]
+                            },
+                            {
+                                "id": "Q2hhbXAtMTk1MDU=",
+                                "__typename": "TextChamp",
+                                "label": "Lieu principal de survenue",
+                                "stringValue": "Autre (institut d'esthétique, salon de tatouage, prison)",
+                                "updatedAt": "2025-03-06T10:25:37+01:00"
+                            },
+                            {
+                                "id": "Q2hhbXAtMjcxNjE=",
+                                "__typename": "AddressChamp",
+                                "label": "Adresse concernée",
+                                "stringValue": "81 Avenue Pierre Curie 78210 Saint-Cyr-l'École",
+                                "updatedAt": "2025-03-06T10:25:57+01:00",
+                                "address": {
+                                    "label": "81 Avenue Pierre Curie 78210 Saint-Cyr-l'École",
+                                    "type": "housenumber",
+                                    "streetAddress": "81 Avenue Pierre Curie",
+                                    "streetNumber": "81",
+                                    "streetName": "Avenue Pierre Curie",
+                                    "postalCode": "78210",
+                                    "cityName": "Saint-Cyr-l'École",
+                                    "cityCode": "78545",
+                                    "departmentName": "Yvelines",
+                                    "departmentCode": "78",
+                                    "regionName": "Île-de-France",
+                                    "regionCode": "11"
+                                },
+                                "commune": {
+                                    "name": "Saint-Cyr-l’École",
+                                    "code": "78545",
+                                    "postalCode": "78210"
+                                },
+                                "departement": {
+                                    "name": "Yvelines",
+                                    "code": "78"
+                                }
+                            },
+                            {
+                                "id": "Q2hhbXAtMjgzNjc=",
+                                "__typename": "CommuneChamp",
+                                "label": "Code postal",
+                                "stringValue": "Hardricourt (78250)",
+                                "updatedAt": "2025-03-11T14:49:28+01:00",
+                                "commune": {
+                                    "name": "Hardricourt",
+                                    "code": "78299",
+                                    "postalCode": "78250"
+                                },
+                                "departement": {
+                                    "name": "Yvelines",
+                                    "code": "78"
+                                }
+                            },
+                            {
+                                "id": "Q2hhbXAtMjgzNjg=",
+                                "__typename": "TextChamp",
+                                "label": "Personne responsable des faits",
+                                "stringValue": "Professionnel",
+                                "updatedAt": "2025-03-06T10:25:59+01:00"
+                            },
+                            {
+                                "id": "Q2hhbXAtMTk1MTU=",
+                                "__typename": "TextChamp",
+                                "label": "Avec qui les faits ont-ils eu lieu ?",
+                                "stringValue": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
+                                "updatedAt": "2025-03-06T14:29:52+01:00"
+                            }
+                        ]
+                    }
+                }
+            }
+            """);
+
+    var libelleTypeLieu = "Autre (institut d'esthétique, salon de tatouage, prison)";
+    when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
+        .thenReturn(CodeTypeDeLieu.AUTRE);
+    // When
+    var dossierObtenu = dematSocialAdapter.recupererDossier(178291);
+
+    // Then
+    var autreLieu = new AutreEtablissement(78250, "81 Avenue Pierre Curie", libelleTypeLieu);
+    var dossierAttendu =
+        new DossierDeReclamation(
+            178291,
+            autreLieu,
+            "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
+            true,
+            List.of("Problème comportemental, relationnel ou de communication avec une personne"));
+    assertNotNull(dossierObtenu);
+    assertThat(dossierObtenu).usingRecursiveComparison().isEqualTo(dossierAttendu);
+  }
+
+  @Test
+  void
+      lorsquunDossierExisteEtConcerneUneReclamationLorsDunTrajetEtDontLeMisEnCauseEstUnProfessionnelDeSante_alorsRecupereTousLesChampsNecessaireALaffectation()
+          throws IOException {
+    // Given
+    mockAppelDematSocialApi(
+        """
+            {
+                "data": {
+                    "dossier": {
+                        "number": 178291,
+                        "champs": [
+                            {
+                                "id": "Q2hhbXAtMjcxNTU=",
+                                "__typename": "TextChamp",
+                                "label": "Des actes de maltraitance ont-ils eu lieu ?",
+                                "stringValue": "Oui"
+                            },
+                            {
+                                "id": "Q2hhbXAtMTk1MjY=",
+                                "__typename": "MultipleDropDownListChamp",
+                                "label": "Le ou les types de fait(s)",
+                                "stringValue": "Problème comportemental, relationnel ou de communication avec une personne",
+                                "updatedAt": "2025-03-06T10:25:25+01:00",
+                                "values": [
+                                    "Problème comportemental, relationnel ou de communication avec une personne"
+                                ]
+                            },
+                            {
+                               "id": "Q2hhbXAtMTk1MDU=",
+                               "__typename": "TextChamp",
+                               "label": "Lieu principal de survenue",
+                               "stringValue": "Durant le trajet (transport sanitaire, SAMU, Pompier)",
+                               "updatedAt": "2025-03-17T10:34:11+01:00"
+                           },
+                           {
+                               "id": "Q2hhbXAtMjcxNjY=",
+                               "__typename": "TextChamp",
+                               "label": "Type de transport concerné",
+                               "stringValue": "Ambulance de secours et de soins d'urgence (ASSU)",
+                               "updatedAt": "2025-03-17T10:34:20+01:00"
+                           },
+                           {
+                               "id": "Q2hhbXAtMjc1ODg=",
+                               "__typename": "TextChamp",
+                               "label": "Société de transport concernée",
+                               "stringValue": "ASSU Dupuis",
+                               "updatedAt": "2025-03-17T10:34:29+01:00"
+                           },
+                           {
+                               "id": "Q2hhbXAtMjgzNjc=",
+                               "__typename": "CommuneChamp",
+                               "label": "Code postal",
+                               "stringValue": "Hardricourt (78250)",
+                               "updatedAt": "2025-03-11T14:49:28+01:00",
+                               "commune": {
+                                   "name": "Hardricourt",
+                                   "code": "78299",
+                                   "postalCode": "78250"
+                               },
+                               "departement": {
+                                   "name": "Yvelines",
+                                   "code": "78"
+                               }
+                             },
+                              {
+                                  "id": "Q2hhbXAtMjgzNjg=",
+                                  "__typename": "TextChamp",
+                                  "label": "Personne responsable des faits",
+                                  "stringValue": "Professionnel",
+                                  "updatedAt": "2025-03-06T10:25:59+01:00"
+                              },
+                              {
+                                  "id": "Q2hhbXAtMTk1MTU=",
+                                  "__typename": "TextChamp",
+                                  "label": "Avec qui les faits ont-ils eu lieu ?",
+                                  "stringValue": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
+                                  "updatedAt": "2025-03-06T14:29:52+01:00"
+                              }
+                        ]
+                    }
+                }
+            }
+            """);
+
+    var libelleTypeLieu = "Durant le trajet (transport sanitaire, SAMU, Pompier)";
+    when(referentielDuTypeDeLieux.recupererCodeTypeDeLieuxAPartirDuLibelle(libelleTypeLieu))
+        .thenReturn(CodeTypeDeLieu.TRAJET);
+    // When
+    var dossierObtenu = dematSocialAdapter.recupererDossier(178291);
+
+    // Then
+    var trajet = new Trajet(78250, libelleTypeLieu);
+    var dossierAttendu =
+        new DossierDeReclamation(
+            178291,
+            trajet,
+            "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
             true,
             List.of("Problème comportemental, relationnel ou de communication avec une personne"));
     assertNotNull(dossierObtenu);

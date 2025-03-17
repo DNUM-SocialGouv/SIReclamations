@@ -87,7 +87,22 @@ public class AffecterReclamation {
   private Set<AutoriteCompetente> determinerAutoritesCompetentes(DossierDeReclamation dossier) {
     Set<AutoriteCompetente> autoritesCompetentes = new HashSet<>();
 
-    if (dossier.getLieuDeSurvenu() instanceof Domicile domicile) {
+    Domicile domicile = null;
+    Etablissement etablissement = null;
+    AutreEtablissement autreEtablissement = null;
+    Trajet trajet = null;
+
+    if (dossier.getLieuDeSurvenu() instanceof Domicile d) {
+      domicile = d;
+    } else if (dossier.getLieuDeSurvenu() instanceof Etablissement e) {
+      etablissement = e;
+    } else if (dossier.getLieuDeSurvenu() instanceof AutreEtablissement a) {
+      autreEtablissement = a;
+    } else if (dossier.getLieuDeSurvenu() instanceof Trajet t) {
+      trajet = t;
+    }
+
+    if (domicile != null) {
       // Récupération des données des référentiels existants pour le domicile
       String autoriteCompetentePourLeMisEnCauseADomicile =
           referentielDesAutoritesCompetentesParMisEnCauseADomicile.recupererAutoriteCompetente(
@@ -110,8 +125,9 @@ public class AffecterReclamation {
           .isEmpty()) { // ajoute CD par défaut si aucune autorité compétente n'est trouvée
         autoritesCompetentes.add(AutoriteCompetente.CD);
       }
-    } else if (dossier.getLieuDeSurvenu() instanceof Etablissement etablissement) {
-      // Récupération des données des référentiels existants pour l'établissement
+    } else if (etablissement != null || autreEtablissement != null || trajet != null) {
+
+      // Récupération des données des référentiels existants
       String autoriteCompetentePourLeMisEnCause =
           dossier.getMaltraitance()
               ? referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement
@@ -129,14 +145,17 @@ public class AffecterReclamation {
               .toList();
 
       List<String> autoritesCompetenteParCategorieEtablissement =
-          referentielDesAutoritesCompetentesParCategoriesDEtablissements
-              .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                  etablissement.getCodeSousCategorie());
+          (etablissement != null)
+              ? referentielDesAutoritesCompetentesParCategoriesDEtablissements
+                  .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
+                      etablissement.getCodeSousCategorie())
+              : List.of();
 
       // Application des règles métier
       Optional.ofNullable(autoriteCompetentePourLeMisEnCause)
           .map(AutoriteCompetente::valueOf)
           .ifPresent(autoritesCompetentes::add);
+
       Optional.ofNullable(autoriteCompetenteParLieuDeSurvenue)
           .map(AutoriteCompetente::valueOf)
           .ifPresent(autoritesCompetentes::add);
@@ -144,7 +163,7 @@ public class AffecterReclamation {
       if (autoriteCompetenteParLieuDeSurvenue == null) {
         if (!autoritesCompetentesParMotifs.isEmpty()) {
           autoritesCompetentes.addAll(convertirCodesAutorites(autoritesCompetentesParMotifs));
-        } else {
+        } else if (!autoritesCompetenteParCategorieEtablissement.isEmpty()) {
           autoritesCompetentes.addAll(
               convertirCodesAutorites(autoritesCompetenteParCategorieEtablissement));
         }
