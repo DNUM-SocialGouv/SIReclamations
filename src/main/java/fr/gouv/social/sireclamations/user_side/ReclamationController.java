@@ -1,6 +1,7 @@
 package fr.gouv.social.sireclamations.user_side;
 
 import fr.gouv.social.sireclamations.hexagone.AffecterReclamation;
+import fr.gouv.social.sireclamations.hexagone.AffecterReclamationDepuisPlateformeTelephonique;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,9 +35,16 @@ public class ReclamationController {
   private static final String OUTPUT = "output";
 
   private final AffecterReclamation affecterReclamation;
+  private final AffecterReclamationDepuisPlateformeTelephonique
+      affecterReclamationDepuisPlateformeTelephonique;
 
-  public ReclamationController(AffecterReclamation affecterReclamation) {
+  public ReclamationController(
+      AffecterReclamation affecterReclamation,
+      AffecterReclamationDepuisPlateformeTelephonique
+          affecterReclamationDepuisPlateformeTelephonique) {
     this.affecterReclamation = affecterReclamation;
+    this.affecterReclamationDepuisPlateformeTelephonique =
+        affecterReclamationDepuisPlateformeTelephonique;
   }
 
   // hack: une nouvelle version du webhook doit prochainement être intégrée. Cette version enverra
@@ -103,6 +112,15 @@ public class ReclamationController {
       return GlobalControllerAdvice.getGlobalControllerAdviceResponse(
           HttpStatus.BAD_REQUEST, message);
     }
+  }
+
+  @PostMapping("/plateforme-telephonique")
+  public ReclamationApiResponse creerReclamation(
+      @RequestBody DossierDeReclamationDeLaPlateformeTelephoniqueApi reclamationApi) {
+    var dossierDeReclamation = ReclamationApiMapper.toDossierDeReclamation(reclamationApi);
+    final Reclamation reclamation =
+        affecterReclamationDepuisPlateformeTelephonique.executer(dossierDeReclamation);
+    return ReclamationApiMapper.toReclamationApiResponse(reclamation);
   }
 
   private static boolean validateInteger(Map<String, String> params, String key) {
