@@ -16,9 +16,8 @@ COPY . .
 # Package the application (skip tests to speed up the build)
 RUN mvn clean package -DskipTests
 
-# ----- Stage 2: Run the application with a minimal JDK base image
-#FROM eclipse-temurin:17.0.13_11-jre-noble
-FROM eclipse-temurin:17.0.14_7-jdk-noble
+# ----- Stage 2: Run the application with a minimal JRE base image
+FROM eclipse-temurin:17.0.14_7-jre-noble
 
 # Set the working directory inside the container
 WORKDIR /app
