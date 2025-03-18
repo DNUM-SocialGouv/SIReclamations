@@ -255,6 +255,7 @@
           "misEnCause",
           "description"
         ],
+        "x-internal": true,
         "examples": [
           {
             "id": "string",
@@ -346,12 +347,23 @@
               }
             }
           }
-        ],
-        "x-internal": true
+        ]
       },
       "declarant": {
         "type": "object",
         "title": "declarant",
+        "required": [
+          "civilite",
+          "nom",
+          "prenom",
+          "telephone",
+          "estLaVictime",
+          "lienVictime",
+          "victimeInformeeDemarche",
+          "anonymatVictimeDemande",
+          "anonymatMisEnCauseDemande",
+          "suiviDemande"
+        ],
         "properties": {
           "civilite": {
             "type": "string",
@@ -417,18 +429,6 @@
             "description": "Le déclarant souhaite être contacté pour le suivi"
           }
         },
-        "required": [
-          "civilite",
-          "nom",
-          "prenom",
-          "telephone",
-          "estLaVictime",
-          "lienVictime",
-          "victimeInformeeDemarche",
-          "anonymatVictimeDemande",
-          "anonymatMisEnCauseDemande",
-          "suiviDemande"
-        ],
         "examples": [
           {
             "civilite": "M.",
@@ -451,6 +451,15 @@
         "type": "object",
         "title": "victime",
         "description": "Identité de la victime présumée",
+        "required": [
+          "civilite",
+          "nom",
+          "prenom",
+          "trancheAge",
+          "enSituationDeHandicap",
+          "anonymatMisEnCauseDemande",
+          "autresPersonnesVictimes"
+        ],
         "properties": {
           "civilite": {
             "type": "string",
@@ -506,15 +515,6 @@
             ]
           }
         },
-        "required": [
-          "civilite",
-          "nom",
-          "prenom",
-          "trancheAge",
-          "enSituationDeHandicap",
-          "anonymatMisEnCauseDemande",
-          "autresPersonnesVictimes"
-        ],
         "examples": [
           {
             "civilite": "M.",
@@ -533,6 +533,11 @@
         "type": "object",
         "title": "lieuSurvenue",
         "description": "Lieu du problème",
+        "required": [
+          "codePostal",
+          "commune",
+          "natureLieu"
+        ],
         "properties": {
           "codePostal": {
             "type": "string",
@@ -566,11 +571,6 @@
             "$ref": "#/components/schemas/cabinetMedical"
           }
         },
-        "required": [
-          "codePostal",
-          "commune",
-          "natureLieu"
-        ],
         "examples": [
           {
             "codePostal": "string",
@@ -600,17 +600,37 @@
         "type": "object",
         "title": "etablissementSanitaireEtSocial",
         "description": "Précise l'établissement sanitaire et social où a eu lieu de le problème. Le service est nécessaire SEULEMENT SI l'établissement mis en cause est un établissement de santé (hôpitaux, cliniques ...).",
+        "examples": [
+          {
+            "et_finess": "string",
+            "nomEtablissement": "string",
+            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
+          }
+        ],
+        "required": [
+          "et_finess",
+          "codeCategorieEtablissement",
+          "typeDeMisEnCause"
+        ],
         "properties": {
           "et_finess": {
             "type": "string",
             "description": "Numéro FINESS du site géographique. Source de données : https://arssante.opendatasoft.com/explore/dataset/t_finess/api/",
             "pattern": "d[AB|\\d]\\d{7}"
           },
+          "codeCategorieEtablissement": {
+            "type": "string",
+            "x-stoplight": {
+              "id": "58vkumpjh1fou"
+            }
+          },
           "nomEtablissement": {
             "type": "string"
           },
           "typeDeMisEnCause": {
-            "type": "string",
+            "x-stoplight": {
+              "id": "7qpmftqrekgf7"
+            },
             "enum": [
               "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
               "Un professionnel du soin (coiffeur, esthéticienne, naturopathe, ...)",
@@ -620,81 +640,7 @@
               "Autre Professionnel"
             ]
           }
-        },
-        "required": [
-          "et_finess",
-          "typeDeMisEnCause"
-        ],
-        "examples": [
-          {
-            "et_finess": "string",
-            "nomEtablissement": "string",
-            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
-          }
-        ]
-      },
-      "domicile": {
-        "type": "object",
-        "title": "domicile",
-        "properties": {
-          "adresse": {
-            "type": "string",
-            "description": "Source : https://adresse.data.gouv.fr/\nExemple : https://api-adresse.data.gouv.fr/search?q=34%20Avenue%20de%20l%27opera&limit=5"
-          },
-          "serviceADomicile": {
-            "type": "string",
-            "enum": [
-              "Hospitalisation à domicile",
-              "Service d'éducation spéciale et de soins",
-              "Service d'aide ménagère",
-              "Service de repas",
-              "Traitements spécialisés",
-              "Structure dispensatrice d'oxygène à usage médical",
-              "Service d'aide et d'accompagnement aux familles (SAADF)",
-              "Service Mandataire Juidiciaire à la Protection des Majeurs (MJPM)",
-              "Autre"
-            ]
-          }
-        },
-        "required": [
-          "adresse",
-          "serviceADomicile"
-        ],
-        "examples": [
-          {
-            "adresse": "string",
-            "serviceADomicile": "Hospitalisation à domicile"
-          }
-        ]
-      },
-      "trajet": {
-        "type": "object",
-        "title": "domicile",
-        "properties": {
-          "typeDeTransport": {
-            "type": "string",
-            "enum": [
-              "Ambulance de secours et de soins d'urgence (ASSU)",
-              "Véhicule de secours et d'assistance aux victimes (VSAV)",
-              "Ambulance",
-              "Véhicule sanitaire léger",
-              "Chauffeur de taxi",
-              "Autre type de transport"
-            ]
-          },
-          "nomSociete": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "typeDeTransport"
-        ],
-        "examples": [
-          {
-            "typeDeTransport": "Ambulance de secours et de soins d'urgence (ASSU)",
-            "nomSociete": "string"
-          }
-        ]
+        }
       },
       "cabinetMedical": {
         "type": "object",
@@ -702,10 +648,26 @@
         "description": "Informations sur le cabinet médical",
         "properties": {
           "informations": {
-            "type": "string"
+            "type": "string",
+            "x-stoplight": {
+              "id": "wt0jpe1m3pn31"
+            }
           },
           "adresse": {
             "type": "string"
+          },
+          "typeDeMisEnCause": {
+            "x-stoplight": {
+              "id": "7qpmftqrekgf7"
+            },
+            "enum": [
+              "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
+              "Un professionnel du soin (coiffeur, esthéticienne, naturopathe, ...)",
+              "Un autre professionnel d'établissement ou de service (directeur, animateur, agent d'entretien...)",
+              "Travailleur social (éducateur, assistant social...)",
+              "Mandataire Judiciaire à la Protection des Majeurs (curatelle, tutelle)",
+              "Autre Professionnel"
+            ]
           }
         },
         "examples": [
@@ -719,9 +681,14 @@
         "type": "object",
         "title": "misEnCause",
         "description": "Identité du mis en cause",
+        "required": [
+          "typeDeMisEnCause"
+        ],
         "properties": {
           "typeDeMisEnCause": {
-            "type": "string",
+            "x-stoplight": {
+              "id": "3amaiduhq7sju"
+            },
             "enum": [
               "Membre de la famille",
               "Proche (ami, voisin...)",
@@ -752,9 +719,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "typeDeMisEnCause"
-        ],
         "examples": [
           {
             "typeDeMisEnCause": "Membre de la famille",
@@ -770,14 +734,26 @@
         "type": "object",
         "title": "details",
         "description": "Modèle permettant de préciser et décrire la réclamation",
+        "x-internal": false,
+        "required": [
+          "maltraitance",
+          "typesDeFaits",
+          "consequenceSurLaVictime",
+          "description"
+        ],
         "properties": {
           "maltraitance": {
-            "type": "boolean"
+            "type": "boolean",
+            "x-stoplight": {
+              "id": "2sokx3eeaofya"
+            }
           },
           "typeDeMaltraitance": {
             "type": "array",
             "items": {
-              "type": "string",
+              "x-stoplight": {
+                "id": "ju34qb2oiddio"
+              },
               "enum": [
                 "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)",
                 "Maltraitance sexuelle (viols, agressions sexuelles, atteintes sexuelles, attentats à la pudeur...)",
@@ -792,9 +768,14 @@
           },
           "typesDeFaits": {
             "type": "array",
+            "x-stoplight": {
+              "id": "px3fx91j5xo9f"
+            },
             "minItems": 1,
             "items": {
-              "type": "string",
+              "x-stoplight": {
+                "id": "2jysymfj4e2ww"
+              },
               "enum": [
                 "Problème comportemental, relationnel ou de communication avec une personne",
                 "Problème lié à la facturation ou aux honoraires",
@@ -814,7 +795,9 @@
           "consequenceSurLaVictime": {
             "type": "array",
             "items": {
-              "type": "string",
+              "x-stoplight": {
+                "id": "d7a39mt8a3fpf"
+              },
               "enum": [
                 "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)",
                 "Sur les droits (violation du droit de la protection et sécurité, accès limité à la justice...)",
@@ -843,12 +826,6 @@
             "maxLength": 10000
           }
         },
-        "required": [
-          "maltraitance",
-          "typesDeFaits",
-          "consequenceSurLaVictime",
-          "description"
-        ],
         "examples": [
           {
             "maltraitance": true,
@@ -872,9 +849,15 @@
         "type": "object",
         "title": "demarches",
         "description": "Modèle définissant les démarches déjà engagées",
+        "required": [
+          "contactEtablissementOuPersonneResponsable"
+        ],
         "properties": {
           "contactEtablissementOuPersonneResponsable": {
-            "$ref": "#/components/schemas/demarcheEtablissementOuProfessionnel"
+            "$ref": "#/components/schemas/demarcheEtablissementOuProfessionnel",
+            "x-stoplight": {
+              "id": "cdjsr0v5tnass"
+            }
           },
           "contactAutreOrganise": {
             "$ref": "#/components/schemas/demarcheAutresOrganismes"
@@ -884,9 +867,6 @@
             "description": "Avez-vous engagé des démarches auprès de la gendarmerie et/ou du commissariat ?"
           }
         },
-        "required": [
-          "contactEtablissementOuPersonneResponsable"
-        ],
         "examples": [
           {
             "contactEtablissementOuPersonneResponsable": {
@@ -909,9 +889,15 @@
         "type": "object",
         "title": "demarcheEtablissementOuPersonneResponsable",
         "description": "Modèle qui précise qu'un contact est déjà pris avec l’établissement ou le professionnel concerné",
+        "required": [
+          "contactEffectue"
+        ],
         "properties": {
           "contactEffectue": {
-            "type": "boolean"
+            "type": "boolean",
+            "x-stoplight": {
+              "id": "92rfgpuqk6gav"
+            }
           },
           "dateDemarche": {
             "type": "string",
@@ -925,9 +911,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "contactEffectue"
-        ],
         "examples": [
           {
             "contactEffectue": true,
@@ -941,14 +924,14 @@
         "type": "object",
         "title": "demarcheAutresOrganismes",
         "description": "Modèle qui permet de définir les Organismes saisis",
+        "required": [
+          "organismesSaisis"
+        ],
         "properties": {
           "organismesSaisis": {
             "type": "string"
           }
         },
-        "required": [
-          "organismesSaisis"
-        ],
         "examples": [
           {
             "organismesSaisis": "string"
@@ -1110,6 +1093,81 @@
             "details": "You must provide a valid access token to access this resource."
           }
         }
+      },
+      "domicile": {
+        "title": "domicile",
+        "type": "object",
+        "examples": [
+          {
+            "adresse": "string",
+            "serviceADomicile": "Hospitalisation à domicile"
+          }
+        ],
+        "required": [
+          "adresse"
+        ],
+        "properties": {
+          "adresse": {
+            "type": "string",
+            "description": "Source : https://adresse.data.gouv.fr/\nExemple : https://api-adresse.data.gouv.fr/search?q=34%20Avenue%20de%20l%27opera&limit=5"
+          },
+          "serviceADomicile": {
+            "type": "string",
+            "enum": [
+              "Hospitalisation à domicile",
+              "Service d'éducation spéciale et de soins",
+              "Service d'aide ménagère",
+              "Service de repas",
+              "Traitements spécialisés",
+              "Structure dispensatrice d'oxygène à usage médical",
+              "Service d'aide et d'accompagnement aux familles (SAADF)",
+              "Service Mandataire Juidiciaire à la Protection des Majeurs (MJPM)",
+              "Autre"
+            ]
+          }
+        }
+      },
+      "trajet": {
+        "title": "domicile",
+        "type": "object",
+        "required": [
+          "typeDeTransport"
+        ],
+        "properties": {
+          "typeDeTransport": {
+            "type": "string",
+            "enum": [
+              "Ambulance de secours et de soins d'urgence (ASSU)",
+              "Véhicule de secours et d'assistance aux victimes (VSAV)",
+              "Ambulance",
+              "Véhicule sanitaire léger",
+              "Chauffeur de taxi",
+              "Autre type de transport"
+            ]
+          },
+          "nomSociete": {
+            "type": "string"
+          },
+          "typeDeMisEnCause": {
+            "x-stoplight": {
+              "id": "7qpmftqrekgf7"
+            },
+            "enum": [
+              "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
+              "Un professionnel du soin (coiffeur, esthéticienne, naturopathe, ...)",
+              "Un autre professionnel d'établissement ou de service (directeur, animateur, agent d'entretien...)",
+              "Travailleur social (éducateur, assistant social...)",
+              "Mandataire Judiciaire à la Protection des Majeurs (curatelle, tutelle)",
+              "Autre Professionnel"
+            ]
+          }
+        },
+        "examples": [
+          {
+            "typeDeTransport": "Ambulance de secours et de soins d'urgence (ASSU)",
+            "nomSociete": "string"
+          }
+        ]
       }
     }
   },
