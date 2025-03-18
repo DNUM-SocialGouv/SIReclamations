@@ -170,6 +170,48 @@ class AffecterReclamationTest {
 
   @Test
   void
+      affecterUneReclamationPourUneMaltraitanceParUnMJPMdansUnEtablissementOuServiceSocialEtUnMotifDeQualiteDeSoins_doitRetournerARSetDDETS()
+          throws IOException {
+    // Given
+    var numeroDossier = 12345;
+    var codeSousCategorieEtablissement = 340;
+    var codePostal = 38120;
+    var finess = "380022723";
+    String nom = "SERVICE DES MAJEURS PROTEGES";
+    String typeDeLieu =
+        "Dans un établissement ou service social (Centre de jour, service d'aide, service Mandataire Judiciaire à la Protection des Majeurs...)";
+    var motifs =
+        List.of(
+            "Problème de qualité des soins médicaux ou paramédicaux (ex: soins et/ou interventions inadaptés, absents ou abusifs...)");
+    var etablissement =
+        new Etablissement(finess, codeSousCategorieEtablissement, codePostal, nom, typeDeLieu);
+    String libelleDuMisEnCauseProvenantDuFormulaire =
+        "Mandataire Judiciaire à la Protection des Majeurs (curatelle, tutelle)";
+    var dossierReclamation =
+        new DossierDeReclamation(
+            numeroDossier, etablissement, libelleDuMisEnCauseProvenantDuFormulaire, true, motifs);
+    when(dematSocial.recupererDossier(numeroDossier)).thenReturn(dossierReclamation);
+    when(referentielDesAutoritesCompetentesParMisEnCauseEnEtablissement.recupererAutoriteCompetente(
+            libelleDuMisEnCauseProvenantDuFormulaire))
+        .thenReturn("DDETS");
+    when(referentielDesAutoritesCompetentesParLieuDeSurvenue.recupererAutoriteCompetente(
+            typeDeLieu))
+        .thenReturn(null);
+    when(referentielDesAutoritesCompetentesParMotifs.recupererAutoriteCompetente(motifs.get(0)))
+        .thenReturn("ARS");
+    // When
+    var reclamationObtenue = affecterReclamation.executer(numeroDossier);
+    // Then
+    var reclamationAttendue =
+        new Reclamation(
+            dossierReclamation,
+            Set.of(AutoriteCompetente.ARS, AutoriteCompetente.DDETS),
+            etablissement);
+    assertThat(reclamationObtenue).usingRecursiveComparison().isEqualTo(reclamationAttendue);
+  }
+
+  @Test
+  void
       deposerUneReclamationPourUneMaltraitanceParUnMembreDeLaFamilleDansUnEtablissementDeSanteMotifComportemental_doitRetournerCDetARS()
           throws IOException {
     // Given

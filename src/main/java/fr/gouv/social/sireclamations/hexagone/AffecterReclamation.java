@@ -128,15 +128,25 @@ public class AffecterReclamation {
       DossierDeReclamation dossier,
       Etablissement etablissement,
       Set<AutoriteCompetente> autoritesCompetentes) {
-    traiterLieuCommun(dossier, autoritesCompetentes);
-    List<String> autoritesCompetenteParCategorieEtablissement =
-        referentielDesAutoritesCompetentesParCategoriesDEtablissements
-            .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                etablissement.getCodeSousCategorie());
 
-    if (!autoritesCompetenteParCategorieEtablissement.isEmpty()) {
-      autoritesCompetentes.addAll(
-          convertirCodesAutorites(autoritesCompetenteParCategorieEtablissement));
+    List<String> autoritesCompetentesParMotifs =
+        dossier.getMotifs().stream()
+            .map(referentielDesAutoritesCompetentesParMotifs::recupererAutoriteCompetente)
+            .filter(Objects::nonNull)
+            .toList();
+
+    traiterLieuCommun(dossier, autoritesCompetentes);
+
+    if (autoritesCompetentesParMotifs.isEmpty()) { // Seulement si aucun motif n'a fourni d'autorité
+      List<String> autoritesCompetenteParCategorieEtablissement =
+          referentielDesAutoritesCompetentesParCategoriesDEtablissements
+              .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
+                  etablissement.getCodeSousCategorie());
+
+      if (!autoritesCompetenteParCategorieEtablissement.isEmpty()) {
+        autoritesCompetentes.addAll(
+            convertirCodesAutorites(autoritesCompetenteParCategorieEtablissement));
+      }
     }
   }
 
@@ -163,11 +173,11 @@ public class AffecterReclamation {
 
     Optional.ofNullable(autoriteCompetenteParLieuDeSurvenue)
         .map(AutoriteCompetente::valueOf)
-        .ifPresent(autoritesCompetentes::add);
-
-    if (autoriteCompetenteParLieuDeSurvenue == null && !autoritesCompetentesParMotifs.isEmpty()) {
-      autoritesCompetentes.addAll(convertirCodesAutorites(autoritesCompetentesParMotifs));
-    }
+        .ifPresentOrElse(
+            autoritesCompetentes::add,
+            () ->
+                autoritesCompetentes.addAll(
+                    convertirCodesAutorites(autoritesCompetentesParMotifs)));
   }
 
   private Set<AutoriteCompetente> convertirCodesAutorites(List<String> codesAutorites) {
