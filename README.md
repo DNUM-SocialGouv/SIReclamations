@@ -86,3 +86,99 @@ mvn spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_
 ## Architecture projet
 
 Le projet applique les concepts de [l'architecture hexagonale](https://blog.octo.com/architecture-hexagonale-trois-principes-et-un-exemple-dimplementation)
+
+# 🚀 Déploiement local de l'API dans un Pod Kubernetes via Rancher
+
+Ce guide explique comment exécuter l'API en local sur un cluster Kubernetes géré par **Rancher**, en utilisant le `Dockerfile` et le `Deployment.yaml` déjà présents dans le projet.
+
+## 📌 Prérequis
+
+- **Cluster Kubernetes** local avec Rancher.
+- **nerdctl** configuré avec **containerd**.
+- **kubectl** installé et connecté au cluster (`kubectl config use-context rancher-desktop`).
+- Utilisez les **Dockerfile** et **Deployment.yaml** présents dans le projet.
+
+---
+## ⚡ Étape 1 : Enregistrement des secrets
+
+A partir du fichier **.env.template** créez le fichier **.env** puis renseignez les clés présentes.
+
+Créez un secret nommé **sireclamations-secret** à partir du fichier **.env**
+
+```sh
+ kubectl create secret generic sireclamations-secret --from-env-file=.env
+```
+Vérifications :
+
+```sh
+kubectl describe secret sireclamations-secret
+```
+
+## ⚡ Étape 2 : Construire et stocker l'image en local
+
+Dans le répertoire du projet, exécutez :
+
+```sh
+nerdctl build --namespace k8s.io -t sireclamations:latest .
+```
+
+Vérifiez la disponiblité de l'image :
+
+```sh
+nerdctl images --namespace k8s.io | grep sireclamations
+```
+
+## ⚡ Étape 3 : Déployer l’API sur Kubernetes
+
+Appliquez le Deployment.yaml :
+```sh
+kubectl apply -f Deployment.yaml --namespace=default
+```
+Vérifiez l’état du Pod :
+
+```sh
+kubectl get pods -n default
+```
+Description du Pod :
+```sh
+kubectl describe pod sireclamations -n default
+```
+## ⚡ Étape 4 : Exposer et accéder à l’API
+
+Exposez le Pod avec port-forward :
+
+```sh
+kubectl port-forward pods/sireclamations 8083:8080 -n default
+```
+L’API sera accessible sur http://localhost:8083.
+
+## 🚀 Étape 5 : Vérification et Debugging
+
+Consulter les logs de l’API :
+
+```sh
+kubectl logs -f sireclamations -n default
+```
+Vérifier les variables d’environnement :
+```sh
+kubectl exec -it sireclamations -- printenv
+```
+Inspection de l'image :
+
+```sh
+nerdctl --namespace=k8s.io image inspect sireclamations
+```
+
+## Nettoyage du déploiement
+
+Suppression du Pod :
+
+```sh
+kubectl delete -f Deployment.yaml -n default
+```
+
+Suppression de l'Image :
+
+```sh
+nerdctl --namespace=k8s.io rmi sireclamations:latest
+```

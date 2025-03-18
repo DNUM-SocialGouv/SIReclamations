@@ -12,7 +12,7 @@ spec:
           valueFrom:
             secretKeyRef:
               key: DEMAT_SOCIAL_GRAPHQL_TOKEN
-              name: top-secret
+              name: sireclamations-secret
       image: sireclamations:latest
       imagePullPolicy: Never
       name: sireclamations
