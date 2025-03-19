@@ -279,6 +279,7 @@
               "nom": "string",
               "prenom": "string",
               "email": "user@example.com",
+              "adresse": "string",
               "telephone": "string",
               "trancheAge": "-18",
               "enSituationDeHandicap": true,
@@ -288,26 +289,27 @@
             "lieuSurvenue": {
               "codePostal": "string",
               "commune": "string",
-              "natureLieu": "domicile",
+              "natureLieu": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant...)",
               "etablissementSanitaireEtSocial": {
                 "et_finess": "string",
-                "nomEtablissement": "string"
+                "nomEtablissement": "string",
+                "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
               },
               "domicile": {
                 "adresse": "string",
                 "serviceADomicile": "Hospitalisation à domicile"
               },
               "trajet": {
-                "typeDeTransport": "Ambulance de secours et de soins d'urgence",
+                "typeDeTransport": "Ambulance de secours et de soins d'urgence (ASSU)",
                 "nomSociete": "string"
               },
               "cabinetMedical": {
-                "nom": "string",
+                "informations": "string",
                 "adresse": "string"
               }
             },
             "misEnCause": {
-              "typeMiseEnCause": "Une personne externe à l'établissement",
+              "typeDeMisEnCause": "Membre de la famille",
               "rpps": "string",
               "civilite": "M.",
               "nom": "string",
@@ -315,19 +317,31 @@
               "profession": "string"
             },
             "description": {
+              "maltraitance": true,
+              "typeDeMaltraitance": [
+                "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)"
+              ],
+              "typesDeFaits": [
+                "Problème comportemental, relationnel ou de communication avec une personne"
+              ],
               "dateSurvenue": "2019-08-24",
-              "typeDeMaltraitance": "Maltraitance physique",
-              "consequenceSurLaVictime": "Sur ma santé physique et/ou psychique",
+              "consequenceSurLaVictime": [
+                "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)"
+              ],
               "situationToujoursActuelle": "Oui",
               "dateDeFin": "2019-08-24",
               "description": "string"
             },
             "demarches": {
-              "organismesDejaSaisis": false,
-              "organismesSaisis": [
-                "Préfecture"
-              ],
-              "autreOrganisme": "string",
+              "contactEtablissementOuPersonneResponsable": {
+                "contactEffectue": true,
+                "dateDemarche": "2019-08-24",
+                "réponseObtenue": false,
+                "description": "string"
+              },
+              "contactAutreOrganise": {
+                "organismesSaisis": "string"
+              },
               "contactForcesDeLOrdre": {
                 "juridiction": "string",
                 "dateDemarche": "2019-08-24"
@@ -384,7 +398,7 @@
           "lienVictime": {
             "type": "string",
             "enum": [
-              "Famille",
+              "Membre de la famille",
               "Proche",
               "Professionnel",
               "Autre"
@@ -466,6 +480,12 @@
             "type": "string",
             "format": "email"
           },
+          "adresse": {
+            "type": "string",
+            "x-stoplight": {
+              "id": "y04dy1ux9lum5"
+            }
+          },
           "telephone": {
             "type": "string",
             "maxLength": 10
@@ -508,6 +528,7 @@
             "nom": "string",
             "prenom": "string",
             "email": "user@example.com",
+            "adresse": "string",
             "telephone": "string",
             "trancheAge": "-18",
             "enSituationDeHandicap": true,
@@ -536,13 +557,13 @@
           "natureLieu": {
             "type": "string",
             "enum": [
-              "domicile",
-              "établissement de santé",
-              "établissement d'hébergement",
-              "établissement social et services sociaux",
-              "cabinet médical",
-              "durant le trajet",
-              "autre"
+              "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant...)",
+              "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)",
+              "Dans un établissement d'hébergement (EHPAD, foyer d'accueil et d'hébergement ...)",
+              "Dans un établissement ou service social (Centre de jour, service d'aide, service Mandataire Judiciaire à la Protection des Majeurs...)",
+              "Dans un cabinet médical (dentiste, orthopédique, pédiatrie, médecin généraliste...)",
+              "Durant le trajet (transport sanitaire, SAMU, Pompier)",
+              "Autre (institut d'esthétique, salon de tatouage, prison)"
             ]
           },
           "etablissementSanitaireEtSocial": {
@@ -562,50 +583,24 @@
           {
             "codePostal": "string",
             "commune": "string",
-            "natureLieu": "domicile",
+            "natureLieu": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant...)",
             "etablissementSanitaireEtSocial": {
               "et_finess": "string",
-              "nomEtablissement": "string"
+              "nomEtablissement": "string",
+              "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
             },
             "domicile": {
               "adresse": "string",
               "serviceADomicile": "Hospitalisation à domicile"
             },
             "trajet": {
-              "typeDeTransport": "Ambulance de secours et de soins d'urgence",
+              "typeDeTransport": "Ambulance de secours et de soins d'urgence (ASSU)",
               "nomSociete": "string"
             },
             "cabinetMedical": {
-              "nom": "string",
+              "informations": "string",
               "adresse": "string"
             }
-          }
-        ]
-      },
-      "lieu": {
-        "type": "object",
-        "title": "lieu",
-        "properties": {
-          "codePostal": {
-            "type": "string",
-            "pattern": "/^(?:0[1-9]|[1-8]\\d|9[0-8])\\d{3}$/"
-          },
-          "commune": {
-            "type": "string"
-          },
-          "adresse": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "codePostal",
-          "commune"
-        ],
-        "examples": [
-          {
-            "codePostal": "string",
-            "commune": "string",
-            "adresse": "string"
           }
         ]
       },
@@ -613,23 +608,45 @@
         "type": "object",
         "title": "etablissementSanitaireEtSocial",
         "description": "Précise l'établissement sanitaire et social où a eu lieu de le problème. Le service est nécessaire SEULEMENT SI l'établissement mis en cause est un établissement de santé (hôpitaux, cliniques ...).",
+        "required": [
+          "et_finess",
+          "codeCategorieEtablissement"
+        ],
         "properties": {
           "et_finess": {
             "type": "string",
             "description": "Numéro FINESS du site géographique. Source de données : https://arssante.opendatasoft.com/explore/dataset/t_finess/api/",
             "pattern": "d[AB|\\d]\\d{7}"
           },
+          "codeCategorieEtablissement": {
+            "type": "string",
+            "x-stoplight": {
+              "id": "58vkumpjh1fou"
+            }
+          },
           "nomEtablissement": {
             "type": "string"
+          },
+          "typeDeMisEnCause": {
+            "x-stoplight": {
+              "id": "7qpmftqrekgf7"
+            },
+            "enum": [
+              "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
+              "Un professionnel du soin (coiffeur, esthéticienne, naturopathe, ...)",
+              "Un autre professionnel d'établissement ou de service (directeur, animateur, agent d'entretien...)",
+              "Travailleur social (éducateur, assistant social...)",
+              "Mandataire Judiciaire à la Protection des Majeurs (curatelle, tutelle)",
+              "Autre Professionnel"
+            ]
           }
         },
-        "required": [
-          "et_finess"
-        ],
         "examples": [
           {
             "et_finess": "string",
-            "nomEtablissement": "string"
+            "codeCategorieEtablissement": "string",
+            "nomEtablissement": "string",
+            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
           }
         ]
       },
@@ -637,21 +654,35 @@
         "type": "object",
         "title": "cabinetMedical",
         "description": "Informations sur le cabinet médical",
-        "required": [
-          "nom"
-        ],
         "properties": {
-          "nom": {
-            "type": "string"
+          "informations": {
+            "type": "string",
+            "x-stoplight": {
+              "id": "wt0jpe1m3pn31"
+            }
           },
           "adresse": {
             "type": "string"
+          },
+          "typeDeMisEnCause": {
+            "x-stoplight": {
+              "id": "7qpmftqrekgf7"
+            },
+            "enum": [
+              "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
+              "Un professionnel du soin (coiffeur, esthéticienne, naturopathe, ...)",
+              "Un autre professionnel d'établissement ou de service (directeur, animateur, agent d'entretien...)",
+              "Travailleur social (éducateur, assistant social...)",
+              "Mandataire Judiciaire à la Protection des Majeurs (curatelle, tutelle)",
+              "Autre Professionnel"
+            ]
           }
         },
         "examples": [
           {
-            "nom": "string",
-            "adresse": "string"
+            "informations": "string",
+            "adresse": "string",
+            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
           }
         ]
       },
@@ -660,25 +691,19 @@
         "title": "misEnCause",
         "description": "Identité du mis en cause",
         "required": [
-          "typeMiseEnCause",
-          "civilite"
+          "typeDeMisEnCause"
         ],
         "properties": {
-          "typeMiseEnCause": {
-            "type": "string",
+          "typeDeMisEnCause": {
+            "x-stoplight": {
+              "id": "3amaiduhq7sju"
+            },
             "enum": [
-              "Une personne externe à l'établissement",
-              "Un autre résident ou un autre patient",
-              "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
-              "Un professionnel du soin (coiffeur, esthéticienne, naturopathe, ...)",
-              "Un autre professionnel de l'établissement ou de service de santé",
-              "Une équipe ou un service spécifique",
-              "Un mandataire judiciaire",
-              "Un membre de la famille",
-              "Un proche (ami, voisin)",
+              "Membre de la famille",
+              "Proche (ami, voisin...)",
+              "Professionnel",
               "Autre"
-            ],
-            "description": "Avec qui a eu lieu le problème ?"
+            ]
           },
           "rpps": {
             "type": "string",
@@ -705,7 +730,7 @@
         },
         "examples": [
           {
-            "typeMiseEnCause": "Une personne externe à l'établissement",
+            "typeDeMisEnCause": "Membre de la famille",
             "rpps": "string",
             "civilite": "M.",
             "nom": "string",
@@ -720,39 +745,76 @@
         "description": "Modèle permettant de préciser et décrire la réclamation",
         "x-internal": false,
         "required": [
-          "dateSurvenue",
-          "typeDeMaltraitance",
+          "maltraitance",
+          "typesDeFaits",
           "consequenceSurLaVictime",
-          "situationToujoursActuelle",
           "description"
         ],
         "properties": {
+          "maltraitance": {
+            "type": "boolean",
+            "x-stoplight": {
+              "id": "2sokx3eeaofya"
+            }
+          },
+          "typeDeMaltraitance": {
+            "type": "array",
+            "items": {
+              "x-stoplight": {
+                "id": "ju34qb2oiddio"
+              },
+              "enum": [
+                "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)",
+                "Maltraitance sexuelle (viols, agressions sexuelles, atteintes sexuelles, attentats à la pudeur...)",
+                "Maltraitance psychologique (humiliations, insulte, intimidation, harcèlement, menaces, dénigrement, isolement...)",
+                "Maltraitance matérielles et financières (fraude, vol d'effets personnels d'argent ou de biens, privation de gestion de ses ressources, dégradation de biens d'une personne...)",
+                "Négligence, abandon, privation (manque de soins, de nourriture, d'hygiène, de sécurité)",
+                "Discrimination (accès difficile, dégradé ou impossible aux droits aux soins ou prestations sociales ou à l'information...)",
+                "Violence institutionnelle (traitement abusif de la part de structures ou d’institutions, menaces, soumission à des actes, comportements ou images violents...)",
+                "Autre type de maltraitance"
+              ]
+            }
+          },
+          "typesDeFaits": {
+            "type": "array",
+            "x-stoplight": {
+              "id": "px3fx91j5xo9f"
+            },
+            "minItems": 1,
+            "items": {
+              "x-stoplight": {
+                "id": "2jysymfj4e2ww"
+              },
+              "enum": [
+                "Problème comportemental, relationnel ou de communication avec une personne",
+                "Problème lié à la facturation ou aux honoraires",
+                "Problème lié aux locaux ou la restauration",
+                "Non-respect des droits des usagers dont défaut d’information (ex : non prise en compte de l'expression de besoin de la personne accompagnée, travail illégal...)",
+                "Problème d’organisation ou de fonctionnement de l’établissement ou du service (ex : Management, plannings, condition de travail...)",
+                "Problème de qualité des soins médicaux ou paramédicaux (ex: soins et/ou interventions inadaptés, absents ou abusifs...)",
+                "Difficultés d'accès aux soins (établissement ou professionnel) (ex: manque de moyen humain...)",
+                "Autre (ex: tatouage, chirurgie et/ou soins esthétiques...)"
+              ]
+            }
+          },
           "dateSurvenue": {
             "type": "string",
             "format": "date"
           },
-          "typeDeMaltraitance": {
-            "type": "string",
-            "enum": [
-              "Maltraitance physique",
-              "Maltraitance sexuelle",
-              "Maltraitance psychologique",
-              "Maltraitance matérielles et financières",
-              "Négligence, abandon, privation",
-              "Discrimination",
-              "Violence institutionnelle",
-              "Autre type de maltraitance"
-            ]
-          },
           "consequenceSurLaVictime": {
-            "type": "string",
-            "enum": [
-              "Sur ma santé physique et/ou psychique",
-              "Sur mes droits",
-              "Sur mes besoins fondamentaux et spécifiques",
-              "Sur mon développement, ma participation sociale",
-              "Autre conséquence"
-            ]
+            "type": "array",
+            "items": {
+              "x-stoplight": {
+                "id": "d7a39mt8a3fpf"
+              },
+              "enum": [
+                "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)",
+                "Sur les droits (violation du droit de la protection et sécurité, accès limité à la justice...)",
+                "Sur les besoins fondamentaux et spécifiques (notamment des besoins vitaux...)",
+                "Sur le développement, la participation sociale (isolement, rejet...)",
+                "Autre conséquence"
+              ]
+            }
           },
           "situationToujoursActuelle": {
             "type": "string",
@@ -775,9 +837,17 @@
         },
         "examples": [
           {
+            "maltraitance": true,
+            "typeDeMaltraitance": [
+              "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)"
+            ],
+            "typesDeFaits": [
+              "Problème comportemental, relationnel ou de communication avec une personne"
+            ],
             "dateSurvenue": "2019-08-24",
-            "typeDeMaltraitance": "Maltraitance physique",
-            "consequenceSurLaVictime": "Sur ma santé physique et/ou psychique",
+            "consequenceSurLaVictime": [
+              "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)"
+            ],
             "situationToujoursActuelle": "Oui",
             "dateDeFin": "2019-08-24",
             "description": "string"
@@ -789,33 +859,17 @@
         "title": "demarches",
         "description": "Modèle définissant les démarches déjà engagées",
         "required": [
-          "organismesDejaSaisis"
+          "contactEtablissementOuPersonneResponsable"
         ],
         "properties": {
-          "organismesDejaSaisis": {
-            "type": "boolean",
-            "default": false
-          },
-          "organismesSaisis": {
-            "type": "array",
-            "minItems": 0,
-            "uniqueItems": true,
-            "items": {
-              "type": "string",
-              "enum": [
-                "Préfecture",
-                "Commission régionale de conciliation et d’indemnisation (CRCI)",
-                "Conseil départemental ou de la métropole ou ou de la collectivité",
-                "Ministère de la santé",
-                "Présidence de la république",
-                "Conseil départemental de l’ordre du professionnel concerné",
-                "Procureur de la République",
-                "Autres organisme"
-              ]
+          "contactEtablissementOuPersonneResponsable": {
+            "$ref": "#/components/schemas/demarcheEtablissementOuProfessionnel",
+            "x-stoplight": {
+              "id": "cdjsr0v5tnass"
             }
           },
-          "autreOrganisme": {
-            "type": "string"
+          "contactAutreOrganise": {
+            "$ref": "#/components/schemas/demarcheAutresOrganismes"
           },
           "contactForcesDeLOrdre": {
             "$ref": "#/components/schemas/demarcheForcesOrdre",
@@ -824,11 +878,15 @@
         },
         "examples": [
           {
-            "organismesDejaSaisis": false,
-            "organismesSaisis": [
-              "Préfecture"
-            ],
-            "autreOrganisme": "string",
+            "contactEtablissementOuPersonneResponsable": {
+              "contactEffectue": true,
+              "dateDemarche": "2019-08-24",
+              "réponseObtenue": false,
+              "description": "string"
+            },
+            "contactAutreOrganise": {
+              "organismesSaisis": "string"
+            },
             "contactForcesDeLOrdre": {
               "juridiction": "string",
               "dateDemarche": "2019-08-24"
@@ -838,9 +896,18 @@
       },
       "demarcheEtablissementOuProfessionnel": {
         "type": "object",
-        "title": "demarcheEtablissementOuProfessionnel",
+        "title": "demarcheEtablissementOuPersonneResponsable",
         "description": "Modèle qui précise qu'un contact est déjà pris avec l’établissement ou le professionnel concerné",
+        "required": [
+          "contactEffectue"
+        ],
         "properties": {
+          "contactEffectue": {
+            "type": "boolean",
+            "x-stoplight": {
+              "id": "92rfgpuqk6gav"
+            }
+          },
           "dateDemarche": {
             "type": "string",
             "format": "date"
@@ -853,12 +920,9 @@
             "type": "string"
           }
         },
-        "required": [
-          "dateDemarche",
-          "réponseObtenue"
-        ],
         "examples": [
           {
+            "contactEffectue": true,
             "dateDemarche": "2019-08-24",
             "réponseObtenue": false,
             "description": "string"
@@ -869,34 +933,17 @@
         "type": "object",
         "title": "demarcheAutresOrganismes",
         "description": "Modèle qui permet de définir les Organismes saisis",
-        "properties": {
-          "organismesSaisis": {
-            "type": "array",
-            "minItems": 1,
-            "uniqueItems": true,
-            "items": {
-              "type": "string",
-              "enum": [
-                "Préfecture",
-                "Commission régionale de conciliation et d’indemnisation (CRCI)",
-                "Conseil départemental ou de la métropole ou ou de la collectivité",
-                "Ministère de la santé",
-                "Présidence de la république",
-                "Conseil départemental de l’ordre du professionnel concerné",
-                "Procureur de la République",
-                "Autres organisme"
-              ]
-            }
-          }
-        },
         "required": [
           "organismesSaisis"
         ],
+        "properties": {
+          "organismesSaisis": {
+            "type": "string"
+          }
+        },
         "examples": [
           {
-            "organismesSaisis": [
-              "Préfecture"
-            ]
+            "organismesSaisis": "string"
           }
         ]
       },
@@ -915,10 +962,6 @@
             "format": "date"
           }
         },
-        "required": [
-          "juridiction",
-          "dateDemarche"
-        ],
         "examples": [
           {
             "juridiction": "string",
@@ -1063,9 +1106,14 @@
       "domicile": {
         "title": "domicile",
         "type": "object",
+        "examples": [
+          {
+            "adresse": "string",
+            "serviceADomicile": "Hospitalisation à domicile"
+          }
+        ],
         "required": [
-          "adresse",
-          "serviceADomicile"
+          "adresse"
         ],
         "properties": {
           "adresse": {
@@ -1098,8 +1146,8 @@
           "typeDeTransport": {
             "type": "string",
             "enum": [
-              "Ambulance de secours et de soins d'urgence",
-              "Voiture de secours aux asphyxiés et blessés",
+              "Ambulance de secours et de soins d'urgence (ASSU)",
+              "Véhicule de secours et d'assistance aux victimes (VSAV)",
               "Ambulance",
               "Véhicule sanitaire léger",
               "Chauffeur de taxi",
@@ -1108,8 +1156,28 @@
           },
           "nomSociete": {
             "type": "string"
+          },
+          "typeDeMisEnCause": {
+            "x-stoplight": {
+              "id": "7qpmftqrekgf7"
+            },
+            "enum": [
+              "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)",
+              "Un professionnel du soin (coiffeur, esthéticienne, naturopathe, ...)",
+              "Un autre professionnel d'établissement ou de service (directeur, animateur, agent d'entretien...)",
+              "Travailleur social (éducateur, assistant social...)",
+              "Mandataire Judiciaire à la Protection des Majeurs (curatelle, tutelle)",
+              "Autre Professionnel"
+            ]
           }
-        }
+        },
+        "examples": [
+          {
+            "typeDeTransport": "Ambulance de secours et de soins d'urgence (ASSU)",
+            "nomSociete": "string",
+            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
+          }
+        ]
       }
     }
   },
