@@ -11,7 +11,8 @@ public class AffecterReclamationDepuisPlateformeTelephonique {
 
   private final AutoriteCompetenteService autoriteCompetenteService;
 
-  private static final Logger logger = LoggerFactory.getLogger(AffecterReclamation.class);
+  private static final Logger logger =
+      LoggerFactory.getLogger(AffecterReclamationDepuisPlateformeTelephonique.class);
 
   public AffecterReclamationDepuisPlateformeTelephonique(
       AutoriteCompetenteService autoriteCompetenteService) {

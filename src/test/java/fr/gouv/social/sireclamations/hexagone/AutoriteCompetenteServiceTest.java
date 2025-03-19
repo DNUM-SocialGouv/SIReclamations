@@ -1,7 +1,6 @@
 package fr.gouv.social.sireclamations.hexagone;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import fr.gouv.social.sireclamations.hexagone.domain.AutoriteCompetente;
@@ -14,7 +13,6 @@ import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesAutorit
 import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesAutoritesCompetentesParMotifs;
 import fr.gouv.social.sireclamations.hexagone.domain.ports.ReferentielDesAutoritesCompetentesParServicesADomicile;
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -53,8 +51,7 @@ class AutoriteCompetenteServiceTest {
 
   @Test
   void
-      duneReclamationPourUneMaltraitanceParUnProfessionnelDeSanteDansUnEtablissementDeSante_doitRetournerARS()
-          throws IOException {
+      duneReclamationPourUneMaltraitanceParUnProfessionnelDeSanteDansUnEtablissementDeSante_doitRetournerARS() {
     // Given
     var numeroDossier = 12345;
     var codeSousCategorieEtablissement = 109;
@@ -92,8 +89,7 @@ class AutoriteCompetenteServiceTest {
 
   @Test
   void
-      uneReclamationPourUneMaltraitanceParUnMembreDeLaFamilleDansUnEtablissementSocialPourUnMotifComportemental_doitRetournerCDetDDETS()
-          throws IOException {
+      uneReclamationPourUneMaltraitanceParUnMembreDeLaFamilleDansUnEtablissementSocialPourUnMotifComportemental_doitRetournerCDetDDETS() {
     // Given
     var numeroDossier = 12345;
     var codeSousCategorieEtablissement = 340;
@@ -132,8 +128,7 @@ class AutoriteCompetenteServiceTest {
 
   @Test
   void
-      deposerUneReclamationPourUneMaltraitanceParUnAutreProfessionnelDeLEtablissementDansUnEtablissementSocialPourUnMotifDeQualiteDesSoin_doitRetournerARS()
-          throws IOException {
+      deposerUneReclamationPourUneMaltraitanceParUnAutreProfessionnelDeLEtablissementDansUnEtablissementSocialPourUnMotifDeQualiteDesSoin_doitRetournerARS() {
     // Given
     var numeroDossier = 12345;
     var codeSousCategorieEtablissement = 340;
@@ -169,8 +164,7 @@ class AutoriteCompetenteServiceTest {
 
   @Test
   void
-      uneReclamationPourUneMaltraitanceParUnMembreDeLaFamilleDansUnEtablissementDeSanteMotifComportemental_doitRetournerCDetARS()
-          throws IOException {
+      uneReclamationPourUneMaltraitanceParUnMembreDeLaFamilleDansUnEtablissementDeSanteMotifComportemental_doitRetournerCDetARS() {
     // Given
     var numeroDossier = 12345;
     var codeSousCategorieEtablissement = 109;
@@ -208,8 +202,7 @@ class AutoriteCompetenteServiceTest {
   }
 
   @Test
-  void uneReclamationAyantEuLieuADomicileAvecUnMembreDeLaFamillePourMisEnCause_doitRetournerCD()
-      throws IOException {
+  void uneReclamationAyantEuLieuADomicileAvecUnMembreDeLaFamillePourMisEnCause_doitRetournerCD() {
     // Given
     var numeroDossier = 12345;
     var codePostal = 38120;
@@ -239,8 +232,8 @@ class AutoriteCompetenteServiceTest {
   }
 
   @Test
-  void uneReclamationAyantEuLieuADomicileAvecLeServiceMJPMetUnMisEnCauseInconnu_doitRetournerDDETS()
-      throws IOException {
+  void
+      uneReclamationAyantEuLieuADomicileAvecLeServiceMJPMetUnMisEnCauseInconnu_doitRetournerDDETS() {
     // Given
     var numeroDossier = 12345;
     var codePostal = 38120;
