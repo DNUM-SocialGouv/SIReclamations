@@ -279,6 +279,7 @@
               "nom": "string",
               "prenom": "string",
               "email": "user@example.com",
+              "adresse": "string",
               "telephone": "string",
               "trancheAge": "-18",
               "enSituationDeHandicap": true,
@@ -479,6 +480,12 @@
             "type": "string",
             "format": "email"
           },
+          "adresse": {
+            "type": "string",
+            "x-stoplight": {
+              "id": "y04dy1ux9lum5"
+            }
+          },
           "telephone": {
             "type": "string",
             "maxLength": 10
@@ -521,6 +528,7 @@
             "nom": "string",
             "prenom": "string",
             "email": "user@example.com",
+            "adresse": "string",
             "telephone": "string",
             "trancheAge": "-18",
             "enSituationDeHandicap": true,
@@ -600,17 +608,9 @@
         "type": "object",
         "title": "etablissementSanitaireEtSocial",
         "description": "Précise l'établissement sanitaire et social où a eu lieu de le problème. Le service est nécessaire SEULEMENT SI l'établissement mis en cause est un établissement de santé (hôpitaux, cliniques ...).",
-        "examples": [
-          {
-            "et_finess": "string",
-            "nomEtablissement": "string",
-            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
-          }
-        ],
         "required": [
           "et_finess",
-          "codeCategorieEtablissement",
-          "typeDeMisEnCause"
+          "codeCategorieEtablissement"
         ],
         "properties": {
           "et_finess": {
@@ -640,7 +640,15 @@
               "Autre Professionnel"
             ]
           }
-        }
+        },
+        "examples": [
+          {
+            "et_finess": "string",
+            "codeCategorieEtablissement": "string",
+            "nomEtablissement": "string",
+            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
+          }
+        ]
       },
       "cabinetMedical": {
         "type": "object",
@@ -673,7 +681,8 @@
         "examples": [
           {
             "informations": "string",
-            "adresse": "string"
+            "adresse": "string",
+            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
           }
         ]
       },
@@ -1165,7 +1174,8 @@
         "examples": [
           {
             "typeDeTransport": "Ambulance de secours et de soins d'urgence (ASSU)",
-            "nomSociete": "string"
+            "nomSociete": "string",
+            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
           }
         ]
       }
