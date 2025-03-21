@@ -103,15 +103,32 @@ public class AutoriteCompetenteService {
       DossierDeReclamation dossier,
       Etablissement etablissement,
       Set<AutoriteCompetente> autoritesCompetentes) {
-    traiterLieuCommun(dossier, autoritesCompetentes);
-    List<String> autoritesCompetenteParCategorieEtablissement =
-        referentielDesAutoritesCompetentesParCategoriesDEtablissements
-            .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                etablissement.getCodeSousCategorie());
 
-    if (!autoritesCompetenteParCategorieEtablissement.isEmpty()) {
-      autoritesCompetentes.addAll(
-          convertirCodesAutorites(autoritesCompetenteParCategorieEtablissement));
+    traiterLieuCommun(dossier, autoritesCompetentes);
+
+    // Vérifier si autoriteCompetenteParLieuDeSurvenue et autoritesCompetentesParMotifs sont vides
+    String autoriteCompetenteParLieuDeSurvenue =
+        referentielDesAutoritesCompetentesParLieuDeSurvenue.recupererAutoriteCompetente(
+            dossier.getLieuDeSurvenu().libelleTypeDeLieu());
+
+    List<String> autoritesCompetentesParMotifs =
+        dossier.getMotifs().stream()
+            .map(referentielDesAutoritesCompetentesParMotifs::recupererAutoriteCompetente)
+            .filter(Objects::nonNull)
+            .toList();
+
+    if (autoriteCompetenteParLieuDeSurvenue == null && autoritesCompetentesParMotifs.isEmpty()) {
+      // Ajout spécifique pour Etablissement, uniquement si aucune autorité compétente par lieu et
+      // motif
+      List<String> autoritesCompetenteParCategorieEtablissement =
+          referentielDesAutoritesCompetentesParCategoriesDEtablissements
+              .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
+                  etablissement.getCodeSousCategorie());
+
+      if (!autoritesCompetenteParCategorieEtablissement.isEmpty()) {
+        autoritesCompetentes.addAll(
+            convertirCodesAutorites(autoritesCompetenteParCategorieEtablissement));
+      }
     }
   }
 

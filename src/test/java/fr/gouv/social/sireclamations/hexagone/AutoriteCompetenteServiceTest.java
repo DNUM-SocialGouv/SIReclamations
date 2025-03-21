@@ -75,10 +75,6 @@ class AutoriteCompetenteServiceTest {
     when(referentielDesAutoritesCompetentesParLieuDeSurvenue.recupererAutoriteCompetente(
             typeDeLieu))
         .thenReturn("ARS");
-    when(referentielDesAutoritesCompetentesParCategoriesDEtablissements
-            .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                codeSousCategorieEtablissement))
-        .thenReturn(List.of("ARS"));
     // When
     var autoritesObtenue =
         autoriteCompetenteService.recupererAutoritesCompetentes(dossierReclamation);
@@ -189,10 +185,6 @@ class AutoriteCompetenteServiceTest {
         .thenReturn("ARS");
     when(referentielDesAutoritesCompetentesParMotifs.recupererAutoriteCompetente(motifs.get(0)))
         .thenReturn(null);
-    when(referentielDesAutoritesCompetentesParCategoriesDEtablissements
-            .recupererAutoritesCompetentesParCodeSousCategorieEtablissement(
-                codeSousCategorieEtablissement))
-        .thenReturn(List.of("ARS"));
     // When
     var autoritesObtenue =
         autoriteCompetenteService.recupererAutoritesCompetentes(dossierReclamation);

@@ -611,10 +611,17 @@
         "type": "object",
         "title": "etablissementSanitaireEtSocial",
         "description": "Précise l'établissement sanitaire et social où a eu lieu de le problème. Le service est nécessaire SEULEMENT SI l'établissement mis en cause est un établissement de santé (hôpitaux, cliniques ...).",
+        "examples": [
+          {
+            "et_finess": "string",
+            "codeCategorieEtablissement": "string",
+            "nomEtablissement": "string",
+            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
+          }
+        ],
         "required": [
           "et_finess",
-          "codeCategorieEtablissement",
-          "typeDeMisEnCause"
+          "codeCategorieEtablissement"
         ],
         "properties": {
           "et_finess": {
@@ -644,15 +651,7 @@
               "Autre Professionnel"
             ]
           }
-        },
-        "examples": [
-          {
-            "et_finess": "string",
-            "codeCategorieEtablissement": "string",
-            "nomEtablissement": "string",
-            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
-          }
-        ]
+        }
       },
       "cabinetMedical": {
         "type": "object",
@@ -664,9 +663,6 @@
             "adresse": "string",
             "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
           }
-        ],
-        "required": [
-          "typeDeMisEnCause"
         ],
         "properties": {
           "informations": {
@@ -1156,8 +1152,7 @@
           }
         ],
         "required": [
-          "typeDeTransport",
-          "typeDeMisEnCause"
+          "typeDeTransport"
         ],
         "properties": {
           "typeDeTransport": {
