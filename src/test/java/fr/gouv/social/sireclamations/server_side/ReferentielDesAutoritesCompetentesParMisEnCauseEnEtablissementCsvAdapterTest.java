@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
-class ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapterTestApi {
+class ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapterTest {
 
   private ReferentielDesAutoritesCompetentesParMisEnCauseEnEtablissementCsvAdapter
       referentielDesAutoritesCompetentesParMisEnCausePourMaltraitance;

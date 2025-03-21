@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Civilite {
   M("M."),
-  Mme("Mme"),
-  Mx("Mx");
+  MME("Mme"),
+  MX("Mx");
 
   private final String description;
 
