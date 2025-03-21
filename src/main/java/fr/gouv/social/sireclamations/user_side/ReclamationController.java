@@ -3,9 +3,11 @@ package fr.gouv.social.sireclamations.user_side;
 import fr.gouv.social.sireclamations.hexagone.AffecterReclamation;
 import fr.gouv.social.sireclamations.hexagone.AffecterReclamationDepuisPlateformeTelephonique;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
+import fr.gouv.social.sireclamations.user_side.plateforme_telephonique.DossierDeReclamationDeLaPlateformeTelephoniqueApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -118,7 +120,7 @@ public class ReclamationController {
 
   @PostMapping("/plateforme-telephonique")
   public ReclamationApiResponse creerReclamation(
-      @RequestBody DossierDeReclamationDeLaPlateformeTelephoniqueApi reclamationApi) {
+      @RequestBody @Valid DossierDeReclamationDeLaPlateformeTelephoniqueApi reclamationApi) {
     var dossierDeReclamation = ReclamationApiMapper.toDossierDeReclamation(reclamationApi);
     final Reclamation reclamation =
         affecterReclamationDepuisPlateformeTelephonique.executer(dossierDeReclamation);

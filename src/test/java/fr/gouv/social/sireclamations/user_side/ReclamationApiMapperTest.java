@@ -8,6 +8,7 @@ import fr.gouv.social.sireclamations.hexagone.domain.AutreEtablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.Domicile;
 import fr.gouv.social.sireclamations.hexagone.domain.DossierDeReclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
+import fr.gouv.social.sireclamations.user_side.plateforme_telephonique.DossierDeReclamationDeLaPlateformeTelephoniqueApi;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +37,6 @@ class ReclamationApiMapperTest {
            },
            "misEnCause": {
              "typeDeMisEnCause": "Professionnel",
-             "rpps": "string",
              "civilite": "M.",
              "nom": "string",
              "prenom": "string",

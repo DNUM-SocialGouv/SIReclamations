@@ -7,8 +7,9 @@ import fr.gouv.social.sireclamations.hexagone.domain.Etablissement;
 import fr.gouv.social.sireclamations.hexagone.domain.LieuDeSurvenue;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
 import fr.gouv.social.sireclamations.hexagone.domain.Trajet;
-import fr.gouv.social.sireclamations.user_side.DossierDeReclamationDeLaPlateformeTelephoniqueApi.LieuSurvenueApi;
-import fr.gouv.social.sireclamations.user_side.DossierDeReclamationDeLaPlateformeTelephoniqueApi.MisEnCauseApi;
+import fr.gouv.social.sireclamations.user_side.plateforme_telephonique.DossierDeReclamationDeLaPlateformeTelephoniqueApi;
+import fr.gouv.social.sireclamations.user_side.plateforme_telephonique.DossierDeReclamationDeLaPlateformeTelephoniqueApi.LieuSurvenueApi;
+import fr.gouv.social.sireclamations.user_side.plateforme_telephonique.MisEnCauseApi;
 
 public class ReclamationApiMapper {
   public static ReclamationApiResponse toReclamationApiResponse(Reclamation reclamation) {
@@ -64,23 +65,23 @@ public class ReclamationApiMapper {
     if (lieuSurvenue.getDomicile() != null) {
       var domicile = lieuSurvenue.getDomicile();
       return domicile.getServiceADomicile() != null
-          ? domicile.getServiceADomicile()
-          : misEnCause.getTypeDeMisEnCause();
+          ? domicile.getServiceADomicile().getDescription()
+          : misEnCause.getTypeDePersonneMisEnCause().getDescription();
     } else if (lieuSurvenue.getEtablissementSanitaireEtSocial() != null) {
       var etablissement = lieuSurvenue.getEtablissementSanitaireEtSocial();
       return etablissement.getTypeDeMisEnCause() != null
-          ? etablissement.getTypeDeMisEnCause()
-          : misEnCause.getTypeDeMisEnCause();
+          ? etablissement.getTypeDeMisEnCause().getDescription()
+          : misEnCause.getTypeDePersonneMisEnCause().getDescription();
     } else if (lieuSurvenue.getCabinetMedical() != null) {
       var cabinetMedical = lieuSurvenue.getCabinetMedical();
       return cabinetMedical.getTypeDeMisEnCause() != null
-          ? cabinetMedical.getTypeDeMisEnCause()
-          : misEnCause.getTypeDeMisEnCause();
+          ? cabinetMedical.getTypeDeMisEnCause().getDescription()
+          : misEnCause.getTypeDePersonneMisEnCause().getDescription();
     } else if (lieuSurvenue.getTrajet() != null) {
       var trajet = lieuSurvenue.getTrajet();
       return trajet.getTypeDeMisEnCause() != null
-          ? trajet.getTypeDeMisEnCause()
-          : misEnCause.getTypeDeMisEnCause();
+          ? trajet.getTypeDeMisEnCause().getDescription()
+          : misEnCause.getTypeDePersonneMisEnCause().getDescription();
     }
     return null;
   }
@@ -92,7 +93,9 @@ public class ReclamationApiMapper {
           Integer.parseInt(lieuSurvenue.getCodePostal()),
           domicile.getAdresse(),
           lieuSurvenue.getNatureLieu(),
-          domicile.getServiceADomicile());
+          domicile.getServiceADomicile() != null
+              ? domicile.getServiceADomicile().getDescription()
+              : null);
     } else if (lieuSurvenue.getEtablissementSanitaireEtSocial() != null) {
       var etablissement = lieuSurvenue.getEtablissementSanitaireEtSocial();
       return new Etablissement(

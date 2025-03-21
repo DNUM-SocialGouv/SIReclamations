@@ -148,7 +148,7 @@ class ReclamationControllerTest {
                  }
                },
                "misEnCause": {
-                 "typeDeMisEnCause": "Professionnel",
+                 "typeDeMisEnCauseProfessionnel": "Professionnel",
                  "rpps": "string",
                  "civilite": "M.",
                  "nom": "string",
