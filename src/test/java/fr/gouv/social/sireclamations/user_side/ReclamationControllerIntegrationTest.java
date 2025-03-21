@@ -31,7 +31,7 @@ class ReclamationControllerIntegrationTest {
     // When Then
     mockMvc
         .perform(
-            post("/api/v1/reclamations")
+            post("/api/v1/reclamation/demat-social")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .param("procedure_id", String.valueOf(numeroDemarche))
                 .param("dossier_id", String.valueOf(numeroDossier))
@@ -54,7 +54,7 @@ class ReclamationControllerIntegrationTest {
     // When Then
     mockMvc
         .perform(
-            post("/api/v1/reclamations")
+            post("/api/v1/reclamation/demat-social")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .param("procedure_id", String.valueOf(numeroDemarche))
                 .param("dossier_id", String.valueOf(numeroDossier))

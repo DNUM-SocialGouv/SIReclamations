@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/v1/reclamations")
+@RequestMapping("api/v1/reclamation")
 @Tag(name = "Réclamations", description = "Endpoints pour gérer les réclamations")
 public class ReclamationController {
   private static final Logger logger = LoggerFactory.getLogger(ReclamationController.class);
@@ -49,7 +49,9 @@ public class ReclamationController {
 
   // hack: une nouvelle version du webhook doit prochainement être intégrée. Cette version enverra
   // une payload de type application/json. Cette méthode est créée dans l'attente.
-  @PostMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+  @PostMapping(
+      value = {"/demat-social"},
+      consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
   @Operation(
       summary = "Récupère une réclamation issue de demat.social",
       description =

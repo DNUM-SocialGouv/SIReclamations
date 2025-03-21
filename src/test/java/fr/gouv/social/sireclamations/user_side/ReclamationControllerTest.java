@@ -61,7 +61,7 @@ class ReclamationControllerTest {
     // When Then
     mockMvc
         .perform(
-            post("/api/v1/reclamations")
+            post("/api/v1/reclamation/demat-social")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .param("procedure_id", String.valueOf(numeroDemarche))
                 .param("dossier_id", String.valueOf(numeroDossier))
@@ -84,7 +84,7 @@ class ReclamationControllerTest {
     // When Then
     mockMvc
         .perform(
-            post("/api/v1/reclamations")
+            post("/api/v1/reclamation/demat-social")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .param("procedure_id", String.valueOf(numeroDemarche))
                 .param("dossier_id", String.valueOf(numeroDossier))
@@ -117,7 +117,7 @@ class ReclamationControllerTest {
     // When Then
     mockMvc
         .perform(
-            post("/api/v1/reclamations")
+            post("/api/v1/reclamation/demat-social")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .param("procedure_id", String.valueOf(numeroDemarche))
                 .param("dossier_id", String.valueOf(numeroDossier))
@@ -176,7 +176,7 @@ class ReclamationControllerTest {
 
     mockMvc
         .perform(
-            post("/api/v1/reclamations/plateforme-telephonique")
+            post("/api/v1/reclamation/plateforme-telephonique")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonPayload))
         .andExpect(status().isOk())
