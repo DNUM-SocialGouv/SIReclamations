@@ -10,8 +10,8 @@ public class EtablissementSanitaireEtSocialApi {
   @JsonProperty(value = "et_finess", required = true)
   @NotNull(message = "Le champ et_finess ne peut pas être nul")
   @Pattern(
-      regexp = "d[AB|\\d]\\d{7}",
-      message = "Le champ et_finess doit correspondre au pattern d[AB|\\d]\\d{7}")
+      regexp = "\\d[AB\\d]\\d{7}",
+      message = "Le champ et_finess doit correspondre au pattern d[AB\\d]\\d{7}")
   private String etFiness;
 
   @JsonProperty(value = "codeCategorieEtablissement", required = true)
@@ -23,8 +23,7 @@ public class EtablissementSanitaireEtSocialApi {
   private String nomEtablissement;
 
   @JsonProperty(value = "typeDeMisEnCause", required = true)
-  @NotNull(message = "Le champ typeDeMisEnCause ne peut pas être nul")
-  @TypeDeMisEnCauseValid(message = "La valeur de typeDeMisEnCause n'est pas valide")
+  @TypeDeMisEnCauseProfessionnelValid(message = "La valeur de typeDeMisEnCause n'est pas valide")
   private TypeDeMisEnCauseProfessionnel typeDeMisEnCauseProfessionnel;
 
   public EtablissementSanitaireEtSocialApi() {

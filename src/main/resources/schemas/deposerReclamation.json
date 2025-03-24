@@ -270,7 +270,7 @@
               "telephone": "string",
               "estLaVictime": true,
               "langueEtrangere": true,
-              "lienVictime": "Famille",
+              "lienVictime": "Membre de la famille",
               "profession": "string",
               "victimeInformeeDemarche": "oui",
               "anonymatVictimeDemande": true,
@@ -442,7 +442,7 @@
             "telephone": "string",
             "estLaVictime": true,
             "langueEtrangere": true,
-            "lienVictime": "Famille",
+            "lienVictime": "Membre de la famille",
             "profession": "string",
             "victimeInformeeDemarche": "oui",
             "anonymatVictimeDemande": true,
@@ -627,7 +627,7 @@
           "et_finess": {
             "type": "string",
             "description": "Numéro FINESS du site géographique. Source de données : https://arssante.opendatasoft.com/explore/dataset/t_finess/api/",
-            "pattern": "d[AB|\\d]\\d{7}"
+            "pattern": "\"\\d[AB\\d]\\d{7}\""
           },
           "codeCategorieEtablissement": {
             "type": "string",

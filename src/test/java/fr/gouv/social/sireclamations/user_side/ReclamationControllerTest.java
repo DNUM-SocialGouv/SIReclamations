@@ -36,6 +36,7 @@ class ReclamationControllerTest {
 
   @TestConfiguration
   static class TestConfig {
+
     @Bean
     public AffecterReclamation affecterReclamation() {
       return Mockito.mock(AffecterReclamation.class);
@@ -147,14 +148,36 @@ class ReclamationControllerTest {
                    "serviceADomicile": "Service de Soins Infirmier à Domicile (SSIAD)"
                  }
                },
+               "declarant": {
+                   "civilite": "M.",
+                   "nom": "string",
+                   "prenom": "string",
+                   "email": "user@example.com",
+                   "telephone": "0123456789",
+                   "estLaVictime": true,
+                   "lienVictime": "Membre de la famille",
+                   "victimeInformeeDemarche": "oui",
+                   "anonymatVictimeDemande": true,
+                   "anonymatMisEnCauseDemande": true,
+                   "suiviDemande": true
+               },
                "misEnCause": {
-                 "typeDeMisEnCauseProfessionnel": "Professionnel",
-                 "rpps": "string",
+                 "typeDeMisEnCause": "Professionnel",
+                 "rpps": "123456789",
                  "civilite": "M.",
                  "nom": "string",
                  "prenom": "string",
                  "profession": "string"
                },
+               "victime": {
+                   "civilite": "M.",
+                   "nom": "string",
+                   "prenom": "string",
+                   "trancheAge": "-18",
+                   "enSituationDeHandicap": true,
+                   "anonymatMisEnCauseDemande": "Oui",
+                   "autresPersonnesVictimes": "Oui"
+                 },
                "description": {
                  "maltraitance": true,
                  "typeDeMaltraitance": [

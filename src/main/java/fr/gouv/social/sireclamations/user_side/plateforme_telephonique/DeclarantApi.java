@@ -24,10 +24,10 @@ public class DeclarantApi {
   private String email;
 
   @JsonProperty(value = "telephone", required = true)
-  @NotNull(message = "Le numéro de téléphone est obligatoire")
+  @NotNull(message = "Le numéro de téléphone du déclarant est obligatoire")
   @Pattern(
       regexp = "^\\d{10}$",
-      message = "Le numéro de téléphone doit être un nombre de 10 chiffres")
+      message = "Le numéro de téléphone du déclarant doit être un nombre de 10 chiffres")
   private String telephone;
 
   @JsonProperty(value = "estLaVictime", required = true)

@@ -1,15 +1,14 @@
 package fr.gouv.social.sireclamations.user_side.plateforme_telephonique;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 public class LieuDeSurvenueApi {
 
   @NotNull(message = "Le champ 'codePostal' est requis.")
-  @Pattern(
-      regexp = "^(?:0[1-9]|[1-8]\\d|9[0-8]\\d{2}|2[AB]\\d{2}|971|972|973|974|976\\d{2})$",
-      message = "Le code postal doit être valide.")
+  @Pattern(regexp = "^\\d{5}$", message = "Le code postal doit être valide.")
   @JsonProperty("codePostal")
   private String codePostal;
 
@@ -22,15 +21,19 @@ public class LieuDeSurvenueApi {
   private String natureLieu;
 
   @JsonProperty("etablissementSanitaireEtSocial")
-  private EtablissementSanitaireEtSocialApi etablissementSanitaireEtSocialapi;
+  @Valid
+  private EtablissementSanitaireEtSocialApi etablissementSanitaireEtSocialApi;
 
   @JsonProperty("domicile")
+  @Valid
   private DomicileApi domicileApi;
 
   @JsonProperty("trajet")
+  @Valid
   private TrajetApi trajetApi;
 
   @JsonProperty("cabinetMedical")
+  @Valid
   private CabinetMedicalApi cabinetMedicalApi;
 
   public String getCodePostal() {
@@ -45,8 +48,8 @@ public class LieuDeSurvenueApi {
     return natureLieu;
   }
 
-  public EtablissementSanitaireEtSocialApi getEtablissementSanitaireEtSocialapi() {
-    return etablissementSanitaireEtSocialapi;
+  public EtablissementSanitaireEtSocialApi getEtablissementSanitaireEtSocialApi() {
+    return etablissementSanitaireEtSocialApi;
   }
 
   public DomicileApi getDomicileApi() {
@@ -73,9 +76,9 @@ public class LieuDeSurvenueApi {
     this.natureLieu = natureLieu;
   }
 
-  public void setEtablissementSanitaireEtSocialapi(
-      EtablissementSanitaireEtSocialApi etablissementSanitaireEtSocialapi) {
-    this.etablissementSanitaireEtSocialapi = etablissementSanitaireEtSocialapi;
+  public void setEtablissementSanitaireEtSocialApi(
+      EtablissementSanitaireEtSocialApi etablissementSanitaireEtSocialApi) {
+    this.etablissementSanitaireEtSocialApi = etablissementSanitaireEtSocialApi;
   }
 
   public void setDomicileApi(DomicileApi domicileApi) {

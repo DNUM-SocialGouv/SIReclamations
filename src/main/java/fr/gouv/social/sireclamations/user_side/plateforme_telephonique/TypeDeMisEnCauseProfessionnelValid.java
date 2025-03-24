@@ -10,8 +10,8 @@ import java.lang.annotation.Target;
 // Annotation personnalisée de validation
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = TypeDeMisEnCauseValidator.class)
-public @interface TypeDeMisEnCauseValid {
+@Constraint(validatedBy = TypeDeMisEnCauseProfessionnelValidator.class)
+public @interface TypeDeMisEnCauseProfessionnelValid {
   String message() default "Valeur non valide pour typeDeMisEnCause";
 
   Class<?>[] groups() default {};

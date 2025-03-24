@@ -50,43 +50,65 @@ class ReclamationControllerIntegrationTest {
     // Given
     String json =
         """
-        {
-           "id": "1234",
-           "lieuSurvenue": {
-             "codePostal": "75010",
-             "commune": "Paris",
-             "natureLieu": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant...)",
-             "domicile": {
-               "adresse": "31 Avenue Pierre Curie",
-               "serviceADomicile": "Service de Soins Infirmier à Domicile (SSIAD)"
+            {
+               "id": "1234",
+               "lieuSurvenue": {
+                 "codePostal": "75010",
+                 "commune": "Paris",
+                 "natureLieu": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant...)",
+                 "domicile": {
+                   "adresse": "31 Avenue Pierre Curie",
+                   "serviceADomicile": "Service de Soins Infirmier à Domicile (SSIAD)"
+                 }
+               },
+               "declarant": {
+                   "civilite": "M.",
+                   "nom": "string",
+                   "prenom": "string",
+                   "email": "user@example.com",
+                   "telephone": "0123456789",
+                   "estLaVictime": true,
+                   "lienVictime": "Membre de la famille",
+                   "victimeInformeeDemarche": "oui",
+                   "anonymatVictimeDemande": true,
+                   "anonymatMisEnCauseDemande": true,
+                   "suiviDemande": true
+               },
+               "victime": {
+                   "civilite": "M.",
+                   "nom": "string",
+                   "prenom": "string",
+                   "trancheAge": "-18",
+                   "enSituationDeHandicap": true,
+                   "anonymatMisEnCauseDemande": "Oui",
+                   "autresPersonnesVictimes": "Oui"
+                 },
+               "misEnCause": {
+                 "typeDeMisEnCause": "Professionnel",
+                 "civilite": "M.",
+                 "nom": "string",
+                 "prenom": "string",
+                 "profession": "string"
+               },
+               "description": {
+                 "maltraitance": true,
+                 "typeDeMaltraitance": [
+                   "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)"
+                 ],
+                 "typesDeFaits": [
+                   "Problème comportemental, relationnel ou de communication avec une personne"
+                 ],
+                 "dateSurvenue": "2019-08-24",
+                 "consequenceSurLaVictime": [
+                   "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)"
+                 ],
+                 "situationToujoursActuelle": "Oui",
+                 "dateDeFin": "2019-08-24",
+                 "description": "string"
+               }
              }
-           },
-           "misEnCause": {
-             "typeDeMisEnCause": "Professionnel",
-             "civilite": "M.",
-             "nom": "string",
-             "prenom": "string",
-             "profession": "string"
-           },
-           "description": {
-             "maltraitance": true,
-             "typeDeMaltraitance": [
-               "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)"
-             ],
-             "typesDeFaits": [
-               "Problème comportemental, relationnel ou de communication avec une personne"
-             ],
-             "dateSurvenue": "2019-08-24",
-             "consequenceSurLaVictime": [
-               "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)"
-             ],
-             "situationToujoursActuelle": "Oui",
-             "dateDeFin": "2019-08-24",
-             "description": "string"
-           }
-         }
 
-        """;
+            """;
     // When Then
     mockMvc
         .perform(
@@ -107,46 +129,68 @@ class ReclamationControllerIntegrationTest {
     // Given
     String json =
         """
-        {
-           "id": "1234",
-           "lieuSurvenue": {
-             "codePostal": "75010",
-             "commune": "Paris",
-             "natureLieu": "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)",
-             "etablissementSanitaireEtSocial": {
-               "et_finess": "1234567",
-               "codeCategorieEtablissement": "340",
-               "nomEtablissement": "HOPITAL ST-LAZARE",
-               "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
+            {
+               "id": "1234",
+               "lieuSurvenue": {
+                 "codePostal": "75010",
+                 "commune": "Paris",
+                 "natureLieu": "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)",
+                 "etablissementSanitaireEtSocial": {
+                   "et_finess": "123456789",
+                   "codeCategorieEtablissement": "340",
+                   "nomEtablissement": "HOPITAL ST-LAZARE",
+                   "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
+                 }
+               },
+               "declarant": {
+                   "civilite": "M.",
+                   "nom": "string",
+                   "prenom": "string",
+                   "email": "user@example.com",
+                   "telephone": "0123456789",
+                   "estLaVictime": true,
+                   "lienVictime": "Membre de la famille",
+                   "victimeInformeeDemarche": "oui",
+                   "anonymatVictimeDemande": true,
+                   "anonymatMisEnCauseDemande": true,
+                   "suiviDemande": true
+               },
+               "victime": {
+                   "civilite": "M.",
+                   "nom": "string",
+                   "prenom": "string",
+                   "trancheAge": "-18",
+                   "enSituationDeHandicap": true,
+                   "anonymatMisEnCauseDemande": "Oui",
+                   "autresPersonnesVictimes": "Oui"
+                 },
+               "misEnCause": {
+                 "typeDeMisEnCause": "Professionnel",
+                 "rpps": "123456789",
+                 "civilite": "M.",
+                 "nom": "string",
+                 "prenom": "string",
+                 "profession": "string"
+               },
+               "description": {
+                 "maltraitance": true,
+                 "typeDeMaltraitance": [
+                   "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)"
+                 ],
+                 "typesDeFaits": [
+                   "Problème comportemental, relationnel ou de communication avec une personne"
+                 ],
+                 "dateSurvenue": "2019-08-24",
+                 "consequenceSurLaVictime": [
+                   "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)"
+                 ],
+                 "situationToujoursActuelle": "Oui",
+                 "dateDeFin": "2019-08-24",
+                 "description": "string"
+               }
              }
-           },
-           "misEnCause": {
-             "typeDeMisEnCause": "Professionnel",
-             "rpps": "string",
-             "civilite": "M.",
-             "nom": "string",
-             "prenom": "string",
-             "profession": "string"
-           },
-           "description": {
-             "maltraitance": true,
-             "typeDeMaltraitance": [
-               "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)"
-             ],
-             "typesDeFaits": [
-               "Problème comportemental, relationnel ou de communication avec une personne"
-             ],
-             "dateSurvenue": "2019-08-24",
-             "consequenceSurLaVictime": [
-               "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)"
-             ],
-             "situationToujoursActuelle": "Oui",
-             "dateDeFin": "2019-08-24",
-             "description": "string"
-           }
-         }
 
-        """;
+            """;
     // When Then
     mockMvc
         .perform(
@@ -156,7 +200,7 @@ class ReclamationControllerIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.numeroDossier", is(1234)))
         .andExpect(jsonPath("$.lieuDeSurvenue.codeTypeDeLieu", is("ETAB")))
-        .andExpect(jsonPath("$.lieuDeSurvenue.numeroFiness", is("1234567")))
+        .andExpect(jsonPath("$.lieuDeSurvenue.numeroFiness", is("123456789")))
         .andExpect(jsonPath("$.lieuDeSurvenue.codeSousCategorie", is(340)))
         .andExpect(jsonPath("$.autoritesCompetentes", hasSize(1)))
         .andExpect(jsonPath("$.autoritesCompetentes", containsInAnyOrder("ARS")));
@@ -169,45 +213,66 @@ class ReclamationControllerIntegrationTest {
     // Given
     String json =
         """
-        {
-           "id": "1234",
-           "lieuSurvenue": {
-             "codePostal": "75010",
-             "commune": "Paris",
-             "natureLieu": "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)",
-             "etablissementSanitaireEtSocial": {
-               "et_finess": "1234567",
-               "codeCategorieEtablissement": "340",
-               "nomEtablissement": "HOPITAL ST-LAZARE"
+            {
+               "id": "1234",
+               "lieuSurvenue": {
+                 "codePostal": "75010",
+                 "commune": "Paris",
+                 "natureLieu": "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)",
+                 "etablissementSanitaireEtSocial": {
+                   "et_finess": "123456789",
+                   "codeCategorieEtablissement": "340",
+                   "nomEtablissement": "HOPITAL ST-LAZARE"
+                 }
+               },
+               "declarant": {
+                   "civilite": "M.",
+                   "nom": "string",
+                   "prenom": "string",
+                   "email": "user@example.com",
+                   "telephone": "0123456789",
+                   "estLaVictime": true,
+                   "lienVictime": "Membre de la famille",
+                   "victimeInformeeDemarche": "oui",
+                   "anonymatVictimeDemande": true,
+                   "anonymatMisEnCauseDemande": true,
+                   "suiviDemande": true
+               },
+               "misEnCause": {
+                 "typeDeMisEnCause": "Membre de la famille",
+                 "civilite": "M.",
+                 "nom": "string",
+                 "prenom": "string",
+                 "profession": "string"
+               },
+               "victime": {
+                   "civilite": "M.",
+                   "nom": "string",
+                   "prenom": "string",
+                   "trancheAge": "-18",
+                   "enSituationDeHandicap": true,
+                   "anonymatMisEnCauseDemande": "Oui",
+                   "autresPersonnesVictimes": "Oui"
+                 },
+               "description": {
+                 "maltraitance": true,
+                 "typeDeMaltraitance": [
+                   "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)"
+                 ],
+                 "typesDeFaits": [
+                   "Problème comportemental, relationnel ou de communication avec une personne"
+                 ],
+                 "dateSurvenue": "2019-08-24",
+                 "consequenceSurLaVictime": [
+                   "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)"
+                 ],
+                 "situationToujoursActuelle": "Oui",
+                 "dateDeFin": "2019-08-24",
+                 "description": "string"
+               }
              }
-           },
-           "misEnCause": {
-             "typeDeMisEnCause": "Membre de la famille",
-             "rpps": "string",
-             "civilite": "M.",
-             "nom": "string",
-             "prenom": "string",
-             "profession": "string"
-           },
-           "description": {
-             "maltraitance": true,
-             "typeDeMaltraitance": [
-               "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)"
-             ],
-             "typesDeFaits": [
-               "Problème comportemental, relationnel ou de communication avec une personne"
-             ],
-             "dateSurvenue": "2019-08-24",
-             "consequenceSurLaVictime": [
-               "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)"
-             ],
-             "situationToujoursActuelle": "Oui",
-             "dateDeFin": "2019-08-24",
-             "description": "string"
-           }
-         }
 
-        """;
+            """;
     // When Then
     mockMvc
         .perform(
@@ -217,10 +282,74 @@ class ReclamationControllerIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.numeroDossier", is(1234)))
         .andExpect(jsonPath("$.lieuDeSurvenue.codeTypeDeLieu", is("ETAB")))
-        .andExpect(jsonPath("$.lieuDeSurvenue.numeroFiness", is("1234567")))
+        .andExpect(jsonPath("$.lieuDeSurvenue.numeroFiness", is("123456789")))
         .andExpect(jsonPath("$.lieuDeSurvenue.codeSousCategorie", is(340)))
         .andExpect(jsonPath("$.autoritesCompetentes", hasSize(2)))
         .andExpect(jsonPath("$.autoritesCompetentes", containsInAnyOrder("ARS", "CD")));
+  }
+
+  @Test
+  void
+      lorsqueLonDeposeUneReclamationViaLaPlateformeTelephoniqueEtQuePlusieursChampsObligatoireSontManquant_alorsRetourne400EtLesChampsEnErreur()
+          throws Exception {
+    // Given
+    String json =
+        """
+            {
+               "lieuSurvenue": {
+                 "codePostal": "75",
+                 "commune": "Paris",
+                 "natureLieu": "Dans un établissement de santé (hôpital, clinique, laboratoire, pharmacie ...)",
+                 "etablissementSanitaireEtSocial": {
+                   "codeCategorieEtablissement": "340",
+                   "nomEtablissement": "HOPITAL ST-LAZARE"
+                 }
+               },
+               "misEnCause": {
+                 "typeDeMisEnCause": "Membre de la famille",
+                 "rpps": "string",
+                 "civilite": "M.",
+                 "nom": "string",
+                 "prenom": "string",
+                 "profession": "string"
+               },
+               "description": {
+                 "maltraitance": true,
+                 "typeDeMaltraitance": [
+                   "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)"
+                 ],
+                 "typesDeFaits": [
+                   "Problème comportemental, relationnel ou de communication avec une personne"
+                 ],
+                 "dateSurvenue": "2019-08-24",
+                 "consequenceSurLaVictime": [
+                   "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)"
+                 ],
+                 "situationToujoursActuelle": "Oui",
+                 "dateDeFin": "2019-08-24",
+                 "description": "string"
+               }
+             }
+
+            """;
+    // When Then
+    mockMvc
+        .perform(
+            post("/api/v1/reclamation/plateforme-telephonique")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+        .andExpect(status().isBadRequest()) // Vérifie le code de réponse
+        .andExpect(jsonPath("$.errors", hasSize(6)))
+        .andExpect(
+            jsonPath(
+                "$.errors",
+                containsInAnyOrder(
+                    "Le champ et_finess ne peut pas être nul",
+                    "Le champ 'id' est requis doit correspondre à un numéro de dossier",
+                    "Le code postal doit être valide.",
+                    "Le RPPS doit être un identifiant à 9 chiffres",
+                    "Le champ 'déclarant' est requis",
+                    "Le champ 'victime' est requis.")));
   }
 
   @Test

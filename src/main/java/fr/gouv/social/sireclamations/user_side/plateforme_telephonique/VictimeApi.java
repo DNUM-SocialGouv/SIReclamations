@@ -8,29 +8,28 @@ import jakarta.validation.constraints.Pattern;
 public class VictimeApi {
 
   @JsonProperty(value = "civilite", required = true)
-  @NotNull(message = "La civilité est obligatoire")
+  @NotNull(message = "La civilité de la victime est obligatoire")
   private Civilite civilite;
 
   @JsonProperty(value = "nom", required = true)
-  @NotNull(message = "Le nom est obligatoire")
+  @NotNull(message = "Le nom de la victime est obligatoire")
   private String nom;
 
   @JsonProperty(value = "prenom", required = true)
-  @NotNull(message = "Le prénom est obligatoire")
+  @NotNull(message = "Le prénom de la victime est obligatoire")
   private String prenom;
 
   @JsonProperty("email")
-  @Email(message = "L'email doit être valide")
+  @Email(message = "L'email de la victime doit être valide")
   private String email;
 
   @JsonProperty("adresse")
   private String adresse;
 
   @JsonProperty(value = "telephone", required = true)
-  @NotNull(message = "Le numéro de téléphone est obligatoire")
   @Pattern(
       regexp = "^\\d{10}$",
-      message = "Le numéro de téléphone doit être un nombre de 10 chiffres")
+      message = "Le numéro de téléphone de la victime doit être un nombre de 10 chiffres")
   private String telephone;
 
   @JsonProperty(value = "trancheAge", required = true)

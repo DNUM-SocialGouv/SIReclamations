@@ -13,7 +13,7 @@ public class CabinetMedicalApi {
 
   @JsonProperty("typeDeMisEnCause")
   @NotNull(message = "Le champ typeDeMisEnCause ne peut pas être nul")
-  @TypeDeMisEnCauseValid(message = "La valeur de typeDeMisEnCause n'est pas valide")
+  @TypeDeMisEnCauseProfessionnelValid(message = "La valeur de typeDeMisEnCause n'est pas valide")
   private TypeDeMisEnCauseProfessionnel typeDeMisEnCauseProfessionnel;
 
   public String getInformations() {
