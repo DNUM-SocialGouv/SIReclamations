@@ -4,7 +4,6 @@ import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFo
 import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -53,7 +52,7 @@ public class GlobalControllerAdvice {
     List<String> errors =
         ex.getBindingResult().getAllErrors().stream()
             .map(DefaultMessageSourceResolvable::getDefaultMessage)
-            .collect(Collectors.toList());
+            .toList();
     return new ResponseEntity<>(new ValidationErrorResponse(errors), HttpStatus.BAD_REQUEST);
   }
 
