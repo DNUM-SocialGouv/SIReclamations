@@ -2,11 +2,14 @@ package fr.gouv.social.sireclamations.user_side;
 
 import fr.gouv.social.sireclamations.hexagone.exceptions.AutoriteCompetenteNotFoundException;
 import fr.gouv.social.sireclamations.hexagone.exceptions.DematSocialException;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -44,6 +47,15 @@ public class GlobalControllerAdvice {
     return getGlobalControllerAdviceBodyResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
   }
 
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    List<String> errors =
+        ex.getBindingResult().getAllErrors().stream()
+            .map(DefaultMessageSourceResolvable::getDefaultMessage)
+            .toList();
+    return new ResponseEntity<>(new ValidationErrorResponse(errors), HttpStatus.BAD_REQUEST);
+  }
+
   public static Map<String, Object> getGlobalControllerAdviceBodyResponse(
       HttpStatus httpStatus, String message) {
     return Map.of(STATUS, String.valueOf(httpStatus.value()), MESSAGE, message);
@@ -53,5 +65,21 @@ public class GlobalControllerAdvice {
       HttpStatus httpStatus, String message) {
     return ResponseEntity.status(httpStatus)
         .body(getGlobalControllerAdviceBodyResponse(httpStatus, message));
+  }
+
+  public class ValidationErrorResponse {
+    private List<String> errors;
+
+    public ValidationErrorResponse(List<String> errors) {
+      this.errors = errors;
+    }
+
+    public List<String> getErrors() {
+      return errors;
+    }
+
+    public void setErrors(List<String> errors) {
+      this.errors = errors;
+    }
   }
 }

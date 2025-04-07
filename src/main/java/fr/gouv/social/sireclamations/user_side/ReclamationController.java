@@ -1,10 +1,13 @@
 package fr.gouv.social.sireclamations.user_side;
 
 import fr.gouv.social.sireclamations.hexagone.AffecterReclamation;
+import fr.gouv.social.sireclamations.hexagone.AffecterReclamationDepuisPlateformeTelephonique;
 import fr.gouv.social.sireclamations.hexagone.domain.Reclamation;
+import fr.gouv.social.sireclamations.user_side.plateforme_telephonique.DossierDeReclamationDeLaPlateformeTelephoniqueApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -16,12 +19,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/v1/reclamations")
+@RequestMapping("api/v1/reclamation")
 @Tag(name = "Réclamations", description = "Endpoints pour gérer les réclamations")
 public class ReclamationController {
   private static final Logger logger = LoggerFactory.getLogger(ReclamationController.class);
@@ -33,14 +37,23 @@ public class ReclamationController {
   private static final String OUTPUT = "output";
 
   private final AffecterReclamation affecterReclamation;
+  private final AffecterReclamationDepuisPlateformeTelephonique
+      affecterReclamationDepuisPlateformeTelephonique;
 
-  public ReclamationController(AffecterReclamation affecterReclamation) {
+  public ReclamationController(
+      AffecterReclamation affecterReclamation,
+      AffecterReclamationDepuisPlateformeTelephonique
+          affecterReclamationDepuisPlateformeTelephonique) {
     this.affecterReclamation = affecterReclamation;
+    this.affecterReclamationDepuisPlateformeTelephonique =
+        affecterReclamationDepuisPlateformeTelephonique;
   }
 
   // hack: une nouvelle version du webhook doit prochainement être intégrée. Cette version enverra
   // une payload de type application/json. Cette méthode est créée dans l'attente.
-  @PostMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
+  @PostMapping(
+      value = {"/demat-social"},
+      consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE})
   @Operation(
       summary = "Récupère une réclamation issue de demat.social",
       description =
@@ -103,6 +116,15 @@ public class ReclamationController {
       return GlobalControllerAdvice.getGlobalControllerAdviceResponse(
           HttpStatus.BAD_REQUEST, message);
     }
+  }
+
+  @PostMapping("/plateforme-telephonique")
+  public ReclamationApiResponse creerReclamation(
+      @RequestBody @Valid DossierDeReclamationDeLaPlateformeTelephoniqueApi reclamationApi) {
+    var dossierDeReclamation = ReclamationApiMapper.toDossierDeReclamation(reclamationApi);
+    final Reclamation reclamation =
+        affecterReclamationDepuisPlateformeTelephonique.executer(dossierDeReclamation);
+    return ReclamationApiMapper.toReclamationApiResponse(reclamation);
   }
 
   private static boolean validateInteger(Map<String, String> params, String key) {

@@ -1,5 +1,6 @@
 package fr.gouv.social.sireclamations.user_side;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -35,6 +36,7 @@ class ReclamationControllerTest {
 
   @TestConfiguration
   static class TestConfig {
+
     @Bean
     public AffecterReclamation affecterReclamation() {
       return Mockito.mock(AffecterReclamation.class);
@@ -60,7 +62,7 @@ class ReclamationControllerTest {
     // When Then
     mockMvc
         .perform(
-            post("/api/v1/reclamations")
+            post("/api/v1/reclamation/demat-social")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .param("procedure_id", String.valueOf(numeroDemarche))
                 .param("dossier_id", String.valueOf(numeroDossier))
@@ -83,7 +85,7 @@ class ReclamationControllerTest {
     // When Then
     mockMvc
         .perform(
-            post("/api/v1/reclamations")
+            post("/api/v1/reclamation/demat-social")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .param("procedure_id", String.valueOf(numeroDemarche))
                 .param("dossier_id", String.valueOf(numeroDossier))
@@ -116,7 +118,7 @@ class ReclamationControllerTest {
     // When Then
     mockMvc
         .perform(
-            post("/api/v1/reclamations")
+            post("/api/v1/reclamation/demat-social")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE)
                 .param("procedure_id", String.valueOf(numeroDemarche))
                 .param("dossier_id", String.valueOf(numeroDossier))
@@ -126,5 +128,84 @@ class ReclamationControllerTest {
         .andExpect(jsonPath("$.output.numeroDossier").value(12345))
         .andExpect(jsonPath("$.output.autoritesCompetentes[0]").value("ARS"))
         .andExpect(jsonPath("$.output.lieuDeSurvenue.numeroFiness").value("78000000"));
+  }
+
+  @Test
+  void
+      lorsqueLaPlateformeTelephoniqueEnvoiUnDossierDeReclamationComplet_alorsRenvoiUne200AvecLesDonneesDeLaReclamationEnBody()
+          throws Exception {
+
+    String jsonPayload =
+        """
+            {
+               "id": "12345",
+               "lieuSurvenue": {
+                 "codePostal": "75010",
+                 "commune": "Paris",
+                 "natureLieu": "Au domicile (domicile de la victime, domicile d'un membre de la famille, domicile d'un aidant...)",
+                 "domicile": {
+                   "adresse": "31 Avenue Pierre Curie",
+                   "serviceADomicile": "Service de Soins Infirmier à Domicile (SSIAD)"
+                 }
+               },
+               "declarant": {
+                   "civilite": "M.",
+                   "nom": "string",
+                   "prenom": "string",
+                   "email": "user@example.com",
+                   "telephone": "0123456789",
+                   "estLaVictime": true,
+                   "lienVictime": "Membre de la famille",
+                   "victimeInformeeDemarche": "oui",
+                   "anonymatVictimeDemande": true,
+                   "anonymatMisEnCauseDemande": true,
+                   "suiviDemande": true
+               },
+               "misEnCause": {
+                 "typeDeMisEnCause": "Professionnel",
+                 "rpps": "123456789",
+                 "civilite": "M.",
+                 "nom": "string",
+                 "prenom": "string",
+                 "profession": "string"
+               },
+               "victime": {
+                   "civilite": "M.",
+                   "nom": "string",
+                   "prenom": "string",
+                   "trancheAge": "-18",
+                   "enSituationDeHandicap": true,
+                   "anonymatMisEnCauseDemande": "Oui",
+                   "autresPersonnesVictimes": "Oui"
+                 },
+               "description": {
+                 "maltraitance": true,
+                 "typeDeMaltraitance": [
+                   "Maltraitance physique (châtiments corporels, agressions physiques, intervention médicale sans consentement éclairé, enfermement...)"
+                 ],
+                 "typesDeFaits": [
+                   "Problème comportemental, relationnel ou de communication avec une personne"
+                 ],
+                 "dateSurvenue": "2019-08-24",
+                 "consequenceSurLaVictime": [
+                   "Sur la santé physique et/ou psychique (blessures, troubles de la santé ou mentaux...)"
+                 ],
+                 "situationToujoursActuelle": "Oui",
+                 "dateDeFin": "2019-08-24",
+                 "description": "string"
+               }
+             }
+            """;
+
+    mockMvc
+        .perform(
+            post("/api/v1/reclamation/plateforme-telephonique")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonPayload))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.numeroDossier").value(12345))
+        .andExpect(jsonPath("$.autoritesCompetentes", hasSize(1)))
+        .andExpect(jsonPath("$.lieuDeSurvenue.codeTypeDeLieu").value("DOM"))
+        .andExpect(jsonPath("$.autoritesCompetentes[0]").value("ARS"));
   }
 }

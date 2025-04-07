@@ -17,7 +17,7 @@
     }
   ],
   "paths": {
-    "/api/v1/reclamation": {
+    "/api/v1/reclamations/plateforme-telephonique": {
       "post": {
         "summary": "Déposer une réclamation",
         "description": "Dans le cadre de l’application de la Loi « bien vieillir », promulguée le 8 avril 2024 et sur son volet permettant de « mieux signaler les maltraitances » et en vertu du 4 de l’article L1432-1 du code de la santé publique relatif aux cellules de recueil, cette API à vocation à couvir le recueil et l’affectation des demandes. ",
@@ -154,7 +154,10 @@
             "url": "",
             "description": ""
           }
-        ]
+        ],
+        "x-stoplight": {
+          "id": "crl54lc5ulbhv"
+        }
       }
     }
   },
@@ -267,7 +270,7 @@
               "telephone": "string",
               "estLaVictime": true,
               "langueEtrangere": true,
-              "lienVictime": "Famille",
+              "lienVictime": "Membre de la famille",
               "profession": "string",
               "victimeInformeeDemarche": "oui",
               "anonymatVictimeDemande": true,
@@ -439,7 +442,7 @@
             "telephone": "string",
             "estLaVictime": true,
             "langueEtrangere": true,
-            "lienVictime": "Famille",
+            "lienVictime": "Membre de la famille",
             "profession": "string",
             "victimeInformeeDemarche": "oui",
             "anonymatVictimeDemande": true,
@@ -608,6 +611,14 @@
         "type": "object",
         "title": "etablissementSanitaireEtSocial",
         "description": "Précise l'établissement sanitaire et social où a eu lieu de le problème. Le service est nécessaire SEULEMENT SI l'établissement mis en cause est un établissement de santé (hôpitaux, cliniques ...).",
+        "examples": [
+          {
+            "et_finess": "string",
+            "codeCategorieEtablissement": "string",
+            "nomEtablissement": "string",
+            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
+          }
+        ],
         "required": [
           "et_finess",
           "codeCategorieEtablissement"
@@ -616,7 +627,7 @@
           "et_finess": {
             "type": "string",
             "description": "Numéro FINESS du site géographique. Source de données : https://arssante.opendatasoft.com/explore/dataset/t_finess/api/",
-            "pattern": "d[AB|\\d]\\d{7}"
+            "pattern": "\"\\d[AB\\d]\\d{7}\""
           },
           "codeCategorieEtablissement": {
             "type": "string",
@@ -640,20 +651,19 @@
               "Autre Professionnel"
             ]
           }
-        },
-        "examples": [
-          {
-            "et_finess": "string",
-            "codeCategorieEtablissement": "string",
-            "nomEtablissement": "string",
-            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
-          }
-        ]
+        }
       },
       "cabinetMedical": {
         "type": "object",
         "title": "cabinetMedical",
         "description": "Informations sur le cabinet médical",
+        "examples": [
+          {
+            "informations": "string",
+            "adresse": "string",
+            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
+          }
+        ],
         "properties": {
           "informations": {
             "type": "string",
@@ -677,14 +687,7 @@
               "Autre Professionnel"
             ]
           }
-        },
-        "examples": [
-          {
-            "informations": "string",
-            "adresse": "string",
-            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
-          }
-        ]
+        }
       },
       "misEnCause": {
         "type": "object",
@@ -1106,12 +1109,6 @@
       "domicile": {
         "title": "domicile",
         "type": "object",
-        "examples": [
-          {
-            "adresse": "string",
-            "serviceADomicile": "Hospitalisation à domicile"
-          }
-        ],
         "required": [
           "adresse"
         ],
@@ -1128,17 +1125,32 @@
               "Service d'aide ménagère",
               "Service de repas",
               "Traitements spécialisés",
-              "Structure dispensatrice d'oxygène à usage médical",
-              "Service d'aide et d'accompagnement aux familles (SAADF)",
-              "Service Mandataire Juidiciaire à la Protection des Majeurs (MJPM)",
+              "Service d'Aide et d'Accompagnement à Domicile aux Familles (SAADF)",
+              "Mandataire Juidiciaire à la Protection des Majeurs (curatelle, tutelle)",
+              "Intervention d'un professionnel libéral ou service (SAMU, médecin)",
+              "Service de Soins Infirmier à Domicile (SSIAD)",
+              "Service d'Aide et d'Accompagnement à Domicile (SAAD)",
               "Autre"
             ]
           }
-        }
+        },
+        "examples": [
+          {
+            "adresse": "string",
+            "serviceADomicile": "Hospitalisation à domicile"
+          }
+        ]
       },
       "trajet": {
         "title": "domicile",
         "type": "object",
+        "examples": [
+          {
+            "typeDeTransport": "Ambulance de secours et de soins d'urgence (ASSU)",
+            "nomSociete": "string",
+            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
+          }
+        ],
         "required": [
           "typeDeTransport"
         ],
@@ -1170,14 +1182,7 @@
               "Autre Professionnel"
             ]
           }
-        },
-        "examples": [
-          {
-            "typeDeTransport": "Ambulance de secours et de soins d'urgence (ASSU)",
-            "nomSociete": "string",
-            "typeDeMisEnCause": "Un professionnel de santé (médecin, infirmier, aide-soignant, kiné, ostéopathe...)"
-          }
-        ]
+        }
       }
     }
   },
